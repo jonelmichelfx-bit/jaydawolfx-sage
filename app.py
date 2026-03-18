@@ -255,5 +255,23 @@ def api_sage_scanner_poll(job_id):
 def health():
     return jsonify({'status':'ok','service':'sage-of-six-paths','time':datetime.utcnow().isoformat()})
 
+@app.route('/setup-admin')
+def setup_admin():
+    """One-time admin setup — promotes jonel.michelfx@gmail.com to unleashed plan"""
+    secret = request.args.get('key','')
+    if secret != 'sage6paths2024admin':
+        return jsonify({'error':'Invalid key'}), 403
+    user = User.query.filter_by(email='jonel.michelfx@gmail.com').first()
+    if not user:
+        return jsonify({'error':'Account not found. Please sign up first at /login'}), 404
+    user.plan = 'unleashed'
+    db.session.commit()
+    return jsonify({
+        'success': True,
+        'message': f'Account {user.email} upgraded to Six Paths Unleashed. You are now admin.',
+        'username': user.username,
+        'plan': user.plan
+    })
+
 if __name__ == '__main__':
     app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
