@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🔮 SAGE OF 6 PATH AGENT — JaydaWolfFX</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#060a0d;--surface:#0d1318;--surface2:#121920;--border:#1e3040;
+  --green:#00ff99;--cyan:#33ddff;--gold:#ffd700;--red:#ff3355;
+  --purple:#cc55ff;--orange:#ff8800;--sage:#a0ffcc;
+  --text:#ffffff;--text-mid:#e2f0f8;--text-dim:#8ab8cc;
+  --mono:'Share Tech Mono',monospace;--head:'Orbitron',monospace;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(0,255,153,0.015) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(0,255,153,0.015) 1px,transparent 1px);
+  background-size:50px 50px;}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;height:52px;background:rgba(6,10,13,0.98);
+  border-bottom:2px solid var(--purple);display:flex;align-items:center;padding:0 20px;gap:12px;}
+.logo{font-family:var(--head);font-size:13px;font-weight:900;color:var(--gold);
+  letter-spacing:3px;text-shadow:0 0 20px rgba(255,215,0,0.5);white-space:nowrap;}
+.logo span{color:var(--orange);}
+.nav-tabs{display:flex;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.ntab{padding:6px 12px;font-family:var(--mono);font-size:11px;letter-spacing:1px;
+  color:var(--text-dim);background:transparent;border:1px solid transparent;
+  border-radius:3px;cursor:pointer;transition:all 0.2s;text-decoration:none;white-space:nowrap;}
+.ntab:hover{color:var(--text-mid);border-color:var(--border);}
+.ntab.active{color:var(--purple);border-color:var(--purple);background:rgba(204,85,255,0.07);}
+.nav-right{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;}
+.clock{font-size:12px;color:var(--text-mid);}
+.logout-a{font-size:11px;color:var(--text-mid);text-decoration:none;
+  padding:4px 10px;border:1px solid var(--border);border-radius:3px;transition:all 0.2s;}
+.logout-a:hover{color:var(--red);border-color:var(--red);}
+
+/* HERO */
+.sage-hero{position:relative;z-index:1;text-align:center;padding:48px 20px 32px;}
+.sage-eye{font-size:72px;line-height:1;margin-bottom:16px;
+  filter:drop-shadow(0 0 30px rgba(160,255,204,0.6));}
+.sage-title{font-family:var(--head);font-size:42px;font-weight:900;letter-spacing:8px;
+  color:var(--sage);text-shadow:0 0 40px rgba(160,255,204,0.5);margin-bottom:8px;}
+.sage-sub{font-size:13px;color:var(--text-dim);letter-spacing:3px;margin-bottom:24px;}
+.sage-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:0;}
+.badge{font-size:10px;letter-spacing:1px;padding:4px 12px;border-radius:2px;font-weight:bold;}
+.b-gold{background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.4);color:var(--gold);}
+.b-cyan{background:rgba(51,221,255,0.1);border:1px solid rgba(51,221,255,0.4);color:var(--cyan);}
+.b-purple{background:rgba(204,85,255,0.1);border:1px solid rgba(204,85,255,0.4);color:var(--purple);}
+.b-green{background:rgba(0,255,153,0.1);border:1px solid rgba(0,255,153,0.4);color:var(--green);}
+
+/* MAIN LAYOUT */
+.sage-wrap{max-width:1200px;margin:0 auto;padding:24px 20px 60px;position:relative;z-index:1;}
+
+/* MODE TABS */
+.mode-tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--surface);
+  padding:4px;border-radius:4px;border:1px solid var(--border);}
+.mtab{flex:1;padding:12px;font-family:var(--mono);font-size:12px;letter-spacing:2px;
+  background:transparent;border:none;border-radius:3px;cursor:pointer;
+  color:var(--text-dim);transition:all 0.2s;text-align:center;}
+.mtab.active.forex{background:rgba(51,221,255,0.1);color:var(--cyan);border:1px solid rgba(51,221,255,0.3);}
+.mtab.active.stocks{background:rgba(0,255,153,0.1);color:var(--green);border:1px solid rgba(0,255,153,0.3);}
+.mtab:hover{color:var(--text-mid);}
+
+/* INPUT SECTION */
+.input-section{background:var(--surface);border:1px solid var(--border);
+  border-radius:4px;padding:24px;margin-bottom:24px;}
+.input-label{font-size:10px;letter-spacing:3px;color:var(--sage);margin-bottom:12px;}
+.pair-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.pair-input{flex:1;min-width:180px;background:var(--surface2);border:2px solid var(--border);
+  color:var(--text);padding:14px 16px;font-family:var(--mono);font-size:18px;
+  letter-spacing:3px;text-transform:uppercase;outline:none;border-radius:3px;transition:border-color 0.2s;}
+.pair-input:focus{border-color:var(--sage);}
+.scan-btn{padding:14px 32px;font-family:var(--head);font-size:13px;letter-spacing:3px;
+  font-weight:900;border:2px solid var(--sage);color:var(--bg);background:var(--sage);
+  cursor:pointer;border-radius:3px;transition:all 0.2s;white-space:nowrap;}
+.scan-btn:hover{background:transparent;color:var(--sage);box-shadow:0 0 20px rgba(160,255,204,0.3);}
+.scan-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* QUICK PAIRS */
+.quick-label{font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:8px;}
+.quick-pairs{display:flex;flex-wrap:wrap;gap:6px;}
+.qp{padding:6px 12px;font-family:var(--mono);font-size:11px;letter-spacing:1px;
+  background:var(--surface2);border:1px solid var(--border);color:var(--text-mid);
+  cursor:pointer;border-radius:2px;transition:all 0.15s;}
+.qp:hover{border-color:var(--sage);color:var(--sage);}
+.qp.stocks{border-color:rgba(0,255,153,0.3);color:var(--green);}
+.qp.stocks:hover{background:rgba(0,255,153,0.07);}
+.forex-pairs{display:block;} .stocks-pairs{display:none;}
+
+/* LOADING STATE */
+.loading-card{background:var(--surface);border:1px solid var(--purple);
+  border-radius:4px;padding:40px;text-align:center;display:none;margin-bottom:24px;}
+.loading-card.visible{display:block;}
+.sage-spinner{width:60px;height:60px;border:3px solid var(--border);
+  border-top:3px solid var(--sage);border-radius:50%;
+  animation:spin 1s linear infinite;margin:0 auto 20px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-step{font-size:14px;color:var(--sage);letter-spacing:2px;margin-bottom:8px;}
+.loading-hint{font-size:12px;color:var(--text-dim);}
+
+/* RESULT CARD */
+.result-card{display:none;position:relative;z-index:1;}
+.result-card.visible{display:block;}
+
+/* VERDICT BANNER */
+.verdict-banner{border-radius:4px;padding:28px;margin-bottom:20px;text-align:center;position:relative;overflow:hidden;}
+.verdict-banner.buy{background:rgba(0,255,153,0.06);border:2px solid var(--green);}
+.verdict-banner.sell{background:rgba(255,51,85,0.06);border:2px solid var(--red);}
+.verdict-banner.wait{background:rgba(255,215,0,0.06);border:2px solid var(--gold);}
+.verdict-label{font-size:10px;letter-spacing:4px;color:var(--text-dim);margin-bottom:8px;}
+.verdict-main{font-family:var(--head);font-size:64px;font-weight:900;line-height:1;margin-bottom:8px;}
+.verdict-banner.buy .verdict-main{color:var(--green);text-shadow:0 0 30px rgba(0,255,153,0.5);}
+.verdict-banner.sell .verdict-main{color:var(--red);text-shadow:0 0 30px rgba(255,51,85,0.5);}
+.verdict-banner.wait .verdict-main{color:var(--gold);text-shadow:0 0 30px rgba(255,215,0,0.5);}
+.verdict-meta{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-top:12px;}
+.vm{text-align:center;}
+.vm-l{font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;}
+.vm-v{font-size:16px;font-weight:bold;color:var(--text);}
+.conf-bar{height:6px;background:var(--border);border-radius:3px;margin:8px 0;overflow:hidden;width:120px;margin:8px auto 0;}
+.conf-fill{height:100%;border-radius:3px;transition:width 0.8s ease;}
+
+/* TRADE LEVELS */
+.levels-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:20px;}
+.level-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:16px;text-align:center;}
+.level-card.entry{border-color:var(--cyan);}
+.level-card.sl{border-color:var(--red);}
+.level-card.tp1{border-color:rgba(0,255,153,0.4);}
+.level-card.tp2{border-color:var(--green);}
+.level-card.tp3{border-color:var(--gold);}
+.lc-label{font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:6px;}
+.lc-price{font-family:var(--head);font-size:18px;font-weight:700;margin-bottom:4px;}
+.level-card.entry .lc-price{color:var(--cyan);}
+.level-card.sl .lc-price{color:var(--red);}
+.level-card.tp1 .lc-price{color:#88ffcc;}
+.level-card.tp2 .lc-price{color:var(--green);}
+.level-card.tp3 .lc-price{color:var(--gold);}
+.lc-pips{font-size:12px;color:var(--text-dim);}
+
+/* TIMEFRAME ALIGNMENT */
+.tf-section{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:20px;margin-bottom:20px;}
+.section-title{font-size:10px;letter-spacing:3px;color:var(--sage);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.tf-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.tf-box{background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:12px;text-align:center;}
+.tf-name{font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:8px;}
+.tf-signal{font-size:13px;font-weight:bold;padding:4px 8px;border-radius:2px;letter-spacing:1px;}
+.tf-bull{background:rgba(0,255,153,0.12);color:var(--green);border:1px solid rgba(0,255,153,0.3);}
+.tf-bear{background:rgba(255,51,85,0.12);color:var(--red);border:1px solid rgba(255,51,85,0.3);}
+.tf-neut{background:rgba(255,215,0,0.12);color:var(--gold);border:1px solid rgba(255,215,0,0.3);}
+
+/* TWO COLUMN */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.info-block{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:20px;}
+
+/* LEGEND CONSENSUS */
+.legend-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.legend-item{background:var(--surface2);border-radius:3px;padding:12px;border-left:3px solid;}
+.legend-item.soros{border-color:var(--gold);}
+.legend-item.druck{border-color:var(--cyan);}
+.legend-item.lips{border-color:var(--green);}
+.legend-item.kovner{border-color:var(--purple);}
+.legend-item.livermore{border-color:var(--gold);}
+.legend-item.ptj{border-color:var(--orange);}
+.legend-item.yass{border-color:var(--purple);}
+.legend-item.brooks{border-color:var(--cyan);}
+.lg-name{font-size:9px;letter-spacing:2px;margin-bottom:6px;font-weight:bold;}
+.legend-item.soros .lg-name,.legend-item.livermore .lg-name{color:var(--gold);}
+.legend-item.druck .lg-name,.legend-item.brooks .lg-name{color:var(--cyan);}
+.legend-item.lips .lg-name{color:var(--green);}
+.legend-item.kovner .lg-name,.legend-item.yass .lg-name{color:var(--purple);}
+.legend-item.ptj .lg-name{color:var(--orange);}
+.lg-text{font-size:12px;color:var(--text-mid);line-height:1.8;}
+
+/* CHART MASTERS */
+.masters-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.master-row{background:var(--surface2);border-radius:3px;padding:10px 12px;
+  display:flex;gap:10px;align-items:flex-start;}
+.master-name{font-size:9px;letter-spacing:1px;color:var(--orange);min-width:72px;
+  padding-top:2px;flex-shrink:0;font-weight:bold;}
+.master-text{font-size:12px;color:var(--text-mid);line-height:1.7;}
+
+/* SAGE SAYS */
+.sage-says{background:linear-gradient(135deg,rgba(160,255,204,0.04),rgba(204,85,255,0.04));
+  border:1px solid rgba(160,255,204,0.3);border-radius:4px;padding:24px;margin-bottom:20px;
+  position:relative;overflow:hidden;}
+.sage-says::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--sage),var(--purple));}
+.ss-header{font-size:11px;letter-spacing:3px;color:var(--sage);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;}
+.ss-text{font-size:15px;color:var(--text-mid);line-height:2;font-family:'Calibri',sans-serif;}
+
+/* INVALIDATION */
+.invalidation{background:rgba(255,51,85,0.04);border:1px solid rgba(255,51,85,0.25);
+  border-radius:4px;padding:16px;margin-bottom:20px;}
+.inv-label{font-size:10px;letter-spacing:2px;color:var(--red);margin-bottom:8px;}
+.inv-text{font-size:13px;color:var(--text-mid);line-height:1.8;}
+
+/* NEWS + GEO */
+.news-geo{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.ng-block{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:16px;}
+.ng-label{font-size:9px;letter-spacing:2px;margin-bottom:10px;font-weight:bold;}
+.ng-label.news{color:var(--cyan);}
+.ng-label.geo{color:var(--red);}
+.ng-text{font-size:13px;color:var(--text-mid);line-height:1.9;}
+
+/* KEY LEVELS */
+.key-levels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;}
+.kl-card{background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:14px;text-align:center;}
+.kl-label{font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:8px;}
+.kl-price{font-size:16px;font-weight:bold;}
+.kl-card.sup .kl-price{color:var(--green);}
+.kl-card.res .kl-price{color:var(--red);}
+.kl-card.stop .kl-price{color:var(--orange);}
+
+/* FOOTER BAR */
+.result-footer{background:var(--surface);border:1px solid var(--border);border-radius:3px;
+  padding:12px 16px;display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:8px;font-size:11px;color:var(--text-dim);}
+.rf-item span{color:var(--text-mid);font-weight:bold;}
+
+/* MOBILE */
+@media(max-width:768px){
+  .sage-title{font-size:28px;letter-spacing:4px;}
+  .sage-eye{font-size:52px;}
+  .two-col,.news-geo,.key-levels,.tf-grid,.legend-grid,.masters-grid{grid-template-columns:1fr!important;}
+  .levels-grid{grid-template-columns:1fr 1fr!important;}
+  .verdict-main{font-size:48px!important;}
+  .verdict-meta{gap:14px!important;}
+  .pair-row{flex-direction:column;}
+  .scan-btn{width:100%;}
+}
+
+/* ══ SAGE AI CHAT PANEL ══ */
+.sage-ai-section {
+  max-width: 1200px;
+  margin: 0 auto 60px;
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
+}
+.sage-ai-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--purple);
+  overflow: hidden;
+}
+.sage-ai-hdr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  background: rgba(204,85,255,0.05);
+  border-bottom: 1px solid var(--border);
+}
+.sage-ai-title {
+  font-family: var(--head);
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--sage);
+  text-shadow: 0 0 20px rgba(160,255,204,0.5);
+}
+.sage-ai-sub {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--purple);
+  font-family: var(--mono);
+}
+.sage-live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: sdot 2s infinite;
+  flex-shrink: 0;
+}
+@keyframes sdot{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* API key */
+#sageKeyBar {
+  padding: 10px 18px;
+  background: rgba(160,255,204,0.03);
+  border-bottom: 1px solid rgba(160,255,204,0.15);
+}
+#sageKeyBar.hidden { display: none; }
+.sak-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+.sak-label { font-size: 9px; letter-spacing: 2px; color: var(--sage); font-family: var(--mono); }
+.sak-input {
+  flex: 1; min-width: 240px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 7px 11px;
+  font-family: var(--mono);
+  font-size: 11px;
+  outline: none;
+  transition: border-color .2s;
+}
+.sak-input:focus { border-color: var(--sage); }
+.sak-input::placeholder { color: #3a5568; }
+.sak-save {
+  background: rgba(160,255,204,0.1);
+  border: 1px solid var(--sage);
+  color: var(--sage);
+  padding: 7px 16px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: .15s;
+}
+.sak-save:hover { background: var(--sage); color: var(--bg); }
+.sak-note { font-size: 9px; color: #3a5568; margin-top: 4px; }
+.sak-note a { color: var(--cyan); text-decoration: none; }
+.sak-change { background: transparent; border: none; color: #3a5568; font-family: var(--mono); font-size: 9px; cursor: pointer; margin-left: auto; }
+.sak-change:hover { color: var(--sage); }
+
+/* Body: split */
+.sage-ai-body {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  height: 520px;
+  overflow: hidden;
+}
+@media(max-width:900px){ .sage-ai-body{ grid-template-columns:1fr; height:auto; } }
+
+/* Left: paths display */
+.sage-paths-side {
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+}
+.sage-paths-hdr {
+  padding: 8px 14px;
+  background: rgba(204,85,255,0.05);
+  border-bottom: 1px solid var(--border);
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--purple);
+  flex-shrink: 0;
+}
+.sage-6-paths {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  flex: 1;
+  overflow: hidden;
+}
+.sage-path-box {
+  background: var(--surface);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+.spb-num {
+  font-family: var(--head);
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--purple);
+  opacity: .3;
+  line-height: 1;
+}
+.spb-title {
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: var(--sage);
+}
+.spb-desc {
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  overflow: hidden;
+}
+
+/* Right: Chat */
+.sage-chat-side {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+.sage-quick-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(204,85,255,0.03);
+  flex-shrink: 0;
+}
+.sage-qb {
+  background: transparent;
+  border: 1px solid rgba(204,85,255,0.3);
+  color: #aa77dd;
+  padding: 4px 9px;
+  font-family: var(--mono);
+  font-size: 10px;
+  cursor: pointer;
+  transition: .15s;
+}
+.sage-qb:hover { border-color: var(--sage); color: var(--sage); background: rgba(160,255,204,0.05); }
+
+.sage-msgs {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+  min-height: 0;
+}
+.sage-msgs::-webkit-scrollbar { width: 3px; }
+.sage-msgs::-webkit-scrollbar-thumb { background: var(--border); }
+
+.sage-welcome {
+  text-align: center;
+  padding: 20px 12px;
+}
+.sage-welcome-icon { font-size: 2.5rem; filter: drop-shadow(0 0 14px rgba(160,255,204,.6)); margin-bottom: 10px; display: block; }
+.sage-welcome-greeting { font-family: var(--head); font-size: 16px; font-weight: 900; letter-spacing: 3px; color: var(--sage); text-shadow: 0 0 16px rgba(160,255,204,.5); margin-bottom: 8px; }
+.sage-welcome-sub { font-size: 11px; letter-spacing: 2px; color: var(--purple); margin-bottom: 6px; }
+.sage-welcome-cta { font-size: 12px; color: var(--green); letter-spacing: 1px; }
+
+.smsg-user { display: flex; justify-content: flex-end; animation: sfade .2s ease; }
+@keyframes sfade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.smsg-user .sbbl {
+  background: rgba(160,255,204,0.07);
+  border: 1px solid rgba(160,255,204,0.25);
+  color: #d0ffe8;
+  padding: 9px 12px;
+  font-size: 11px;
+  line-height: 1.65;
+  max-width: 92%;
+  font-family: var(--mono);
+}
+.smsg-sage { animation: sfade .2s ease; }
+.smsg-sage .sbbl {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--sage);
+  padding: 11px 13px;
+  font-size: 11px;
+  line-height: 1.8;
+  color: #e2f8ee;
+  font-family: var(--mono);
+}
+.smsg-sage .sbbl strong { color: var(--sage); }
+.smsg-sage .sbbl .s-up { color: var(--green); }
+.smsg-sage .sbbl .s-dn { color: var(--red); }
+.smsg-sage .sbbl .s-cy { color: var(--cyan); }
+.smsg-sage .sbbl .s-pu { color: var(--purple); }
+.sage-thinking {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--purple);
+  font-size: 10px; letter-spacing: 2px; color: var(--purple);
+  animation: sfade .2s ease;
+}
+.sdots { display: flex; gap: 3px; }
+.sdots span { width: 4px; height: 4px; background: var(--purple); border-radius: 50%; animation: sdot 1.2s infinite; }
+.sdots span:nth-child(2){animation-delay:.2s}.sdots span:nth-child(3){animation-delay:.4s}
+
+/* Trade card sage style */
+.sage-trade-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--sage);
+  margin-top: 8px;
+}
+.stc-hdr { display: flex; justify-content: space-between; align-items: center; padding: 7px 11px; background: rgba(160,255,204,.03); border-bottom: 1px solid var(--border); }
+.stc-sym { font-family: var(--head); font-size: 16px; font-weight: 900; letter-spacing: 2px; }
+.stc-sig { font-family: var(--mono); font-size: 11px; padding: 2px 10px; }
+.stc-sig.BUY { background: rgba(0,255,153,.1); color: var(--green); border: 1px solid var(--green); }
+.stc-sig.SELL { background: rgba(255,51,85,.1); color: var(--red); border: 1px solid var(--red); }
+.stc-sig.WAIT { background: rgba(255,215,0,.1); color: var(--gold); border: 1px solid var(--gold); }
+.stc-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); }
+.stc-cell { background: var(--bg); padding: 7px 9px; }
+.stc-lbl { font-size: 8px; letter-spacing: 2px; color: #3a5568; text-transform: uppercase; margin-bottom: 2px; font-family: var(--mono); }
+.stc-val { font-family: var(--mono); font-size: 12px; font-weight: 700; }
+.stc-risk { padding: 7px 11px; border-top: 1px solid var(--border); background: rgba(160,255,204,.02); }
+.stc-rbar { height: 4px; background: var(--border); overflow: hidden; margin-top: 4px; }
+.stc-rfill { height: 100%; transition: width 1s ease; }
+.stc-rfill.lo { background: var(--green); }
+.stc-rfill.md { background: var(--gold); }
+.stc-rfill.hi { background: var(--red); }
+
+.sage-input-area {
+  padding: 9px 10px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex; gap: 7px; align-items: flex-end;
+  flex-shrink: 0;
+}
+.sage-textarea {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 11px;
+  font-family: var(--mono);
+  font-size: 11px;
+  outline: none; resize: none;
+  min-height: 36px; max-height: 80px;
+  line-height: 1.5;
+  transition: border-color .2s;
+}
+.sage-textarea:focus { border-color: rgba(160,255,204,.4); }
+.sage-textarea::placeholder { color: #3a5568; font-size: 10px; }
+.sage-send {
+  background: rgba(160,255,204,.1);
+  border: 1px solid var(--sage);
+  color: var(--sage);
+  width: 36px; height: 36px;
+  cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: .15s;
+}
+.sage-send:hover { background: var(--sage); color: var(--bg); }
+.sage-send:disabled { background: transparent; border-color: var(--border); color: #3a5568; cursor: not-allowed; }
+.sage-disc {
+  text-align: center;
+  font-size: 9px; letter-spacing: 1px; color: #3a5568;
+  padding: 3px 10px 5px;
+  background: var(--surface);
+  border-top: 1px solid rgba(255,255,255,.03);
+  flex-shrink: 0;
+  font-family: var(--mono);
+}
+
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="logo">🐺 JAYDAWOLFX <span>SAGE</span></div>
+  <div class="nav-tabs">
+    <a href="/" class="ntab">STOCKS</a>
+    <a href="/forex" class="ntab">FOREX</a>
+    <a href="/byakugan" class="ntab">📊 SCANNER</a>
+    <a href="/legends" class="ntab" style="color:var(--gold);">⚡ LEGENDS</a>
+    <a href="/ai-infra" class="ntab" style="color:var(--purple);">🚀 AI FUTURE</a>
+    <a href="/sage-mode" class="ntab active">🔮 SAGE OF 6 PATH</a>
+    <a href="/pricing" class="ntab">PLANS</a>
+  </div>
+  <div class="nav-right">
+    <span class="clock" id="clock">--:-- EST</span>
+    <a href="/auth/logout" class="logout-a">LOGOUT</a>
+  </div>
+</nav>
+
+<div class="sage-hero">
+  <div class="sage-eye">🔮</div>
+  <div class="sage-title">SAGE OF 6 PATH</div>
+  <div class="sage-sub">ULTIMATE TRADING INTELLIGENCE · 5 TIMEFRAMES · 4 LEGENDS · 10 CHART MASTERS · LIVE NEWS</div>
+  <div class="sage-badges">
+    <span class="badge b-gold">⚡ SOROS · DRUCKENMILLER · LIPSCHUTZ · KOVNER</span>
+    <span class="badge b-cyan">📊 MURPHY · NISON · ELDER · WYCKOFF · BOLLINGER · WILDER</span>
+    <span class="badge b-purple">🗞️ LIVE NEWS SEARCH · ECONOMIC CALENDAR · GEOPOLITICAL</span>
+    <span class="badge b-green">📈 WEEKLY → DAILY → H4 → H1 → M15</span>
+  </div>
+</div>
+
+<div class="sage-wrap">
+
+  <!-- MODE TABS -->
+  <div class="mode-tabs">
+    <button class="mtab active forex" onclick="setMode('forex')" id="tab-forex">💱 FOREX / GOLD</button>
+    <button class="mtab stocks" onclick="setMode('stocks')" id="tab-stocks">📈 STOCKS / OPTIONS</button>
+  </div>
+
+  <!-- INPUT -->
+  <!-- MULTI-PAIR SCANNER SECTION -->
+  <div class="input-section" style="margin-bottom:16px;">
+    <div class="input-label" style="color:var(--cyan);">🔍 WOLF MULTI-PAIR SCANNER — Find The Trending Setups</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;line-height:1.6;">Scan simultaneously. Wolf AI identifies what is <strong style="color:var(--green);">TRENDING</strong> vs ranging. Click any result to run full Sage analysis.</div>
+
+    <!-- Scan type toggle -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <button id="scan-type-forex" onclick="setScanType('forex')" style="flex:1;min-width:110px;padding:8px;border-radius:4px;font-family:var(--mono);font-size:10px;letter-spacing:1px;cursor:pointer;border:1px solid var(--cyan);background:rgba(51,221,255,0.15);color:var(--cyan);">💱 FOREX / GOLD</button>
+      <button id="scan-type-stocks" onclick="setScanType('stocks')" style="flex:1;min-width:110px;padding:8px;border-radius:4px;font-family:var(--mono);font-size:10px;letter-spacing:1px;cursor:pointer;border:1px solid rgba(255,255,255,0.12);background:rgba(8,12,15,0.5);color:var(--text-dim);">📈 TOP STOCKS</button>
+      <button id="scan-type-custom" onclick="setScanType('custom')" style="flex:1;min-width:110px;padding:8px;border-radius:4px;font-family:var(--mono);font-size:10px;letter-spacing:1px;cursor:pointer;border:1px solid rgba(255,255,255,0.12);background:rgba(8,12,15,0.5);color:var(--text-dim);">✏️ CUSTOM</button>
+    </div>
+    <div id="scan-custom-box" style="display:none;margin-bottom:10px;">
+      <input id="scan-custom-input" placeholder="AAPL, TSLA, NVDA, EUR/USD, GBP/JPY..." style="width:100%;background:rgba(8,12,15,0.8);border:1px solid rgba(255,255,255,0.15);color:var(--text-mid);padding:9px 12px;border-radius:4px;font-family:var(--mono);font-size:12px;box-sizing:border-box;"/>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:4px;">Comma-separated — mix forex pairs and stock tickers (max 12)</div>
+    </div>
+
+    <button class="scan-btn" id="scanAllBtn" onclick="startScanner()" style="width:100%;background:linear-gradient(135deg,rgba(51,221,255,0.15),rgba(10,20,32,0));border-color:var(--cyan);color:var(--cyan);margin-bottom:12px;">🔍 <span id="scan-btn-label">SCAN ALL 10 FOREX PAIRS</span></button>
+    <div id="scannerResults" style="display:none;">
+      <div style="font-size:9px;letter-spacing:2px;color:var(--cyan);margin-bottom:10px;" id="scannerTime">SCAN RESULTS</div>
+      <div id="scannerGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;"></div>
+      <div id="topPicksBox" style="background:rgba(0,255,153,0.04);border:1px solid rgba(0,255,153,0.2);border-radius:6px;padding:12px;margin-bottom:4px;display:none;">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--green);margin-bottom:8px;">🏆 TOP TRENDING PICKS — CLICK TO ANALYZE</div>
+        <div id="topPicksList" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+      </div>
+    </div>
+    <div id="scannerLoading" style="display:none;text-align:center;padding:20px;">
+      <div style="font-size:12px;color:var(--cyan);letter-spacing:2px;" id="scannerStep">SCANNING...</div>
+    </div>
+  </div>
+
+  <div class="input-section">
+    <div class="input-label">🔮 SELECT INSTRUMENT TO ANALYZE</div>
+    <div class="pair-row">
+      <input class="pair-input" id="pairInput" placeholder="EUR/USD" value="EUR/USD" autocomplete="off"/>
+      <button class="scan-btn" id="scanBtn" onclick="startSage()">⚡ ACTIVATE SAGE OF 6 PATH</button>
+    </div>
+    <div class="quick-label">QUICK SELECT:</div>
+    <div class="quick-pairs forex-pairs" id="forexPairs">
+      <span class="qp" onclick="setPair('EUR/USD')">EUR/USD</span>
+      <span class="qp" onclick="setPair('GBP/USD')">GBP/USD</span>
+      <span class="qp" onclick="setPair('USD/JPY')">USD/JPY</span>
+      <span class="qp" onclick="setPair('USD/CHF')">USD/CHF</span>
+      <span class="qp" onclick="setPair('AUD/USD')">AUD/USD</span>
+      <span class="qp" onclick="setPair('USD/CAD')">USD/CAD</span>
+      <span class="qp" onclick="setPair('EUR/JPY')">EUR/JPY</span>
+      <span class="qp" onclick="setPair('GBP/JPY')">GBP/JPY</span>
+      <span class="qp" onclick="setPair('EUR/GBP')">EUR/GBP</span>
+      <span class="qp" onclick="setPair('NZD/USD')">NZD/USD</span>
+      <span class="qp" onclick="setPair('XAU/USD')">XAU/USD 🥇</span>
+    </div>
+    <div class="quick-pairs stocks-pairs" id="stocksPairs">
+      <span class="qp stocks" onclick="setPair('SPY')">SPY</span>
+      <span class="qp stocks" onclick="setPair('QQQ')">QQQ</span>
+      <span class="qp stocks" onclick="setPair('NVDA')">NVDA</span>
+      <span class="qp stocks" onclick="setPair('AAPL')">AAPL</span>
+      <span class="qp stocks" onclick="setPair('TSLA')">TSLA</span>
+      <span class="qp stocks" onclick="setPair('MSFT')">MSFT</span>
+      <span class="qp stocks" onclick="setPair('AMZN')">AMZN</span>
+      <span class="qp stocks" onclick="setPair('META')">META</span>
+      <span class="qp stocks" onclick="setPair('GOOGL')">GOOGL</span>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-card" id="loadingCard">
+    <div class="sage-spinner"></div>
+    <div class="loading-step" id="loadingStep">Initializing Sage Mode...</div>
+    <div class="loading-hint">Reading live charts · Fetching news · Consulting all legends · Building verdict</div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-card" id="resultCard">
+
+    <!-- VERDICT BANNER -->
+    <div class="verdict-banner" id="verdictBanner">
+      <div class="verdict-label">🔮 SAGE OF 6 PATH VERDICT</div>
+      <div class="verdict-main" id="verdictMain">—</div>
+      <div class="verdict-meta">
+        <div class="vm"><div class="vm-l">CONFIDENCE</div><div class="vm-v" id="vmConf">—</div>
+          <div class="conf-bar"><div class="conf-fill" id="confFill" style="width:0%"></div></div></div>
+        <div class="vm"><div class="vm-l">SESSION</div><div class="vm-v" id="vmSess">—</div></div>
+        <div class="vm"><div class="vm-l">R:R RATIO</div><div class="vm-v" id="vmRR">—</div></div>
+        <div class="vm"><div class="vm-l">ANALYZED</div><div class="vm-v" id="vmTime">—</div></div>
+      </div>
+    </div>
+
+    <!-- TRADE LEVELS -->
+    <div class="levels-grid">
+      <div class="level-card entry">
+        <div class="lc-label">ENTRY</div>
+        <div class="lc-price" id="lvEntry">—</div>
+        <div class="lc-pips">Live market price</div>
+      </div>
+      <div class="level-card sl">
+        <div class="lc-label">STOP LOSS</div>
+        <div class="lc-price" id="lvSL">—</div>
+        <div class="lc-pips" id="lvSLpips">— pips risk</div>
+      </div>
+      <div class="level-card tp1">
+        <div class="lc-label">TP1 🎯</div>
+        <div class="lc-price" id="lvTP1">—</div>
+        <div class="lc-pips" id="lvTP1pips">— pips</div>
+      </div>
+      <div class="level-card tp2">
+        <div class="lc-label">TP2 🎯🎯</div>
+        <div class="lc-price" id="lvTP2">—</div>
+        <div class="lc-pips" id="lvTP2pips">— pips</div>
+      </div>
+      <div class="level-card tp3">
+        <div class="lc-label">TP3 🏆</div>
+        <div class="lc-price" id="lvTP3">—</div>
+        <div class="lc-pips" id="lvTP3pips">— pips</div>
+      </div>
+    </div>
+
+    <!-- TIMEFRAME ALIGNMENT -->
+    <div class="tf-section">
+      <div class="section-title">📊 TIMEFRAME ALIGNMENT — HIGH TF DIRECTION · LOW TF ENTRY</div>
+      <div class="tf-grid">
+        <div class="tf-box"><div class="tf-name">WEEKLY</div><div class="tf-signal" id="tfWeekly">—</div></div>
+        <div class="tf-box"><div class="tf-name">DAILY</div><div class="tf-signal" id="tfDaily">—</div></div>
+        <div class="tf-box"><div class="tf-name">H4</div><div class="tf-signal" id="tfH4">—</div></div>
+        <div class="tf-box"><div class="tf-name">H1</div><div class="tf-signal" id="tfH1">—</div></div>
+        <div class="tf-box"><div class="tf-name">M15</div><div class="tf-signal" id="tfM15">—</div></div>
+      </div>
+    </div>
+
+    <!-- SAGE SAYS -->
+    <div class="sage-says">
+      <div class="ss-header">🔮 SAGE OF 6 PATH SAYS</div>
+      <div class="ss-text" id="sageSays">—</div>
+    </div>
+
+    <!-- KEY LEVELS -->
+    <div class="key-levels">
+      <div class="kl-card sup"><div class="kl-label">NEAREST SUPPORT</div><div class="kl-price" id="klSup">—</div></div>
+      <div class="kl-card res"><div class="kl-label">NEAREST RESISTANCE</div><div class="kl-price" id="klRes">—</div></div>
+      <div class="kl-card stop"><div class="kl-label">STOP ZONE</div><div class="kl-price" id="klStop">—</div></div>
+    </div>
+
+    <!-- MARKET STRUCTURE — NEW SECTION -->
+    <div class="info-block" style="margin-bottom:20px;background:rgba(255,165,0,0.03);border:1px solid rgba(255,165,0,0.2);border-radius:6px;padding:16px;">
+      <div class="section-title" style="color:var(--orange);">🗺️ MARKET STRUCTURE — WHERE ARE WE? (Prevents wrong-direction trades)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+        <div style="background:rgba(10,20,32,0.6);border:1px solid var(--border);border-radius:4px;padding:10px;">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:6px;">MARKET PHASE</div>
+          <div style="font-size:13px;font-weight:bold;" id="msPhase">—</div>
+        </div>
+        <div style="background:rgba(10,20,32,0.6);border:1px solid var(--border);border-radius:4px;padding:10px;">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:6px;">ABC / WAVE POSITION</div>
+          <div style="font-size:13px;font-weight:bold;" id="msABC">—</div>
+        </div>
+        <div style="background:rgba(10,20,32,0.6);border:1px solid var(--border);border-radius:4px;padding:10px;">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:6px;">PRICE LOCATION</div>
+          <div style="font-size:13px;font-weight:bold;" id="msLocation">—</div>
+        </div>
+        <div style="background:rgba(10,20,32,0.6);border:1px solid var(--border);border-radius:4px;padding:10px;">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:6px;">TREND STRENGTH</div>
+          <div style="font-size:13px;font-weight:bold;" id="msTrend">—</div>
+        </div>
+      </div>
+      <div style="background:rgba(10,20,32,0.5);border:1px solid var(--border);border-radius:4px;padding:10px;margin-bottom:8px;">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;">HIGHER TIMEFRAME CONTEXT</div>
+        <div style="font-size:12px;color:var(--text-mid);line-height:1.6;" id="msHTF">—</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:rgba(255,51,85,0.05);border:1px solid rgba(255,51,85,0.2);border-radius:4px;padding:8px;">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--red);margin-bottom:4px;">RESISTANCE ABOVE</div>
+          <div style="font-size:12px;color:var(--text-mid);" id="msSrAbove">—</div>
+        </div>
+        <div style="background:rgba(0,255,153,0.04);border:1px solid rgba(0,255,153,0.2);border-radius:4px;padding:8px;">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--green);margin-bottom:4px;">SUPPORT BELOW</div>
+          <div style="font-size:12px;color:var(--text-mid);" id="msSrBelow">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEGEND CONSENSUS -->
+    <div class="info-block" style="margin-bottom:20px;">
+      <div class="section-title">⚡ LEGEND CONSENSUS</div>
+      <div class="legend-grid" id="legendGrid">
+        <div class="legend-item soros"><div class="lg-name">🦅 SOROS — REFLEXIVITY</div><div class="lg-text" id="lgSoros">—</div></div>
+        <div class="legend-item druck"><div class="lg-name">🎯 DRUCKENMILLER — MONETARY DIVERGENCE</div><div class="lg-text" id="lgDruck">—</div></div>
+        <div class="legend-item lips"><div class="lg-name">👑 LIPSCHUTZ — ORDER FLOW</div><div class="lg-text" id="lgLips">—</div></div>
+        <div class="legend-item kovner"><div class="lg-name">🌍 KOVNER — MACRO + TECHNICAL</div><div class="lg-text" id="lgKovner">—</div></div>
+      </div>
+    </div>
+
+    <!-- CHART MASTERS -->
+    <div class="info-block" style="margin-bottom:20px;">
+      <div class="section-title">📚 10 CHART MASTERS ANALYSIS</div>
+      <div class="masters-grid">
+        <div class="master-row"><div class="master-name">MURPHY</div><div class="master-text" id="mMurphy">—</div></div>
+        <div class="master-row"><div class="master-name">NISON</div><div class="master-text" id="mNison">—</div></div>
+        <div class="master-row"><div class="master-name">DOUGLAS</div><div class="master-text" id="mDouglas">—</div></div>
+        <div class="master-row"><div class="master-name">KATHY LIEN</div><div class="master-text" id="mLien">—</div></div>
+        <div class="master-row"><div class="master-name">SILVANI</div><div class="master-text" id="mSilvani">—</div></div>
+        <div class="master-row"><div class="master-name">LAIDI</div><div class="master-text" id="mLaidi">—</div></div>
+        <div class="master-row"><div class="master-name">ELDER</div><div class="master-text" id="mElder">—</div></div>
+        <div class="master-row"><div class="master-name">WYCKOFF</div><div class="master-text" id="mWyckoff">—</div></div>
+        <div class="master-row"><div class="master-name">BOLLINGER</div><div class="master-text" id="mBollinger">—</div></div>
+        <div class="master-row"><div class="master-name">WILDER ATR</div><div class="master-text" id="mWilder">—</div></div>
+      </div>
+    </div>
+
+    <!-- NEWS & GEO -->
+    <div class="news-geo">
+      <div class="ng-block">
+        <div class="ng-label news">🗞️ LIVE NEWS IMPACT</div>
+        <div class="ng-text" id="newsImpact">—</div>
+      </div>
+      <div class="ng-block">
+        <div class="ng-label geo">⚔️ GEOPOLITICAL RISK</div>
+        <div class="ng-text" id="geoRisk">—</div>
+      </div>
+    </div>
+
+    <!-- CANDLESTICK -->
+    <div class="info-block" style="margin-bottom:20px;">
+      <div class="section-title">🕯️ CANDLESTICK SIGNAL (Steve Nison)</div>
+      <div style="font-size:14px;color:var(--text-mid);line-height:1.9;" id="candleSignal">—</div>
+    </div>
+
+    <!-- INVALIDATION -->
+    <div class="invalidation">
+      <div class="inv-label">⚠️ TRADE INVALIDATION — IF THIS HAPPENS, EXIT IMMEDIATELY</div>
+      <div class="inv-text" id="invalidation">—</div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="result-footer">
+      <span>Pair: <span id="rfPair">—</span></span>
+      <span>Price: <span id="rfPrice">—</span></span>
+      <span>Session: <span id="rfSession">—</span></span>
+      <span>Analyzed: <span id="rfTime">—</span></span>
+      <span style="color:var(--purple);cursor:pointer;" onclick="startSage()">↺ RE-SCAN</span>
+    </div>
+
+  </div><!-- end result-card -->
+
+</div><!-- end sage-wrap -->
+
+<script>
+let currentMode = 'forex';
+let pollTimer = null;
+
+// Clock
+function updateClock(){
+  const now = new Date();
+  const est = new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
+  document.getElementById('clock').textContent =
+    est.toTimeString().slice(0,5) + ' EST';
+}
+setInterval(updateClock,1000); updateClock();
+
+function setMode(mode){
+  currentMode = mode;
+  document.getElementById('tab-forex').classList.toggle('active', mode==='forex');
+  document.getElementById('tab-forex').classList.toggle('forex', mode==='forex');
+  document.getElementById('tab-stocks').classList.toggle('active', mode==='stocks');
+  document.getElementById('tab-stocks').classList.toggle('stocks', mode==='stocks');
+  document.getElementById('forexPairs').style.display = mode==='forex' ? 'flex' : 'none';
+  document.getElementById('stocksPairs').style.display = mode==='stocks' ? 'flex' : 'none';
+  if(mode==='stocks') document.getElementById('pairInput').value = 'SPY';
+  else document.getElementById('pairInput').value = 'EUR/USD';
+}
+
+function setPair(p){
+  document.getElementById('pairInput').value = p;
+}
+
+function tfClass(val){
+  if(!val) return 'tf-neut';
+  const v = val.toUpperCase();
+  if(v.includes('BULL') || v.includes('BUY')) return 'tf-bull';
+  if(v.includes('BEAR') || v.includes('SELL')) return 'tf-bear';
+  return 'tf-neut';
+}
+
+function setTF(id, val){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const cls = tfClass(val);
+  el.className = 'tf-signal ' + cls;
+  el.textContent = val || '—';
+}
+
+async function startSage(){
+  const pair = document.getElementById('pairInput').value.trim().toUpperCase();
+  if(!pair){ alert('Enter a pair or stock first'); return; }
+
+  // Reset UI
+  document.getElementById('loadingCard').classList.add('visible');
+  document.getElementById('resultCard').classList.remove('visible');
+  document.getElementById('scanBtn').disabled = true;
+  document.getElementById('loadingStep').textContent = 'Initializing Sage Mode...';
+
+  if(pollTimer){ clearInterval(pollTimer); pollTimer=null; }
+
+  try{
+    const resp = await fetch('/api/sage-start',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({pair, mode:currentMode})
+    });
+    const data = await resp.json();
+    if(!data.job_id){ throw new Error(data.error||'Start failed'); }
+    pollSage(data.job_id);
+  } catch(e){
+    document.getElementById('loadingCard').classList.remove('visible');
+    document.getElementById('scanBtn').disabled = false;
+    alert('Error: ' + e.message);
+  }
+}
+
+function pollSage(jobId){
+  pollTimer = setInterval(async()=>{
+    try{
+      const resp = await fetch('/api/sage-poll/'+jobId);
+      const data = await resp.json();
+      if(data.step) document.getElementById('loadingStep').textContent = data.step;
+      if(data.status==='done'){
+        clearInterval(pollTimer); pollTimer=null;
+        renderResult(data);
+      } else if(data.status==='error'){
+        clearInterval(pollTimer); pollTimer=null;
+        document.getElementById('loadingCard').classList.remove('visible');
+        document.getElementById('scanBtn').disabled = false;
+        alert('Sage Mode error: '+(data.error||'Unknown'));
+      }
+    } catch(e){
+      clearInterval(pollTimer); pollTimer=null;
+      document.getElementById('loadingCard').classList.remove('visible');
+      document.getElementById('scanBtn').disabled = false;
+    }
+  }, 2000);
+}
+
+function renderResult(d){
+  document.getElementById('loadingCard').classList.remove('visible');
+  document.getElementById('scanBtn').disabled = false;
+
+  const isWait = (d.verdict||'').toUpperCase() === 'WAIT';
+  const isBuy  = (d.verdict||'').toUpperCase() === 'BUY';
+  const isSell = (d.verdict||'').toUpperCase() === 'SELL';
+
+  // Verdict banner
+  const banner = document.getElementById('verdictBanner');
+  banner.className = 'verdict-banner ' + (d.verdict||'wait').toLowerCase();
+
+  // Show clear verdict text
+  const verdictEl = document.getElementById('verdictMain');
+  if(isBuy)       verdictEl.textContent = '🟢 BUY';
+  else if(isSell) verdictEl.textContent = '🔴 SELL';
+  else            verdictEl.textContent = '⏳ WAIT — Setup Building';
+
+  const conf = parseInt(d.confidence) || 0;
+  document.getElementById('vmConf').textContent = conf + '%';
+  const fill = document.getElementById('confFill');
+  fill.style.width = conf + '%';
+  fill.style.background = conf>=75 ? '#00ff99' : conf>=50 ? '#ffd700' : '#ff3355';
+  document.getElementById('vmSess').textContent = d.session || '—';
+  document.getElementById('vmRR').textContent = (d.rr_ratio && d.rr_ratio !== '0:1') ? d.rr_ratio : '—';
+  document.getElementById('vmTime').textContent = d.analyzed_at || '—';
+
+  // Helper: clean a price value — return '—' if missing/zero/invalid
+  const cleanPrice = (v) => {
+    if(!v || v === '0' || v === 0 || v === 'REAL_PRICE') return '—';
+    return v;
+  };
+  const cleanPips = (v) => {
+    const n = parseInt(v);
+    if(!n || n <= 0) return '—';
+    return n;
+  };
+
+  // Levels
+  const entryLabel = isWait ? document.querySelector('#resultCard .level-card.entry .lc-label') : null;
+  if(entryLabel) entryLabel.textContent = 'IF TRIGGERED';
+  document.getElementById('lvEntry').textContent = cleanPrice(d.entry);
+  document.getElementById('lvEntry').title = isWait ? 'Conditional entry — only valid if price reaches this level with confirmation' : '';
+  document.getElementById('lvSL').textContent = cleanPrice(d.stop_loss);
+  document.getElementById('lvSLpips').textContent = cleanPips(d.sl_pips) !== '—' ? cleanPips(d.sl_pips) + ' pips risk' : '— pips';
+  document.getElementById('lvTP1').textContent = cleanPrice(d.tp1);
+  document.getElementById('lvTP1pips').textContent = cleanPips(d.tp1_pips) !== '—' ? cleanPips(d.tp1_pips) + ' pips' : '—';
+  document.getElementById('lvTP2').textContent = cleanPrice(d.tp2);
+  document.getElementById('lvTP2pips').textContent = cleanPips(d.tp2_pips) !== '—' ? cleanPips(d.tp2_pips) + ' pips' : '—';
+  document.getElementById('lvTP3').textContent = cleanPrice(d.tp3);
+  document.getElementById('lvTP3pips').textContent = cleanPips(d.tp3_pips) !== '—' ? cleanPips(d.tp3_pips) + ' pips' : '—';
+
+  // If WAIT — add a banner below the levels explaining why
+  const existingWaitNote = document.getElementById('waitNote');
+  if(existingWaitNote) existingWaitNote.remove();
+  if(isWait && d.invalidation){
+    const waitNote = document.createElement('div');
+    waitNote.id = 'waitNote';
+    waitNote.style.cssText = 'background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.25);border-radius:6px;padding:12px 16px;margin:10px 0;font-size:12px;color:var(--text-mid);line-height:1.8;';
+    waitNote.innerHTML = '<span style="color:var(--gold);font-family:var(--head);font-size:10px;letter-spacing:2px;">⚠️ WHY WAIT</span><br>' + (d.sage_says || d.invalidation || 'Market is ranging — no clean edge yet. Levels above show where a setup could form.');
+    const levelsGrid = document.querySelector('#resultCard .levels-grid');
+    if(levelsGrid) levelsGrid.insertAdjacentElement('afterend', waitNote);
+  }
+
+  // Timeframes
+  const tf = d.timeframe_alignment || {};
+  setTF('tfWeekly', tf.weekly);
+  setTF('tfDaily', tf.daily);
+  setTF('tfH4', tf.h4);
+  setTF('tfH1', tf.h1);
+  setTF('tfM15', tf.m15);
+
+  // Sage says
+  document.getElementById('sageSays').textContent = d.sage_says || '—';
+
+  // Key levels
+  const kl = d.key_levels || {};
+  document.getElementById('klSup').textContent = kl.nearest_support || '—';
+  document.getElementById('klRes').textContent = kl.nearest_resistance || '—';
+  document.getElementById('klStop').textContent = kl.stop_zone || '—';
+
+  // Legend consensus — forex vs stock
+  const lc = d.legend_consensus || {};
+  const mode = d.mode || 'forex';
+  if(mode==='forex' || ['EUR','GBP','JPY','USD','CHF','AUD','NZD','CAD','XAU'].some(x=>d.pair?.includes(x))){
+    document.getElementById('legendGrid').innerHTML = `
+      <div class="legend-item soros"><div class="lg-name">🦅 SOROS — REFLEXIVITY</div><div class="lg-text">${lc.soros||'—'}</div></div>
+      <div class="legend-item druck"><div class="lg-name">🎯 DRUCKENMILLER — MONETARY DIVERGENCE</div><div class="lg-text">${lc.druckenmiller||'—'}</div></div>
+      <div class="legend-item lips"><div class="lg-name">👑 LIPSCHUTZ — ORDER FLOW</div><div class="lg-text">${lc.lipschutz||'—'}</div></div>
+      <div class="legend-item kovner"><div class="lg-name">🌍 KOVNER — MACRO + TECHNICAL</div><div class="lg-text">${lc.kovner||'—'}</div></div>`;
+  } else {
+    document.getElementById('legendGrid').innerHTML = `
+      <div class="legend-item livermore"><div class="lg-name">⚡ LIVERMORE — PIVOTAL POINTS</div><div class="lg-text">${lc.livermore||lc.soros||'—'}</div></div>
+      <div class="legend-item ptj"><div class="lg-name">🛡️ PTJ — 200 EMA + 5:1 RR</div><div class="lg-text">${lc.ptj||lc.druckenmiller||'—'}</div></div>
+      <div class="legend-item yass"><div class="lg-name">🎲 JEFF YASS — OPTIONS MATH</div><div class="lg-text">${lc.yass||lc.lipschutz||'—'}</div></div>
+      <div class="legend-item brooks"><div class="lg-name">📊 AL BROOKS — PRICE ACTION</div><div class="lg-text">${lc.brooks||lc.kovner||'—'}</div></div>`;
+  }
+
+  // Chart masters
+  const cm = d.chart_masters || {};
+  document.getElementById('mMurphy').textContent    = cm.murphy    || '—';
+  document.getElementById('mNison').textContent     = cm.nison     || '—';
+  document.getElementById('mDouglas').textContent   = cm.douglas   || '—';
+  document.getElementById('mLien').textContent      = cm.kathy_lien|| '—';
+  document.getElementById('mSilvani').textContent   = cm.silvani   || '—';
+  document.getElementById('mLaidi').textContent     = cm.laidi     || '—';
+  document.getElementById('mElder').textContent     = cm.elder     || '—';
+  document.getElementById('mWyckoff').textContent   = cm.wyckoff   || '—';
+  document.getElementById('mBollinger').textContent = cm.bollinger || '—';
+  document.getElementById('mWilder').textContent    = cm.wilder    || '—';
+
+  // News & geo
+  document.getElementById('newsImpact').textContent   = d.news_impact     || '—';
+  document.getElementById('geoRisk').textContent      = d.geopolitical_risk|| '—';
+  document.getElementById('candleSignal').textContent = d.candlestick_signal|| '—';
+  document.getElementById('invalidation').textContent = d.invalidation    || '—';
+
+  // Market structure
+  const ms = d.market_structure || {};
+  const msPhaseEl = document.getElementById('msPhase');
+  const msABCEl   = document.getElementById('msABC');
+  const msLocEl   = document.getElementById('msLocation');
+  const msTrEl    = document.getElementById('msTrend');
+  const msHTFEl   = document.getElementById('msHTF');
+  const msSrAEl   = document.getElementById('msSrAbove');
+  const msSrBEl   = document.getElementById('msSrBelow');
+  if(msPhaseEl){
+    const phase = ms.phase || '—';
+    msPhaseEl.textContent = phase;
+    msPhaseEl.style.color = phase.includes('TREND') ? 'var(--green)' : phase.includes('RANG') ? 'var(--gold)' : phase.includes('BREAK') ? 'var(--cyan)' : 'var(--red)';
+  }
+  if(msABCEl){
+    const abc = ms.abc_position || '—';
+    msABCEl.textContent = abc;
+    msABCEl.style.color = abc.includes('IMPULSE') ? 'var(--green)' : abc.includes('CORRECT') ? 'var(--red)' : 'var(--gold)';
+  }
+  if(msLocEl){
+    const loc = ms.price_location || '—';
+    msLocEl.textContent = loc;
+    msLocEl.style.color = loc.includes('RESIST') ? 'var(--red)' : loc.includes('SUPPORT') ? 'var(--green)' : loc.includes('BREAK') ? 'var(--cyan)' : 'var(--gold)';
+  }
+  if(msTrEl){
+    const tr = ms.trend_strength || '—';
+    msTrEl.textContent = tr;
+    msTrEl.style.color = tr.includes('STRONG') ? 'var(--green)' : tr.includes('MODERATE') ? 'var(--cyan)' : tr.includes('RANG') || tr.includes('CHOP') ? 'var(--red)' : 'var(--gold)';
+  }
+  if(msHTFEl) msHTFEl.textContent = ms.higher_tf_context || '—';
+  if(msSrAEl) msSrAEl.textContent = ms.sr_above || '—';
+  if(msSrBEl) msSrBEl.textContent = ms.sr_below || '—';
+
+  // Footer
+  document.getElementById('rfPair').textContent    = d.pair     || '—';
+  document.getElementById('rfPrice').textContent   = d.price    || '—';
+  document.getElementById('rfSession').textContent = d.session  || '—';
+  document.getElementById('rfTime').textContent    = d.analyzed_at || '—';
+
+  document.getElementById('resultCard').classList.add('visible');
+  document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ══ MULTI-PAIR SCANNER ═══════════════════════════════════
+let _scannerJobId = null;
+let _scannerPoll  = null;
+let _scanType = 'forex';
+
+const SCAN_LABELS = {
+  forex:  'SCAN ALL 10 FOREX PAIRS',
+  stocks: 'SCAN TOP 12 STOCKS',
+  custom: 'SCAN CUSTOM LIST',
+};
+
+function setScanType(type){
+  _scanType = type;
+  ['forex','stocks','custom'].forEach(t=>{
+    const btn = document.getElementById('scan-type-'+t);
+    if(!btn) return;
+    const active = t === type;
+    btn.style.borderColor    = active ? 'var(--cyan)' : 'rgba(255,255,255,0.12)';
+    btn.style.background     = active ? 'rgba(51,221,255,0.15)' : 'rgba(8,12,15,0.5)';
+    btn.style.color          = active ? 'var(--cyan)' : 'var(--text-dim)';
+  });
+  const labelEl = document.getElementById('scan-btn-label');
+  if(labelEl) labelEl.textContent = SCAN_LABELS[type] || 'SCAN';
+  const customBox = document.getElementById('scan-custom-box');
+  if(customBox) customBox.style.display = type === 'custom' ? 'block' : 'none';
+}
+
+async function startScanner(){
+  const btn = document.getElementById('scanAllBtn');
+  const loading = document.getElementById('scannerLoading');
+  const results = document.getElementById('scannerResults');
+  btn.disabled = true;
+  const labelEl = document.getElementById('scan-btn-label');
+  if(labelEl) labelEl.textContent = '⏳ SCANNING...';
+  loading.style.display = 'block';
+  results.style.display = 'none';
+
+  let customList = [];
+  if(_scanType === 'custom'){
+    const raw = (document.getElementById('scan-custom-input')?.value||'').trim();
+    customList = raw.split(',').map(s=>s.trim().toUpperCase()).filter(Boolean).slice(0,12);
+    if(!customList.length){
+      btn.disabled = false;
+      if(labelEl) labelEl.textContent = SCAN_LABELS[_scanType];
+      loading.style.display = 'none';
+      alert('Enter at least one ticker or pair in the custom list.');
+      return;
+    }
+  }
+
+  try{
+    const body = {scan_type: _scanType, custom_list: customList};
+    const resp = await fetch('/api/sage-scanner',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const data = await resp.json();
+    if(data.job_id){
+      _scannerJobId = data.job_id;
+      _scannerPoll = setInterval(pollScanner, 2000);
+    } else {
+      btn.disabled = false;
+      if(labelEl) labelEl.textContent = SCAN_LABELS[_scanType];
+      loading.style.display = 'none';
+    }
+  } catch(e){
+    btn.disabled = false;
+    if(labelEl) labelEl.textContent = SCAN_LABELS[_scanType];
+    loading.style.display = 'none';
+  }
+}
+
+async function pollScanner(){
+  if(!_scannerJobId) return;
+  try{
+    const resp = await fetch('/api/sage-scanner-poll/' + _scannerJobId);
+    const data = await resp.json();
+    if(data.step){
+      const stepEl = document.getElementById('scannerStep');
+      if(stepEl) stepEl.textContent = data.step;
+    }
+    if(data.status === 'done'){
+      clearInterval(_scannerPoll);
+      renderScannerResults(data);
+    } else if(data.status === 'error'){
+      clearInterval(_scannerPoll);
+      const btn = document.getElementById('scanAllBtn');
+      btn.disabled = false;
+      const labelEl = document.getElementById('scan-btn-label');
+      if(labelEl) labelEl.textContent = SCAN_LABELS[_scanType];
+      document.getElementById('scannerLoading').style.display = 'none';
+    }
+  } catch(e){ /* continue polling */ }
+}
+
+function renderScannerResults(data){
+  const btn = document.getElementById('scanAllBtn');
+  btn.disabled = false;
+  const labelEl = document.getElementById('scan-btn-label');
+  if(labelEl) labelEl.textContent = '🔄 RE-SCAN';
+  document.getElementById('scannerLoading').style.display = 'none';
+  document.getElementById('scannerResults').style.display = 'block';
+
+  const timeEl = document.getElementById('scannerTime');
+  if(timeEl) timeEl.textContent = 'SCAN RESULTS · ' + (data.scanned_at || '');
+
+  const grid = document.getElementById('scannerGrid');
+  const pairs = data.pairs || [];
+  grid.innerHTML = pairs.map(p => {
+    const v = p.verdict || 'WAIT';
+    const conf = p.confidence || 0;
+    const strength = p.trend_strength || 'UNKNOWN';
+    const reason = p.reason || '';
+    const phase = p.market_phase || '';
+    const abc = p.abc_position || '';
+    const clr = v === 'BUY' ? 'var(--green)' : v === 'SELL' ? 'var(--red)' : 'var(--text-dim)';
+    const bg  = v === 'BUY' ? 'rgba(0,255,153,0.04)' : v === 'SELL' ? 'rgba(255,51,85,0.04)' : 'rgba(10,20,32,0.4)';
+    const borderClr = v === 'BUY' ? 'rgba(0,255,153,0.3)' : v === 'SELL' ? 'rgba(255,51,85,0.2)' : 'rgba(30,48,64,0.5)';
+    const clickable = (v === 'BUY' || v === 'SELL') ? 'cursor:pointer;' : '';
+    const clickFn  = (v === 'BUY' || v === 'SELL') ? `onclick="setPair('${p.pair}');document.getElementById('resultCard').classList.remove('visible')"` : '';
+    return '<div style="background:' + bg + ';border:1px solid ' + borderClr + ';border-radius:6px;padding:10px;' + clickable + '" ' + clickFn + '>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+        '<span style="font-size:12px;font-weight:bold;color:var(--text);">' + p.pair + '</span>' +
+        '<span style="font-size:13px;font-weight:bold;color:' + clr + ';">' + v + '</span>' +
+      '</div>' +
+      '<div style="font-size:10px;color:var(--text-dim);margin-bottom:2px;">' + strength + (phase ? ' · ' + phase : '') + '</div>' +
+      (abc ? '<div style="font-size:10px;color:' + (abc.includes('IMPULSE') ? 'var(--green)' : 'var(--gold)') + ';margin-bottom:2px;">' + abc + '</div>' : '') +
+      (conf > 0 ? '<div style="font-size:10px;color:' + clr + ';font-weight:bold;">' + conf + '% confidence</div>' : '') +
+      (reason ? '<div style="font-size:10px;color:var(--text-dim);margin-top:2px;font-style:italic;">' + reason + '</div>' : '') +
+      ((v === 'BUY' || v === 'SELL') ? '<div style="font-size:9px;letter-spacing:1px;color:var(--sage);margin-top:4px;">TAP TO ANALYZE ▶</div>' : '') +
+    '</div>';
+  }).join('');
+
+  // Top picks
+  const top = data.top_picks || [];
+  if(top.length > 0){
+    document.getElementById('topPicksBox').style.display = 'block';
+    document.getElementById('topPicksList').innerHTML = top.map(p => {
+      const clr = p.verdict === 'BUY' ? 'var(--green)' : 'var(--red)';
+      return `<button onclick="setPair('${p.pair}');document.getElementById('resultCard').classList.remove('visible')" ` +
+        'style="padding:8px 16px;background:transparent;border:1px solid ' + clr + ';color:' + clr + ';cursor:pointer;border-radius:3px;font-family:var(--mono);font-size:12px;">' +
+        p.pair + ' ' + p.verdict + ' (' + (p.confidence||0) + '%)</button>';
+    }).join('');
+  }
+}
+</script>
+
+  <!-- ══ SAGE AI CHAT SECTION ══ -->
+  <div class="sage-ai-section">
+    <div class="sage-ai-box">
+
+      <!-- Header -->
+      <div class="sage-ai-hdr">
+        <div class="sage-live-dot"></div>
+        <div>
+          <div class="sage-ai-title">🔮 SAGE AI — 6 PATH INTELLIGENCE</div>
+          <div class="sage-ai-sub">LIVE DATA · MULTI-PATH ANALYSIS · NO GUESSING</div>
+        </div>
+        <button class="sak-change" onclick="document.getElementById('sageKeyBar').classList.toggle('hidden')" style="margin-left:auto">⚙ API KEY</button>
+      </div>
+
+      <!-- API Key -->
+      <div id="sageKeyBar">
+        <div class="sak-label">🔑 ANTHROPIC API KEY REQUIRED</div>
+        <div class="sak-row">
+          <input class="sak-input" id="sageKeyInput" type="password" placeholder="sk-ant-api03-..." />
+          <button class="sak-save" onclick="saveSageKey()">SAVE KEY</button>
+          <span class="sak-note">Get yours free → <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></span>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="sage-ai-body">
+
+        <!-- LEFT: 6 Paths -->
+        <div class="sage-paths-side">
+          <div class="sage-paths-hdr">⬡ THE 6 PATHS OF MARKET MASTERY</div>
+          <div class="sage-6-paths">
+            <div class="sage-path-box">
+              <div class="spb-num">01</div>
+              <div class="spb-title">PATH OF PRICE</div>
+              <div class="spb-desc">Pure price action. Bars, candles, patterns. Al Brooks, Jesse Livermore. The market tells you everything — learn to listen.</div>
+            </div>
+            <div class="sage-path-box">
+              <div class="spb-num">02</div>
+              <div class="spb-title">PATH OF STRUCTURE</div>
+              <div class="spb-desc">ICT/SMC — Order Blocks, FVGs, BOS/CHoCH, Liquidity, Kill Zones. Where institutional money lives.</div>
+            </div>
+            <div class="sage-path-box">
+              <div class="spb-num">03</div>
+              <div class="spb-title">PATH OF FLOW</div>
+              <div class="spb-desc">Wyckoff — Accumulation, Distribution, Volume Analysis. Following the Composite Man. Smart money leaves footprints.</div>
+            </div>
+            <div class="sage-path-box">
+              <div class="spb-num">04</div>
+              <div class="spb-title">PATH OF MATHEMATICS</div>
+              <div class="spb-desc">Fibonacci, Elliott Wave, Harmonic Patterns. The universe speaks in ratios. 61.8% is the golden gate.</div>
+            </div>
+            <div class="sage-path-box">
+              <div class="spb-num">05</div>
+              <div class="spb-title">PATH OF MACRO</div>
+              <div class="spb-desc">Central banks, NFP, CPI, DXY, yield curve, intermarket. The biggest moves come from macro. Read the world.</div>
+            </div>
+            <div class="sage-path-box">
+              <div class="spb-num">06</div>
+              <div class="spb-title">PATH OF MIND</div>
+              <div class="spb-desc">Mark Douglas, risk management, probability thinking. The greatest edge is between your ears. Execute without emotion.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Chat -->
+        <div class="sage-chat-side">
+          <div class="sage-quick-btns">
+            <button class="sage-qb" onclick="sageQuick('Apply all 6 paths to this market right now. What is the complete picture?')">🔮 All 6 Paths</button>
+            <button class="sage-qb" onclick="sageQuick('What is the ICT/SMC setup on this pair? Order blocks, FVGs, liquidity zones.')">⚡ ICT/SMC Read</button>
+            <button class="sage-qb" onclick="sageQuick('Give me the Wyckoff read. What phase are we in? Accumulation or distribution?')">📦 Wyckoff Phase</button>
+            <button class="sage-qb" onclick="sageQuick('What does Fibonacci and Elliott Wave say about where price is going?')">🔢 Fib + EW</button>
+            <button class="sage-qb" onclick="sageQuick('What is the macro environment telling us this week? DXY, yields, risk sentiment?')">🌍 Macro Read</button>
+            <button class="sage-qb" onclick="sageQuick('Give me a full trade setup with entry, SL, TP1, TP2, exact pips and confidence.')">🎯 Full Setup</button>
+            <button class="sage-qb" onclick="sageQuick('What session are we in and what moves should I expect right now?')">🕐 Session</button>
+            <button class="sage-qb" onclick="sageQuick('What news this week could disrupt this trade? How should I protect my position?')">📰 News Risk</button>
+          </div>
+
+          <div class="sage-msgs" id="sageMsgs">
+            <div class="sage-welcome" id="sageWelcome">
+              <span class="sage-welcome-icon">🔮</span>
+              <div class="sage-welcome-greeting">Hello — How Can I Help You?</div>
+              <div class="sage-welcome-sub">Jaydawolfx programmed me through the 6 paths.</div>
+              <div class="sage-welcome-cta">Let's find the perfect setup. 💚</div>
+            </div>
+          </div>
+
+          <div class="sage-input-area">
+            <textarea class="sage-textarea" id="sageInput" placeholder="Ask Sage anything about the market..." onkeydown="sageHandleKey(event)" oninput="sageAutoResize(this)"></textarea>
+            <button class="sage-send" id="sageSend" onclick="sageSend()">➤</button>
+          </div>
+          <div class="sage-disc">⚠ EDUCATIONAL ONLY · NOT FINANCIAL ADVICE · ALWAYS MANAGE YOUR OWN RISK</div>
+        </div>
+
+      </div><!-- /sage-ai-body -->
+    </div><!-- /sage-ai-box -->
+  </div><!-- /sage-ai-section -->
+
+<script>
+
+/* ══════════════════════════════════════
+   SAGE AI ENGINE
+══════════════════════════════════════ */
+const SAGE_AI = {
+  history: [],
+  loading: false,
+  key: localStorage.getItem('sageai_key') || ''
+};
+
+(function sagInitKey() {
+  if (SAGE_AI.key) document.getElementById('sageKeyBar').classList.add('hidden');
+})();
+
+function saveSageKey() {
+  const v = document.getElementById('sageKeyInput').value.trim();
+  if (!v.startsWith('sk-')) { document.getElementById('sageKeyInput').style.borderColor='var(--red)'; setTimeout(()=>document.getElementById('sageKeyInput').style.borderColor='',1500); return; }
+  SAGE_AI.key = v; localStorage.setItem('sageai_key', v);
+  document.getElementById('sageKeyBar').classList.add('hidden');
+}
+
+function sageQuick(q) { document.getElementById('sageInput').value = q; sageSend(); }
+function sageHandleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sageSend();} }
+function sageAutoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,80)+'px'; }
+function sageScrollBottom() { const m=document.getElementById('sageMsgs'); m.scrollTop=m.scrollHeight; }
+function sageEsc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function sageParseCard(text) {
+  const m = text.match(/TRADE_CARD:([\s\S]*?)END_TRADE_CARD/);
+  if (!m) return { clean: text, card: null };
+  const d = {};
+  m[1].split('\n').forEach(line => { const i=line.indexOf(':'); if(i>0) d[line.slice(0,i).trim()]=line.slice(i+1).trim(); });
+  return { clean: text.replace(m[0],'').trim(), card: d };
+}
+
+function sageBuildCard(d) {
+  if (!d) return '';
+  const sig = (d.SIGNAL||'WAIT').toUpperCase();
+  const sc = sig.includes('BUY')?'BUY':sig.includes('SELL')?'SELL':'WAIT';
+  const symColor = sc==='BUY'?'var(--green)':sc==='SELL'?'var(--red)':'var(--gold)';
+  const rp = parseInt(d.RISK_PCT)||50;
+  const rc = rp>66?'hi':rp>33?'md':'lo';
+  return `<div class="sage-trade-card">
+    <div class="stc-hdr"><span class="stc-sym" style="color:${symColor}">${d.SYMBOL||'MARKET'}</span><span class="stc-sig ${sc}">${sig}</span></div>
+    <div class="stc-grid">
+      <div class="stc-cell"><div class="stc-lbl">Entry</div><div class="stc-val" style="color:var(--gold)">${d.ENTRY||'—'}</div></div>
+      <div class="stc-cell"><div class="stc-lbl">Stop Loss</div><div class="stc-val" style="color:var(--red)">${d.STOP||'—'}</div></div>
+      <div class="stc-cell"><div class="stc-lbl">SL Pips</div><div class="stc-val" style="color:#6a9ab8">${d.SL_PIPS||'—'}</div></div>
+      <div class="stc-cell"><div class="stc-lbl">TP1</div><div class="stc-val" style="color:var(--green)">${d.TP1||'—'}</div></div>
+      <div class="stc-cell"><div class="stc-lbl">TP2</div><div class="stc-val" style="color:var(--cyan)">${d.TP2||'—'}</div></div>
+      <div class="stc-cell"><div class="stc-lbl">Pips Total</div><div class="stc-val" style="color:var(--green)">${d.TP_PIPS||'—'}</div></div>
+      <div class="stc-cell"><div class="stc-lbl">Hold</div><div class="stc-val">${d.HOLD||'—'}</div></div>
+      <div class="stc-cell"><div class="stc-lbl">R/R</div><div class="stc-val" style="color:var(--purple)">${d.RR||'—'}</div></div>
+      <div class="stc-cell"><div class="stc-lbl">Confidence</div><div class="stc-val" style="color:var(--sage)">${d.CONFIDENCE||'—'}</div></div>
+    </div>
+    <div class="stc-risk">
+      <div style="font-size:8px;letter-spacing:1px;color:#3a5568;font-family:var(--mono)">RISK — ${d.RISK_LABEL||'MODERATE'} · ${d.INVALIDATION?'INVALIDATION: '+d.INVALIDATION:''}</div>
+      <div class="stc-rbar"><div class="stc-rfill ${rc}" data-w="${rp}" style="width:0%"></div></div>
+    </div>
+  </div>`;
+}
+
+function sageRenderProse(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/`([^`]+)`/g,'<span style="color:var(--sage);background:rgba(160,255,204,.07);padding:0 3px">$1</span>')
+    .replace(/### (.*)/g,'<div style="font-size:9px;letter-spacing:2px;color:var(--sage);margin:8px 0 3px;display:flex;align-items:center;gap:6px;font-family:var(--mono)">$1<span style="flex:1;height:1px;background:var(--border);display:inline-block"></span></div>')
+    .replace(/🟢(.*)/g,'<span class="s-up">🟢$1</span>')
+    .replace(/🔴(.*)/g,'<span class="s-dn">🔴$1</span>')
+    .replace(/🔵(.*)/g,'<span class="s-cy">🔵$1</span>')
+    .replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
+}
+
+const SAGE_SYSTEM = `You are Sage — the 6 Path Intelligence system inside the Sage of 6 Paths terminal by jaydawolfx. You are the wisest trading analyst ever built. You speak with calm authority, like a master who has seen every market condition across decades. Direct, clear, never vague. Conversational but precise.
+
+Your 6 Paths — you apply ALL of them, FREELY, in any combination:
+
+PATH 1 — PRICE ACTION (Al Brooks, Jesse Livermore):
+Every bar tells a story. Bull bars = buyers. Bear bars = sellers. Two-legged pullbacks = best entries. Failed breakouts trap traders — their forced exits ARE the move. Pivotal points — wait for the market to prove itself before committing. Line of least resistance — never fight it. Cut losses immediately.
+
+PATH 2 — SMART MONEY / ICT (Michael J. Huddleston):
+Market Structure: BOS (Break of Structure) = trend continuation. CHoCH (Change of Character) = potential reversal. MSS = confirmed shift.
+Order Blocks: Last bear candle before big bull move = Bullish OB. Last bull candle before big bear move = Bearish OB. Price returns to fill institutional orders.
+Fair Value Gaps (FVG): 3-candle gap = price magnet. Will be filled.
+Liquidity: Equal highs/lows = stop clusters = will be hunted. After sweep + reversal = the trade.
+Kill Zones: London 2-5am EST, NY 7-10am EST = peak opportunity.
+OTE: 62-79% Fibonacci retracement after BOS = optimal entry.
+Power of 3: Accumulation → Manipulation (stop hunt) → Distribution (real move).
+
+PATH 3 — WYCKOFF FLOW:
+Accumulation: PS → SC → AR → Spring → SOS → LPS → Breakout = BUY
+Distribution: PSY → BC → AR → UTAD → SOW → LPSY → Breakdown = SELL
+Volume is the lie detector. Follow the Composite Man. Low volume rallies = trap. High volume breakouts = real.
+
+PATH 4 — MATHEMATICS (Fibonacci + Elliott Wave):
+61.8% = Golden Ratio — most powerful retracement. 38.2% = shallow trend pullback. 50% = magnet. 78.6% = last defense.
+Extensions: 127.2%, 161.8%, 261.8% = profit targets.
+Elliott Wave: 5-wave impulse + ABC correction. Wave 3 = longest, strongest, most profitable. Wave 2 never exceeds Wave 1 origin. ABC completion = best re-entry.
+Confluence of Fib + OB + FVG + S/R = MAXIMUM probability zone.
+
+PATH 5 — MACRO (Kathy Lien + John Murphy):
+Fed rates, ECB, BOJ, BOE decisions drive currency pairs long-term. NFP = biggest USD mover — wait 20 min for real direction. DXY up = EUR/USD, GBP/USD, AUD/USD down. London open sets daily direction 70% of time. London/NY overlap = peak opportunity. Yield curve, CPI, PCE, GDP all matter. Risk-ON = buy AUD, NZD, stocks; sell JPY, CHF. Risk-OFF = reverse.
+Intermarket: Oil up = CAD strong. Gold up = USD weak or fear. Bonds up = stocks often down.
+
+PATH 6 — MIND (Mark Douglas + Paul Tudor Jones):
+Think in probabilities, not certainties. Execute the plan — remove emotion. Every edge plays out over a series of trades. Minimum 5:1 R/R. Never add to losers. 2% max risk per trade. After 3 losses stop for the day.
+
+ADDITIONAL STRATEGIES — freely available:
+[All 20 forex scalping strategies, all 20 options strategies, all swing strategies, all futures strategies, all crypto strategies — apply whatever fits the setup]
+
+ABSOLUTE RULES:
+- ALWAYS search web for live prices and news FIRST — never guess current market data
+- NEVER give vague answers — specific prices, specific pips, always
+- State which path(s) you're applying and why
+- Be conversational — speak like the wisest trader, not a robot
+
+When giving a full trade setup, end with:
+TRADE_CARD:
+SYMBOL:[pair]
+SIGNAL:[BUY/SELL/WAIT]
+ENTRY:[price]
+STOP:[stop loss]
+SL_PIPS:[pips]
+TP1:[target 1]
+TP2:[target 2]
+TP_PIPS:[TP1: X pips | TP2: Y pips]
+HOLD:[timeframe]
+RR:[ratio]
+CONFIDENCE:[%]
+RISK_PCT:[0-100]
+RISK_LABEL:[LOW/MODERATE/HIGH/EXTREME]
+INVALIDATION:[what cancels the trade]
+END_TRADE_CARD
+
+Use ### for section headers. **Bold** key numbers. 🟢 bullish. 🔴 bearish. Talk with wisdom and calm authority. Think out loud through the 6 paths.`;
+
+async function sageSend() {
+  if (SAGE_AI.loading) return;
+  if (!SAGE_AI.key) { document.getElementById('sageKeyBar').classList.remove('hidden'); document.getElementById('sageKeyInput').focus(); return; }
+  const inp = document.getElementById('sageInput');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = ''; sageAutoResize(inp);
+  SAGE_AI.loading = true;
+  document.getElementById('sageSend').disabled = true;
+  document.getElementById('sageWelcome')?.remove();
+
+  const um = document.createElement('div');
+  um.className = 'smsg-user';
+  um.innerHTML = `<div class="sbbl">${sageEsc(text)}</div>`;
+  document.getElementById('sageMsgs').appendChild(um);
+
+  const tm = document.createElement('div');
+  tm.id = 'sageThinking'; tm.className = 'sage-thinking';
+  tm.innerHTML = `<div class="sdots"><span></span><span></span><span></span></div>Sage is searching live data and consulting the 6 paths...`;
+  document.getElementById('sageMsgs').appendChild(tm);
+  sageScrollBottom();
+
+  SAGE_AI.history.push({ role: 'user', content: text });
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': SAGE_AI.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, system: SAGE_SYSTEM, tools: [{ type: 'web_search_20250305', name: 'web_search' }], messages: SAGE_AI.history })
+    });
+    const data = await resp.json();
+    let fullText = '';
+    if (data.content) for (const b of data.content) if (b.type === 'text') fullText += b.text + '\n';
+    if (!fullText && data.error) { fullText = `Error: ${data.error.message}`; if(data.error.type==='authentication_error'){SAGE_AI.key='';localStorage.removeItem('sageai_key');document.getElementById('sageKeyBar').classList.remove('hidden');} }
+    SAGE_AI.history.push({ role: 'assistant', content: fullText });
+    document.getElementById('sageThinking')?.remove();
+    const { clean, card } = sageParseCard(fullText);
+    const wm = document.createElement('div');
+    wm.className = 'smsg-sage';
+    wm.innerHTML = `<div class="sbbl"><p>${sageRenderProse(clean)}</p>${sageBuildCard(card)}</div>`;
+    document.getElementById('sageMsgs').appendChild(wm);
+    setTimeout(()=>wm.querySelectorAll('.stc-rfill[data-w]').forEach(el=>el.style.width=el.dataset.w+'%'),100);
+  } catch(err) {
+    document.getElementById('sageThinking')?.remove();
+    const em = document.createElement('div'); em.className='smsg-sage';
+    em.innerHTML=`<div class="sbbl"><span style="color:var(--red)">Connection error: ${sageEsc(err.message)}</span></div>`;
+    document.getElementById('sageMsgs').appendChild(em);
+  }
+  SAGE_AI.loading = false;
+  document.getElementById('sageSend').disabled = false;
+  sageScrollBottom();
+}
+
+</script>
+</body>
+</html>

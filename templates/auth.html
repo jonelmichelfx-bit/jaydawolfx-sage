@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JAYDAWOLFX — Enter The Terminal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:        #04080c;
+      --surface:   #090f15;
+      --surface2:  #0e1822;
+      --border:    #1a2d3f;
+      --border2:   #243d52;
+      --gold:      #e8a014;
+      --gold2:     #c4850e;
+      --green:     #00e676;
+      --cyan:      #00c8f0;
+      --red:       #ff2952;
+      --text:      #dce8f0;
+      --text-mid:  #8ba8bc;
+      --text-dim:  #3d5a6e;
+      --head:      'Syne', sans-serif;
+      --mono:      'JetBrains Mono', monospace;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      overflow-x: hidden;
+    }
+
+    /* ── BACKGROUND ─────────────────────────────────────────── */
+    .bg-layer {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 0%, rgba(232,160,20,0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 90% 100%, rgba(0,200,240,0.04) 0%, transparent 60%);
+    }
+
+    .grid-layer {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(0,200,240,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,240,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    /* corner accent lines */
+    .corner {
+      position: fixed; z-index: 0; pointer-events: none;
+    }
+    .corner-tl { top: 0; left: 0; width: 200px; height: 200px;
+      background: radial-gradient(circle at 0 0, rgba(232,160,20,0.08) 0%, transparent 70%); }
+    .corner-br { bottom: 0; right: 0; width: 200px; height: 200px;
+      background: radial-gradient(circle at 100% 100%, rgba(0,200,240,0.07) 0%, transparent 70%); }
+
+    /* scan line sweep */
+    @keyframes scan {
+      0%   { transform: translateY(-100vh); }
+      100% { transform: translateY(100vh); }
+    }
+    .scan-line {
+      position: fixed; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(232,160,20,0.15), transparent);
+      animation: scan 8s linear infinite;
+      z-index: 0; pointer-events: none;
+    }
+
+    /* ── LAYOUT ─────────────────────────────────────────────── */
+    .page {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 480px 1fr;
+      grid-template-rows: 1fr auto 1fr;
+      padding: 24px;
+    }
+
+    .center-col {
+      grid-column: 2;
+      grid-row: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* ── LOGO ───────────────────────────────────────────────── */
+    .logo-block {
+      text-align: center;
+      margin-bottom: 32px;
+      animation: fadeDown 0.6s ease both;
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .wolf-icon {
+      font-size: 52px;
+      line-height: 1;
+      display: block;
+      margin-bottom: 14px;
+      filter: drop-shadow(0 0 24px rgba(232,160,20,0.6));
+      animation: wolfPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes wolfPulse {
+      0%, 100% { filter: drop-shadow(0 0 20px rgba(232,160,20,0.5)); }
+      50%       { filter: drop-shadow(0 0 44px rgba(232,160,20,0.9)); }
+    }
+
+    .logo-name {
+      font-family: var(--head);
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 6px;
+      color: var(--gold);
+      text-shadow: 0 0 40px rgba(232,160,20,0.4);
+    }
+
+    .logo-name span { color: var(--cyan); }
+
+    .logo-sub {
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: var(--text-dim);
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    /* ── STATUS ROW ─────────────────────────────────────────── */
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+    }
+
+    .status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: blink 2s ease-in-out infinite;
+    }
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* ── CARD ───────────────────────────────────────────────── */
+    .card {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.5s ease 0.15s both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* top accent bar */
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), var(--cyan), transparent);
+    }
+
+    /* corner brackets */
+    .card::after {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(var(--gold), var(--gold)) top left / 16px 1px no-repeat,
+        linear-gradient(var(--gold), var(--gold)) top left / 1px 16px no-repeat,
+        linear-gradient(var(--gold), var(--gold)) bottom right / 16px 1px no-repeat,
+        linear-gradient(var(--gold), var(--gold)) bottom right / 1px 16px no-repeat;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    /* ── TABS ───────────────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      flex: 1;
+      padding: 16px;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .tab::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 20%; right: 20%; height: 2px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transition: transform 0.25s;
+    }
+
+    .tab.active {
+      color: var(--gold);
+      background: rgba(232,160,20,0.04);
+    }
+
+    .tab.active::after { transform: scaleX(1); }
+    .tab:hover:not(.active) { color: var(--text-mid); }
+
+    /* ── FORM BODY ──────────────────────────────────────────── */
+    .form-body { padding: 28px 32px 32px; }
+
+    /* ── ALERT ──────────────────────────────────────────────── */
+    .alert {
+      padding: 10px 14px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-bottom: 20px;
+      display: none;
+      letter-spacing: 0.5px;
+      line-height: 1.5;
+    }
+    .alert.error   { background: rgba(255,41,82,0.08); border: 1px solid rgba(255,41,82,0.3); color: var(--red); }
+    .alert.success { background: rgba(0,230,118,0.06); border: 1px solid rgba(0,230,118,0.25); color: var(--green); }
+    .alert.show    { display: block; }
+
+    /* ── TRIAL BANNER ───────────────────────────────────────── */
+    .trial-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: rgba(232,160,20,0.05);
+      border: 1px solid rgba(232,160,20,0.2);
+      border-left: 3px solid var(--gold);
+      border-radius: 3px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+    }
+
+    .trial-icon { font-size: 22px; line-height: 1; flex-shrink: 0; }
+
+    .trial-text strong {
+      display: block;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--gold);
+      margin-bottom: 3px;
+    }
+
+    .trial-text span {
+      font-size: 11px;
+      color: var(--text-mid);
+      line-height: 1.5;
+    }
+
+    /* ── FORM GROUPS ────────────────────────────────────────── */
+    .form-group { margin-bottom: 18px; }
+
+    label {
+      display: block;
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 2.5px;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+    }
+
+    input[type=text], input[type=email], input[type=password] {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type=text]:focus, input[type=email]:focus, input[type=password]:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(232,160,20,0.08);
+    }
+
+    input::placeholder { color: var(--text-dim); }
+
+    /* ── REMEMBER ROW ───────────────────────────────────────── */
+    .remember-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+
+    .remember-row input[type=checkbox] {
+      width: 14px; height: 14px;
+      accent-color: var(--gold);
+    }
+
+    .remember-row label {
+      margin: 0;
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+    }
+
+    /* ── SUBMIT BTN ─────────────────────────────────────────── */
+    .btn-submit {
+      width: 100%;
+      padding: 15px;
+      margin-top: 20px;
+      background: linear-gradient(135deg, rgba(232,160,20,0.15), rgba(196,133,14,0.1));
+      border: 1px solid var(--gold);
+      border-radius: 3px;
+      color: var(--gold);
+      font-family: var(--head);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-submit::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(232,160,20,0.2), rgba(196,133,14,0.15));
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .btn-submit:hover::before { opacity: 1; }
+    .btn-submit:hover { box-shadow: 0 0 28px rgba(232,160,20,0.3); }
+    .btn-submit:active { transform: scale(0.99); }
+    .btn-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-loading { opacity: 0.65; pointer-events: none; }
+    .btn-loading::after {
+      content: ' ▋';
+      animation: cursor-blink 0.5s step-end infinite;
+    }
+    @keyframes cursor-blink { 50% { opacity: 0; } }
+
+    /* ── DIVIDER ────────────────────────────────────────────── */
+    .form-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 28px 0 24px;
+      font-size: 9px; letter-spacing: 3px; color: var(--text-dim);
+    }
+    .form-divider::before, .form-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── PLAN MINI CARDS ────────────────────────────────────── */
+    .plan-mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .plan-mini {
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+
+    .plan-mini.featured { border-color: rgba(232,160,20,0.4); background: rgba(232,160,20,0.03); }
+    .plan-mini.top      { border-color: rgba(150,80,240,0.4); background: rgba(150,80,240,0.03); }
+
+    .plan-mini .pm-name {
+      font-family: var(--head);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+    }
+
+    .pm-basic  { color: var(--green); }
+    .pm-elite  { color: var(--gold); }
+    .pm-top    { color: #b06aff; }
+
+    .plan-mini .pm-price {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .plan-mini .pm-tag {
+      font-size: 9px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* ── TICKER STRIP ───────────────────────────────────────── */
+    .ticker-strip {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: 32px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .ticker-label {
+      padding: 0 14px;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      border-right: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .ticker-scroll { overflow: hidden; flex: 1; }
+
+    .ticker-inner {
+      display: inline-block;
+      white-space: nowrap;
+      animation: scroll-ticker 35s linear infinite;
+      font-size: 11px;
+    }
+
+    @keyframes scroll-ticker {
+      from { transform: translateX(100vw); }
+      to   { transform: translateX(-100%); }
+    }
+
+    .up  { color: var(--green); }
+    .dn  { color: var(--red); }
+    .dim { color: var(--text-dim); margin: 0 20px; }
+
+    /* ── FOOTER NOTE ────────────────────────────────────────── */
+    .footer-note {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 10px;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      line-height: 1.7;
+      animation: fadeUp 0.5s ease 0.3s both;
+    }
+
+    /* ── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width: 560px) {
+      .page { grid-template-columns: 1fr; padding: 16px; }
+      .center-col { grid-column: 1; }
+      .form-body { padding: 20px; }
+      .plan-mini-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="grid-layer"></div>
+<div class="corner corner-tl"></div>
+<div class="corner corner-br"></div>
+<div class="scan-line"></div>
+
+<div class="page">
+  <div class="center-col">
+
+    <!-- LOGO -->
+    <div class="logo-block">
+      <span class="wolf-icon">🐺</span>
+      <div class="logo-name">JAYDAWOLF<span>FX</span></div>
+      <div class="logo-sub">Trading Intelligence Terminal</div>
+    </div>
+
+    <!-- STATUS -->
+    <div class="status-row">
+      <span class="status-dot"></span>
+      MARKETS LIVE &nbsp;·&nbsp; ALL SYSTEMS OPERATIONAL
+    </div>
+
+    <!-- CARD -->
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('login')">LOGIN</button>
+        <button class="tab" onclick="showTab('signup')">SIGN UP</button>
+      </div>
+
+      <div class="form-body">
+        <div id="alert" class="alert"></div>
+
+        <!-- ── LOGIN FORM ─────────────────────────────────── -->
+        <div id="login-form">
+          <div class="form-group">
+            <label>Email or Username</label>
+            <input type="text" id="login-identifier" placeholder="wolftrader@example.com" autocomplete="username"/>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"/>
+          </div>
+          <div class="remember-row">
+            <input type="checkbox" id="remember" checked/>
+            <label for="remember">Keep me logged in</label>
+          </div>
+          <button class="btn-submit" id="login-btn" onclick="doLogin()">ENTER TERMINAL →</button>
+        </div>
+
+        <!-- ── SIGNUP FORM ────────────────────────────────── -->
+        <div id="signup-form" style="display:none;">
+          <div class="trial-banner">
+            <span class="trial-icon">🔥</span>
+            <div class="trial-text">
+              <strong>6-MONTH FREE TRIAL</strong>
+              <span>Full Wolf Basic access. No credit card required.<br>Cancel anytime.</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="signup-email" placeholder="wolftrader@example.com" autocomplete="email"/>
+          </div>
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="signup-username" placeholder="wolftrader42" autocomplete="username"/>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="signup-password" placeholder="Minimum 8 characters + 1 number" autocomplete="new-password"/>
+          </div>
+
+          <div class="form-divider">CHOOSE YOUR PLAN AFTER TRIAL</div>
+
+          <div class="plan-mini-grid">
+            <div class="plan-mini">
+              <div class="pm-name pm-basic">BASIC</div>
+              <div class="pm-price">$29/mo</div>
+              <div class="pm-tag">Academy + Live Prices</div>
+            </div>
+            <div class="plan-mini featured">
+              <div class="pm-name pm-elite">ELITE</div>
+              <div class="pm-price">$97/mo</div>
+              <div class="pm-tag">Full Terminal + AI</div>
+            </div>
+            <div class="plan-mini top">
+              <div class="pm-name pm-top">BYAKUGAN</div>
+              <div class="pm-price">$197/mo</div>
+              <div class="pm-tag">All Seeing Eye</div>
+            </div>
+          </div>
+
+          <button class="btn-submit" id="signup-btn" onclick="doSignup()">START FREE TRIAL →</button>
+        </div>
+
+      </div><!-- /form-body -->
+    </div><!-- /card -->
+
+    <div class="footer-note">
+      By signing up you agree to our terms of service.<br>
+      JaydaWolfFX is for educational purposes only. Not financial advice.
+    </div>
+
+  </div><!-- /center-col -->
+</div><!-- /page -->
+
+<!-- TICKER STRIP -->
+<div class="ticker-strip">
+  <div class="ticker-label">LIVE</div>
+  <div class="ticker-scroll">
+    <span class="ticker-inner">
+      SPY <span class="up">▲ 521.44 +0.82%</span><span class="dim">·</span>
+      QQQ <span class="up">▲ 438.22 +1.14%</span><span class="dim">·</span>
+      AAPL <span class="dn">▼ 182.34 −0.43%</span><span class="dim">·</span>
+      TSLA <span class="up">▲ 241.11 +2.31%</span><span class="dim">·</span>
+      NVDA <span class="up">▲ 867.55 +3.22%</span><span class="dim">·</span>
+      VIX <span class="dn">▼ 14.22 −1.05%</span><span class="dim">·</span>
+      AMD <span class="up">▲ 178.90 +1.67%</span><span class="dim">·</span>
+      META <span class="up">▲ 502.10 +0.95%</span><span class="dim">·</span>
+      EUR/USD <span class="up">▲ 1.0842 +0.18%</span><span class="dim">·</span>
+      GBP/USD <span class="dn">▼ 1.2734 −0.09%</span><span class="dim">·</span>
+      USD/JPY <span class="up">▲ 149.62 +0.24%</span><span class="dim">·</span>
+      XAU/USD <span class="up">▲ 2,185.40 +0.55%</span>
+    </span>
+  </div>
+</div>
+
+<script>
+  function showTab(tab) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'signup' && i === 1));
+    });
+    document.getElementById('login-form').style.display  = tab === 'login'  ? 'block' : 'none';
+    document.getElementById('signup-form').style.display = tab === 'signup' ? 'block' : 'none';
+    clearAlert();
+  }
+
+  function showAlert(msg, type = 'error') {
+    const el = document.getElementById('alert');
+    el.textContent = msg;
+    el.className = `alert ${type} show`;
+  }
+
+  function clearAlert() {
+    document.getElementById('alert').className = 'alert';
+  }
+
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    btn.classList.toggle('btn-loading', loading);
+    btn.disabled = loading;
+  }
+
+  async function doLogin() {
+    clearAlert();
+    const identifier = document.getElementById('login-identifier').value.trim();
+    const password   = document.getElementById('login-password').value;
+    const remember   = document.getElementById('remember').checked;
+    if (!identifier || !password) { showAlert('Please enter your email/username and password.'); return; }
+    setLoading('login-btn', true);
+    try {
+      const res  = await fetch('/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ identifier, password, remember }) });
+      const data = await res.json();
+      if (res.ok) { showAlert(data.message, 'success'); setTimeout(() => { window.location.href = '/'; }, 800); }
+      else { showAlert(data.error || 'Login failed.'); }
+    } catch (e) { showAlert('Connection error. Check your network.'); }
+    finally { setLoading('login-btn', false); }
+  }
+
+  async function doSignup() {
+    clearAlert();
+    const email    = document.getElementById('signup-email').value.trim();
+    const username = document.getElementById('signup-username').value.trim();
+    const password = document.getElementById('signup-password').value;
+    if (!email || !username || !password) { showAlert('All fields are required.'); return; }
+    setLoading('signup-btn', true);
+    try {
+      const res  = await fetch('/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, username, password }) });
+      const data = await res.json();
+      if (res.ok) { showAlert(data.message, 'success'); setTimeout(() => { window.location.href = '/'; }, 1000); }
+      else { showAlert(data.error || 'Signup failed.'); }
+    } catch (e) { showAlert('Connection error. Check your network.'); }
+    finally { setLoading('signup-btn', false); }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const loginVisible = document.getElementById('login-form').style.display !== 'none';
+      loginVisible ? doLogin() : doSignup();
+    }
+  });
+</script>
+</body>
+</html>
