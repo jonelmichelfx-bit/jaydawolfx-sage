@@ -44,6 +44,18 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   linear-gradient(90deg,rgba(0,255,153,0.015) 1px,transparent 1px);
   background-size:50px 50px;}
 
+/* ── Animated background price lines ── */
+@keyframes sageBgLine1{0%{transform:translateX(-100%) translateY(0)}100%{transform:translateX(100vw) translateY(-30px)}}
+@keyframes sageBgLine2{0%{transform:translateX(-100%) translateY(0)}100%{transform:translateX(100vw) translateY(20px)}}
+@keyframes sageBgFloat{0%{opacity:0;transform:translateY(30px)}15%{opacity:.7}85%{opacity:.15}100%{opacity:0;transform:translateY(-400px)}}
+@keyframes sageBgCandle{0%{opacity:.08;transform:scaleY(.7)}100%{opacity:.18;transform:scaleY(1)}}
+
+.sage-bg-wrap{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.sage-bg-line{position:absolute;height:1px;width:40%;background:linear-gradient(90deg,transparent,rgba(64,224,255,0.28),rgba(64,224,255,0.4),rgba(64,224,255,0.28),transparent);animation:sageBgLine1 12s linear infinite}
+.sage-bg-line2{position:absolute;height:1px;width:30%;background:linear-gradient(90deg,transparent,rgba(0,255,153,0.2),rgba(0,255,153,0.28),transparent);animation:sageBgLine2 18s linear infinite;animation-delay:-6s}
+.sage-bg-num{position:absolute;font-family:var(--mono);font-size:11px;color:rgba(64,224,255,0.35);animation:sageBgFloat linear infinite;white-space:nowrap}
+.sage-bg-candle{position:absolute;bottom:0;width:4px;border-radius:1px;animation:sageBgCandle ease-in-out infinite alternate}
+
 /* NAV */
 .nav{position:sticky;top:0;z-index:100;height:52px;background:rgba(6,10,13,0.98);
   border-bottom:2px solid var(--purple);display:flex;align-items:center;padding:0 20px;gap:12px;}
@@ -75,7 +87,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .b-gold{background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.4);color:var(--gold);}
 .b-cyan{background:rgba(51,221,255,0.1);border:1px solid rgba(51,221,255,0.4);color:var(--cyan);}
 .b-purple{background:rgba(204,85,255,0.1);border:1px solid rgba(204,85,255,0.4);color:var(--purple);}
-.b-green{background:rgba(0,255,153,0.1);border:1px solid rgba(0,255,153,0.4);color:var(--green);}
+.b-green{background:rgba(0,255,153,0.2);border:1px solid rgba(0,255,153,0.4);color:var(--green);}
 
 /* MAIN LAYOUT */
 .sage-wrap{max-width:1200px;margin:0 auto;padding:24px 20px 60px;position:relative;z-index:1;}
@@ -87,7 +99,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:transparent;border:none;border-radius:3px;cursor:pointer;
   color:var(--text-mid);transition:all 0.2s;text-align:center;}
 .mtab.active.forex{background:rgba(51,221,255,0.1);color:var(--cyan);border:1px solid rgba(51,221,255,0.3);}
-.mtab.active.stocks{background:rgba(0,255,153,0.1);color:var(--green);border:1px solid rgba(0,255,153,0.3);}
+.mtab.active.stocks{background:rgba(0,255,153,0.2);color:var(--green);border:1px solid rgba(0,255,153,0.3);}
 .mtab:hover{color:var(--text-mid);}
 
 /* INPUT SECTION */
@@ -172,7 +184,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .tf-box{background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:12px;text-align:center;}
 .tf-name{font-size:12px;letter-spacing:2px;color:var(--text-mid);margin-bottom:8px;}
 .tf-signal{font-size:13px;font-weight:bold;padding:4px 8px;border-radius:2px;letter-spacing:1px;}
-.tf-bull{background:rgba(0,255,153,0.12);color:var(--green);border:1px solid rgba(0,255,153,0.3);}
+.tf-bull{background:rgba(0,255,153,0.25);color:var(--green);border:1px solid rgba(0,255,153,0.3);}
 .tf-bear{background:rgba(255,51,85,0.12);color:var(--red);border:1px solid rgba(255,51,85,0.3);}
 .tf-neut{background:rgba(255,215,0,0.12);color:var(--gold);border:1px solid rgba(255,215,0,0.3);}
 
@@ -583,6 +595,29 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 </head>
 <body>
 
+<!-- Animated background -->
+<div class="sage-bg-wrap">
+  <div class="sage-bg-line" style="top:22%;animation-duration:14s"></div>
+  <div class="sage-bg-line" style="top:48%;animation-duration:19s;animation-delay:-4s"></div>
+  <div class="sage-bg-line2" style="top:67%;animation-duration:16s;animation-delay:-8s"></div>
+  <div class="sage-bg-line2" style="top:35%;animation-duration:22s;animation-delay:-11s"></div>
+  <div class="sage-bg-num" style="left:8%;animation-duration:14s;animation-delay:0s;bottom:60px">1.0842</div>
+  <div class="sage-bg-num" style="left:22%;animation-duration:18s;animation-delay:-5s;bottom:60px">159.34</div>
+  <div class="sage-bg-num" style="left:38%;animation-duration:12s;animation-delay:-9s;bottom:60px">+0.42%</div>
+  <div class="sage-bg-num" style="left:55%;animation-duration:16s;animation-delay:-3s;bottom:60px">78/100</div>
+  <div class="sage-bg-num" style="left:70%;animation-duration:20s;animation-delay:-7s;bottom:60px">1.2756</div>
+  <div class="sage-bg-num" style="left:85%;animation-duration:15s;animation-delay:-11s;bottom:60px">4998.81</div>
+  <div class="sage-bg-candle" style="left:5%;height:40px;background:rgba(0,255,153,0.25);animation-duration:3s"></div>
+  <div class="sage-bg-candle" style="left:8%;height:28px;background:rgba(255,68,102,0.22);animation-duration:2.5s;animation-delay:.3s"></div>
+  <div class="sage-bg-candle" style="left:11%;height:52px;background:rgba(0,255,153,0.25);animation-duration:3.5s;animation-delay:.6s"></div>
+  <div class="sage-bg-candle" style="left:14%;height:35px;background:rgba(0,255,153,0.2);animation-duration:2.8s;animation-delay:.2s"></div>
+  <div class="sage-bg-candle" style="left:17%;height:22px;background:rgba(255,68,102,0.22);animation-duration:3.2s;animation-delay:.5s"></div>
+  <div class="sage-bg-candle" style="right:5%;height:45px;background:rgba(0,255,153,0.2);animation-duration:3s;animation-delay:.8s"></div>
+  <div class="sage-bg-candle" style="right:8%;height:30px;background:rgba(255,68,102,0.18);animation-duration:2.6s;animation-delay:.4s"></div>
+  <div class="sage-bg-candle" style="right:11%;height:55px;background:rgba(0,255,153,0.25);animation-duration:3.4s;animation-delay:.7s"></div>
+  <div class="sage-bg-candle" style="right:14%;height:38px;background:rgba(0,255,153,0.2);animation-duration:2.9s;animation-delay:.1s"></div>
+</div>
+
 <nav class="nav">
   <div class="logo">🔮 SAGE <span style="color:var(--cyan)">OF 6 PATHS</span></div>
   <div class="nav-tabs">
@@ -591,7 +626,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   </div>
   <div class="nav-right">
     <span class="clock" id="clock">--:-- ET</span>
-    <a href="/auth/logout" class="logout-a" style="font-size:13px;color:var(--text-dim);text-decoration:none;padding:4px 10px;border:1px solid var(--border);border-radius:3px;margin-left:8px;transition:.2s" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)'">LOGOUT</a>
+    <span id="sagePlanBadge" style="font-size:10px;font-family:var(--mono);letter-spacing:2px;color:var(--text-dim);padding:3px 8px;border:1px solid var(--border);border-radius:3px">STUDENT</span>
+    <span id="sageMsgBadge" style="font-size:10px;font-family:var(--mono);letter-spacing:1px;color:var(--gold);display:none">6 msgs left</span>
+    <a href="/pricing" style="font-size:11px;font-family:var(--mono);letter-spacing:1px;color:var(--cyan);text-decoration:none;padding:4px 10px;border:1px solid rgba(64,224,255,0.25);border-radius:3px" id="sageUpgradeBtn">UPGRADE</a>
+    <a href="/auth/logout" class="logout-a" style="font-size:13px;color:var(--text-dim);text-decoration:none;padding:4px 10px;border:1px solid var(--border);border-radius:3px;margin-left:4px;transition:.2s" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-dim)'">LOGOUT</a>
   </div>
 </nav>
 
@@ -1132,6 +1170,10 @@ function setScanType(type){
 }
 
 async function startScanner(){
+  if (SAGE_USER.loaded && !SAGE_USER.scanner) {
+    sageShowUpgrade('scanner');
+    return;
+  }
   const btn = document.getElementById('scanAllBtn');
   const loading = document.getElementById('scannerLoading');
   const results = document.getElementById('scannerResults');
@@ -1450,6 +1492,78 @@ const SAGE_AI = {
   loading: false,
   key: localStorage.getItem('sageai_key') || ''
 };
+
+// ── Plan access control ─────────────────────────────────
+const SAGE_USER = {
+  plan: 'student', can_message: true, messages_remaining: 6,
+  messages_per_day: 6, lessons_allowed: 10,
+  scanner: false, watchlist: false, full_cards: false, loaded: false
+};
+
+async function sageLoadPlan() {
+  try {
+    const r = await fetch('/api/user-plan');
+    if (r.ok) {
+      const d = await r.json();
+      Object.assign(SAGE_USER, {
+        plan: d.plan, can_message: d.can_message,
+        messages_remaining: d.messages_remaining,
+        messages_per_day: d.messages_per_day,
+        lessons_allowed: d.lessons_allowed,
+        scanner: d.scanner, watchlist: d.watchlist,
+        full_cards: d.full_cards, loaded: true
+      });
+      sageUpdatePlanUI();
+    }
+  } catch(e) {}
+}
+
+function sageUpdatePlanUI() {
+  const badge = document.getElementById('sageMsgBadge');
+  if (badge) {
+    if (SAGE_USER.plan === 'student') {
+      badge.textContent = SAGE_USER.messages_remaining + ' msgs left today';
+      badge.style.display = 'inline';
+    } else { badge.style.display = 'none'; }
+  }
+  const planBadge = document.getElementById('sagePlanBadge');
+  if (planBadge) {
+    const labels = {student:'STUDENT', sage:'SAGE ✦', unleashed:'SIX PATHS UNLEASHED 🔮'};
+    const colors = {student:'var(--text-dim)', sage:'var(--cyan)', unleashed:'var(--purple)'};
+    planBadge.textContent = labels[SAGE_USER.plan] || SAGE_USER.plan.toUpperCase();
+    planBadge.style.color = colors[SAGE_USER.plan] || 'var(--text-dim)';
+  }
+  // Hide upgrade button for paid plans
+  const upgradeBtn = document.getElementById('sageUpgradeBtn');
+  if (upgradeBtn) {
+    upgradeBtn.style.display = SAGE_USER.plan === 'student' ? 'inline' : 'none';
+  }
+}
+
+function sageShowUpgrade(feature) {
+  const msgs = {
+    messages: '⚡ You have used all 6 daily messages on the Student plan. Upgrade to Sage for unlimited chat.',
+    scanner:  '🔍 The multi-pair scanner requires the Sage plan ($49.99/mo) or higher.',
+    watchlist:'👁 Watchlist price alerts require the Sage plan ($49.99/mo) or higher.',
+    lessons:  '📚 Lessons 11–50 require the Sage plan ($49.99/mo) or higher.',
+  };
+  const msg = msgs[feature] || 'This feature requires an upgrade.';
+  const modal = document.createElement('div');
+  modal.id = 'sageUpgradeModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = `
+    <div style="background:#080f1a;border:1px solid rgba(64,224,255,0.25);border-radius:10px;padding:36px 32px;max-width:460px;width:100%;text-align:center">
+      <div style="font-size:32px;margin-bottom:16px">🔮</div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:14px;letter-spacing:2px;color:var(--cyan);margin-bottom:16px">UPGRADE REQUIRED</div>
+      <div style="font-size:15px;color:var(--text-mid);line-height:1.7;margin-bottom:28px">${msg}</div>
+      <div style="display:flex;gap:12px;justify-content:center">
+        <a href="/pricing" style="background:var(--cyan);color:#040810;padding:13px 28px;border-radius:4px;font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:800;letter-spacing:2px;text-decoration:none">VIEW PLANS →</a>
+        <button onclick="document.getElementById('sageUpgradeModal').remove()" style="background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--text-dim);padding:13px 20px;border-radius:4px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:12px">CLOSE</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+}
 
 (function sagInitKey() {
   if (SAGE_AI.key) document.getElementById('sageKeyBar').classList.add('hidden');
@@ -1982,6 +2096,21 @@ async function sageSend() {
   const inp = document.getElementById('sageInput');
   const text = inp.value.trim();
   if (!text) return;
+
+  // Plan gate: check message limit
+  if (SAGE_USER.loaded && SAGE_USER.plan === 'student') {
+    try {
+      const planCheck = await fetch('/api/check-message', { method:'POST', headers:{'Content-Type':'application/json'} });
+      if (!planCheck.ok) {
+        const err = await planCheck.json();
+        sageShowUpgrade('messages');
+        return;
+      }
+      const planData = await planCheck.json();
+      SAGE_USER.messages_remaining = planData.messages_remaining;
+      sageUpdatePlanUI();
+    } catch(e) {}
+  }
   inp.value = ''; sageAutoResize(inp);
   SAGE_AI.loading = true;
   document.getElementById('sageSend').disabled = true;
@@ -2163,6 +2292,10 @@ function sageInitEdu() {
 }
 
 function sageOpenLesson(id) {
+  if (SAGE_USER.loaded && id > SAGE_USER.lessons_allowed) {
+    sageShowUpgrade('lessons');
+    return;
+  }
   const lesson = SAGE_LESSONS.find(function(l){return l.id===id;});
   if (!lesson) return;
   const progress = sageGetProgress();
@@ -2228,7 +2361,7 @@ function sageCheckAnswer(lessonId, qIdx, selectedIdx, correctIdx) {
     if (resultEl) {
       resultEl.style.display = 'block';
       if (allCorrect) {
-        resultEl.style.background = 'rgba(0,255,153,0.1)';
+        resultEl.style.background = 'rgba(0,255,153,0.2)';
         resultEl.style.border = '1px solid var(--green)';
         resultEl.style.color = 'var(--green)';
         resultEl.innerHTML = '✅ Perfect score! Lesson complete. You can move to the next lesson.';
@@ -2240,7 +2373,7 @@ function sageCheckAnswer(lessonId, qIdx, selectedIdx, correctIdx) {
           setTimeout(() => sageOpenLesson(next.id), 1500);
         }
       } else {
-        resultEl.style.background = 'rgba(255,68,102,0.08)';
+        resultEl.style.background = 'rgba(255,68,102,0.18)';
         resultEl.style.border = '1px solid var(--red)';
         resultEl.style.color = 'var(--text-mid)';
         resultEl.innerHTML = '📖 Review the lesson and try again. Correct answers are highlighted in green.';
@@ -2429,6 +2562,10 @@ function sageSaveWatch() {
 }
 
 function sageAddWatch(pair, price, direction, note, sl, tp1) {
+  if (SAGE_USER.loaded && !SAGE_USER.watchlist) {
+    sageShowUpgrade('watchlist');
+    return;
+  }
   const item = {
     id: Date.now(),
     pair: pair.toUpperCase(),
@@ -2464,7 +2601,7 @@ function sageManualWatch(btn) {
   }
   sageAddWatch(pair, price, dir, note, sl, tp);
   btn.textContent = '✅ WATCHING';
-  btn.style.background = 'rgba(0,255,153,0.1)';
+  btn.style.background = 'rgba(0,255,153,0.2)';
   btn.style.borderColor = 'var(--green)';
   btn.style.color = 'var(--green)';
   btn.disabled = true;
@@ -2621,6 +2758,9 @@ const _origAddResponse = typeof sageAddResponse === 'function' ? sageAddResponse
 // Boot watchlist
 sageRenderWatchlist();
 setInterval(sageCheckWatchAlerts, 30000);
+
+// Load plan on startup
+sageLoadPlan();
 
 </script>
 
