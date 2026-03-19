@@ -167,7 +167,7 @@ body::before{
         <li class="c">6 Path deep analysis on any pair</li>
         <li class="c">Economic calendar integration</li>
       </ul>
-      <a href="/login?signup=1" class="c-btn cyan">GET SAGE →</a>
+      <button onclick="startCheckout('sage')" class="c-btn cyan">GET SAGE →</button>
     </div>
 
     <!-- SIX PATHS UNLEASHED -->
@@ -188,7 +188,7 @@ body::before{
         <li class="p">Early access to new features</li>
         <li class="highlight">🔒 Free lifetime upgrades — forever</li>
       </ul>
-      <a href="/login?signup=1" class="c-btn purple">GO UNLEASHED →</a>
+      <button onclick="startCheckout('unleashed')" class="c-btn purple">GO UNLEASHED →</button>
     </div>
 
   </div>
@@ -227,5 +227,29 @@ body::before{
 
 <div class="footer">© JAYDAWOLFX · SAGE OF SIX PATHS · ALL RIGHTS RESERVED</div>
 
+<script>
+async function startCheckout(plan) {
+  // If not logged in, go to signup first
+  try {
+    const r = await fetch('/create-checkout-session', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({plan})
+    });
+    if (r.status === 401 || r.redirected) {
+      window.location.href = '/login?signup=1&plan=' + plan;
+      return;
+    }
+    const d = await r.json();
+    if (d.url) {
+      window.location.href = d.url;
+    } else if (d.error) {
+      alert('Error: ' + d.error);
+    }
+  } catch(e) {
+    window.location.href = '/login?signup=1&plan=' + plan;
+  }
+}
+</script>
 </body>
 </html>
