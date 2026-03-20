@@ -114,60 +114,62 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 
 /* Section blocks */
 .sp-section{border-bottom:1px solid var(--border);padding:10px 12px;}
-.sp-sec-title{font-family:var(--head);font-size:.55rem;letter-spacing:2px;
-  color:var(--text-dim);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
-.sp-sec-title span{color:var(--cyan);}
+.sp-sec-title{font-family:var(--head);font-size:.72rem;letter-spacing:2px;
+  color:var(--cyan);margin-bottom:8px;display:flex;align-items:center;gap:6px;
+  padding-bottom:5px;border-bottom:1px solid rgba(64,224,255,0.12);}
+.sp-sec-title span{color:#e0f8ff;font-weight:700;}
 
 /* 2/3-col grids */
-.sp-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
-.sp-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;}
+.sp-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.sp-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
 .sp-cell{background:var(--surface2);border:1px solid var(--border);
-  border-radius:2px;padding:5px 7px;}
-.sp-cell-lbl{font-size:.55rem;color:var(--text-dim);margin-bottom:2px;letter-spacing:1px;}
-.sp-cell-val{font-family:var(--mono);font-size:.8rem;font-weight:700;color:var(--text);}
+  border-radius:3px;padding:7px 9px;}
+.sp-cell-lbl{font-size:.68rem;color:var(--text-mid);margin-bottom:3px;letter-spacing:1px;font-weight:600;}
+.sp-cell-val{font-family:var(--mono);font-size:.95rem;font-weight:700;color:var(--text);}
 
 /* Level rows */
-.sp-level-row{display:flex;align-items:center;gap:6px;padding:4px 0;
-  border-bottom:1px solid rgba(26,48,80,0.5);}
+.sp-level-row{display:flex;align-items:center;gap:7px;padding:6px 0;
+  border-bottom:1px solid rgba(26,48,80,0.6);}
 .sp-level-row:last-child{border-bottom:none;}
-.sp-lvl-tag{font-size:.6rem;letter-spacing:1px;padding:1px 5px;border-radius:2px;
-  font-weight:700;min-width:42px;text-align:center;flex-shrink:0;}
-.sp-lvl-tag.res{background:rgba(255,68,102,0.12);color:var(--red);border:1px solid rgba(255,68,102,0.25);}
-.sp-lvl-tag.sup{background:rgba(0,255,136,0.08);color:var(--green);border:1px solid rgba(0,255,136,0.2);}
-.sp-lvl-tag.ema{background:rgba(170,102,255,0.1);color:var(--purple);border:1px solid rgba(170,102,255,0.25);}
-.sp-lvl-tag.fib{background:rgba(64,224,255,0.08);color:var(--cyan);border:1px solid rgba(64,224,255,0.2);}
-.sp-lvl-tag.ob{background:rgba(255,136,0,0.1);color:var(--orange);border:1px solid rgba(255,136,0,0.25);}
-.sp-lvl-tag.fvg{background:rgba(255,215,0,0.08);color:var(--gold);border:1px solid rgba(255,215,0,0.2);}
-.sp-lvl-tag.pdh{background:rgba(64,224,255,0.06);color:var(--sage);border:1px solid rgba(64,224,255,0.15);}
-.sp-lvl-tag.rnd{background:rgba(255,255,255,0.04);color:var(--text-mid);border:1px solid var(--border);}
-.sp-lvl-price{font-family:var(--mono);font-size:.8rem;font-weight:700;flex:1;}
-.sp-lvl-desc{font-size:.6rem;color:var(--text-dim);text-align:right;}
+.sp-lvl-tag{font-size:.68rem;letter-spacing:1px;padding:2px 7px;border-radius:3px;
+  font-weight:700;min-width:50px;text-align:center;flex-shrink:0;}
+.sp-lvl-tag.res{background:rgba(255,68,102,0.18);color:#ff6680;border:1px solid rgba(255,68,102,0.4);}
+.sp-lvl-tag.sup{background:rgba(0,255,136,0.12);color:#00ff99;border:1px solid rgba(0,255,136,0.35);}
+.sp-lvl-tag.ema{background:rgba(170,102,255,0.15);color:#cc88ff;border:1px solid rgba(170,102,255,0.4);}
+.sp-lvl-tag.fib{background:rgba(64,224,255,0.12);color:#40e0ff;border:1px solid rgba(64,224,255,0.35);}
+.sp-lvl-tag.ob{background:rgba(255,136,0,0.15);color:#ffaa33;border:1px solid rgba(255,136,0,0.4);}
+.sp-lvl-tag.fvg{background:rgba(255,215,0,0.12);color:#ffd700;border:1px solid rgba(255,215,0,0.35);}
+.sp-lvl-tag.pdh{background:rgba(96,208,255,0.1);color:#80d8ff;border:1px solid rgba(96,208,255,0.3);}
+.sp-lvl-tag.rnd{background:rgba(255,255,255,0.07);color:#c0d8f0;border:1px solid rgba(255,255,255,0.15);}
+.sp-lvl-price{font-family:var(--mono);font-size:.95rem;font-weight:700;flex:1;color:#f0f8ff;}
+.sp-lvl-desc{font-size:.68rem;color:#7aaccc;text-align:right;max-width:100px;}
 
 /* News/alert rows */
-.sp-news-row{padding:6px 8px;border-left:2px solid;margin-bottom:4px;background:rgba(13,22,37,0.6);}
-.sp-news-row.high{border-color:var(--red);}
-.sp-news-row.medium{border-color:var(--gold);}
-.sp-news-row.low{border-color:var(--text-dim);}
-.sp-news-time{font-size:.6rem;color:var(--text-dim);margin-bottom:2px;}
-.sp-news-event{font-size:.7rem;color:var(--text-mid);font-weight:700;}
-.sp-news-imp{font-size:.6rem;padding:1px 5px;border-radius:2px;margin-left:4px;}
-.sp-news-imp.high{background:rgba(255,68,102,0.15);color:var(--red);}
-.sp-news-imp.medium{background:rgba(255,215,0,0.12);color:var(--gold);}
+.sp-news-row{padding:8px 10px;border-left:3px solid;margin-bottom:6px;
+  background:rgba(13,22,37,0.8);border-radius:0 3px 3px 0;}
+.sp-news-row.high{border-color:var(--red);background:rgba(255,68,102,0.05);}
+.sp-news-row.medium{border-color:var(--gold);background:rgba(255,215,0,0.04);}
+.sp-news-row.low{border-color:var(--cyan);background:rgba(64,224,255,0.03);}
+.sp-news-time{font-size:.68rem;color:var(--text-mid);margin-bottom:3px;font-weight:600;}
+.sp-news-event{font-size:.78rem;color:#e0f0ff;font-weight:700;}
+.sp-news-imp{font-size:.65rem;padding:2px 6px;border-radius:3px;margin-left:5px;font-weight:700;}
+.sp-news-imp.high{background:rgba(255,68,102,0.2);color:#ff6680;}
+.sp-news-imp.medium{background:rgba(255,215,0,0.15);color:#ffd700;}
 
 /* Regime badge */
-.sp-regime{padding:6px 10px;border-radius:2px;margin-bottom:6px;font-size:.7rem;
+.sp-regime{padding:8px 12px;border-radius:3px;margin-bottom:7px;font-size:.8rem;
   font-weight:700;letter-spacing:1px;text-align:center;}
-.sp-regime.bull{background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.3);color:var(--green);}
-.sp-regime.bear{background:rgba(255,68,102,0.06);border:1px solid rgba(255,68,102,0.25);color:var(--red);}
-.sp-regime.range{background:rgba(90,122,144,0.1);border:1px solid var(--border);color:var(--text-dim);}
-.sp-regime.trans{background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.25);color:var(--gold);}
+.sp-regime.bull{background:rgba(0,255,136,0.12);border:1px solid rgba(0,255,136,0.4);color:#00ff99;}
+.sp-regime.bear{background:rgba(255,68,102,0.1);border:1px solid rgba(255,68,102,0.4);color:#ff6680;}
+.sp-regime.range{background:rgba(90,122,144,0.15);border:1px solid rgba(160,200,232,0.25);color:#a0c8e8;}
+.sp-regime.trans{background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.35);color:#ffd700;}
 
 /* Bias bar */
-.sp-bias-bar{display:flex;align-items:center;gap:6px;padding:5px 10px;
-  border-radius:2px;margin-bottom:4px;font-size:.7rem;}
-.sp-bias-bar.buy{background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);}
-.sp-bias-bar.sell{background:rgba(255,68,102,0.06);border:1px solid rgba(255,68,102,0.2);}
-.sp-bias-bar.wait{background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.15);}
+.sp-bias-bar{display:flex;align-items:center;gap:8px;padding:7px 12px;
+  border-radius:3px;margin-bottom:5px;font-size:.8rem;font-weight:700;}
+.sp-bias-bar.buy{background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.3);}
+.sp-bias-bar.sell{background:rgba(255,68,102,0.08);border:1px solid rgba(255,68,102,0.3);}
+.sp-bias-bar.wait{background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);}
 
 /* ══════════════════════════════════
    RIGHT — CHAT
@@ -365,7 +367,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
               <span style="font-size:.75rem" id="sageBiasIcon">⚪</span>
               <span style="font-size:.7rem;font-weight:700" id="sageBiasText">LOADING LIVE DATA...</span>
             </div>
-            <div style="font-size:.6rem;color:var(--text-dim);margin-top:4px;line-height:1.6" id="sageRegimeDesc">--</div>
+            <div style="font-size:.72rem;color:#90b8d8;margin-top:5px;line-height:1.7" id="sageRegimeDesc">--</div>
           </div>
 
           <!-- Resistance zones -->
@@ -394,7 +396,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
                 <div class="sp-cell"><div class="sp-cell-lbl">EMA 50</div><div class="sp-cell-val" id="sageEma50">--</div></div>
                 <div class="sp-cell"><div class="sp-cell-lbl" style="color:var(--purple)">EMA 200 ★</div><div class="sp-cell-val" id="sageEma200" style="color:var(--purple)">--</div></div>
               </div>
-              <div style="margin-top:6px;font-size:.6rem;color:var(--text-dim);line-height:1.6" id="sageEmaContext">--</div>
+              <div style="margin-top:7px;font-size:.72rem;line-height:1.7;font-weight:600" id="sageEmaContext">--</div>
             </div>
           </div>
 
@@ -440,17 +442,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
               <div class="sp-cell">
                 <div class="sp-cell-lbl">RSI 14</div>
                 <div class="sp-cell-val" id="sageRsi">--</div>
-                <div style="font-size:.55rem;color:var(--text-dim);margin-top:2px" id="sageRsiNote">--</div>
+                <div style="font-size:.65rem;color:#90b8d8;margin-top:3px;font-weight:600" id="sageRsiNote">--</div>
               </div>
               <div class="sp-cell">
                 <div class="sp-cell-lbl">ADX 14</div>
                 <div class="sp-cell-val" id="sageAdx">--</div>
-                <div style="font-size:.55rem;color:var(--text-dim);margin-top:2px" id="sageAdxNote">--</div>
+                <div style="font-size:.65rem;color:#90b8d8;margin-top:3px;font-weight:600" id="sageAdxNote">--</div>
               </div>
               <div class="sp-cell">
                 <div class="sp-cell-lbl">ATR 14</div>
                 <div class="sp-cell-val" id="sageAtr">--</div>
-                <div style="font-size:.55rem;color:var(--text-dim);margin-top:2px">volatility</div>
+                <div style="font-size:.65rem;color:#90b8d8;margin-top:3px;font-weight:600">volatility range</div>
               </div>
             </div>
           </div>
@@ -475,12 +477,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
                 <div style="font-size:.55rem;color:var(--text-dim);margin-top:1px" id="sageSessionNext">--</div>
               </div>
             </div>
-            <div style="margin-top:8px;font-size:.6rem;color:var(--text-dim);line-height:1.7" id="sageSessionAdvice">--</div>
+            <div style="margin-top:8px;font-size:.72rem;color:#90c8e8;line-height:1.8;font-weight:600" id="sageSessionAdvice">--</div>
           </div>
 
           <div class="sp-section">
             <div class="sp-sec-title">⚡ <span>BEST STRATEGY RIGHT NOW</span></div>
-            <div style="font-size:.7rem;color:var(--text-mid);line-height:1.8" id="sageStrategyAdvice">--</div>
+            <div style="font-size:.75rem;color:#c0e0ff;line-height:1.9;font-weight:600" id="sageStrategyAdvice">--</div>
           </div>
 
         </div><!-- /tabIndicators -->
@@ -490,7 +492,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 
           <div class="sp-section">
             <div class="sp-sec-title">🏦 <span>ORDER BLOCKS</span>
-              <span style="font-size:.55rem;color:var(--text-dim);margin-left:4px">last institutional footprints</span>
+              <span style="font-size:.65rem;color:#80b0d0;margin-left:4px">last institutional footprints</span>
             </div>
             <div id="sageOBSection">
               <div style="text-align:center;padding:12px;color:var(--text-dim);font-size:.65rem">Loading...</div>
@@ -499,7 +501,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 
           <div class="sp-section">
             <div class="sp-sec-title">⚡ <span>FAIR VALUE GAPS</span>
-              <span style="font-size:.55rem;color:var(--text-dim);margin-left:4px">price fills these 80%</span>
+              <span style="font-size:.65rem;color:#80b0d0;margin-left:4px">price fills these 80%</span>
             </div>
             <div id="sageFVGSection">
               <div style="text-align:center;padding:12px;color:var(--text-dim);font-size:.65rem">Loading...</div>
@@ -515,7 +517,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 
           <div class="sp-section">
             <div class="sp-sec-title">💧 <span>LIQUIDITY POOLS</span>
-              <span style="font-size:.55rem;color:var(--text-dim);margin-left:4px">where stops are sitting</span>
+              <span style="font-size:.65rem;color:#80b0d0;margin-left:4px">where stops are sitting</span>
             </div>
             <div id="sageLiqSection">
               <div style="text-align:center;padding:8px;color:var(--text-dim);font-size:.65rem">Loading...</div>
@@ -524,7 +526,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 
           <div class="sp-section">
             <div class="sp-sec-title">🔵 <span>OTE ZONE</span>
-              <span style="font-size:.55rem;color:var(--text-dim);margin-left:4px">optimal trade entry 61.8–78.6%</span>
+              <span style="font-size:.65rem;color:#80b0d0;margin-left:4px">optimal trade entry 61.8–78.6%</span>
             </div>
             <div id="sageOTESection">
               <div style="text-align:center;padding:8px;color:var(--text-dim);font-size:.65rem">Loading...</div>
@@ -562,13 +564,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 
           <div class="sp-section">
             <div class="sp-sec-title">⚠️ <span>TRADING CAUTION RULES</span></div>
-            <div style="font-size:.65rem;color:var(--text-dim);line-height:1.9">
-              🔴 <strong style="color:var(--red)">NFP / CPI / FOMC</strong> in next 30 min → NO TRADES<br>
-              🔴 <strong style="color:var(--red)">Central bank decision</strong> today → reduce size or wait<br>
-              🟡 <strong style="color:var(--gold)">Medium impact event</strong> in 1hr → half size only<br>
-              🟢 <strong style="color:var(--green)">Calendar clear</strong> → normal risk. Trust the setup.<br>
-              ⏰ <strong style="color:var(--text-mid)">Friday after 2pm ET</strong> → no new scalp trades<br>
-              😴 <strong style="color:var(--text-dim)">Dead zone 5-8pm ET</strong> → skip all scalping
+            <div style="font-size:.75rem;color:#c0d8f0;line-height:2.1;font-weight:600">
+              🔴 <strong style="color:#ff6680">NFP / CPI / FOMC</strong> in next 30 min → <span style="color:#ff6680">NO TRADES — sit out</span><br>
+              🔴 <strong style="color:#ff6680">Central bank decision</strong> today → <span style="color:#ffaa44">reduce size or wait</span><br>
+              🟡 <strong style="color:#ffd700">Medium impact event</strong> in 1hr → <span style="color:#ffd700">half size only</span><br>
+              🟢 <strong style="color:#00ff99">Calendar clear</strong> → <span style="color:#00ff99">normal risk — trust the setup</span><br>
+              ⏰ <strong style="color:#a0c8e8">Friday after 2pm ET</strong> → no new scalp trades<br>
+              😴 <strong style="color:#7090a8">Dead zone 5-8pm ET</strong> → skip all scalping
             </div>
           </div>
 
@@ -968,18 +970,18 @@ function sageRenderPanel(d){
       <div class="sp-news-row medium" style="border-color:var(--green)">
         <div class="sp-news-time">BULLISH ORDER BLOCK</div>
         <div class="sp-news-event" style="color:var(--green)">Zone: ${d.bull_ob.low} — ${d.bull_ob.high}</div>
-        <div style="font-size:.6rem;color:var(--text-dim);margin-top:2px;line-height:1.6">
+        <div style="font-size:.72rem;color:#90b8d8;margin-top:3px;line-height:1.7;font-weight:600">
           Last bearish candle before bullish displacement. Price tends to return here for institutional re-entry. 
-          ${parseFloat(d.bull_ob.low)<price?'✅ Below price — watch for pullback buy here.':'⚠️ Above price — already broken.'}
+          ${parseFloat(d.bull_ob.low)<price?'<span style="color:#00ff99">✅ Below price — watch for pullback BUY here.</span>':'<span style="color:#ffaa44">⚠️ Above price — already broken through.</span>'}
         </div>
       </div>`;
     if(d.bear_ob) obHtml += `
       <div class="sp-news-row medium" style="border-color:var(--red)">
         <div class="sp-news-time">BEARISH ORDER BLOCK</div>
         <div class="sp-news-event" style="color:var(--red)">Zone: ${d.bear_ob.low} — ${d.bear_ob.high}</div>
-        <div style="font-size:.6rem;color:var(--text-dim);margin-top:2px;line-height:1.6">
+        <div style="font-size:.72rem;color:#90b8d8;margin-top:3px;line-height:1.7;font-weight:600">
           Last bullish candle before bearish displacement. Institutions may sell here on any rally. 
-          ${parseFloat(d.bear_ob.high)>price?'✅ Above price — watch for rally rejection.':'⚠️ Below price — already traded through.'}
+          ${parseFloat(d.bear_ob.high)>price?'<span style="color:#ff6680">✅ Above price — watch for rally REJECTION here.</span>':'<span style="color:#ffaa44">⚠️ Below price — already traded through.</span>'}
         </div>
       </div>`;
     if(!obHtml) obHtml = '<div style="color:var(--text-dim);font-size:.6rem;padding:8px">No clear order blocks detected in recent 30 candles.</div>';
@@ -992,12 +994,12 @@ function sageRenderPanel(d){
     if(d.fvgs && d.fvgs.length){
       fvgEl.innerHTML = d.fvgs.map(f=>`
         <div class="sp-news-row low" style="border-color:${f.type==='BULL'?'var(--green)':'var(--red)'}">
-          <div class="sp-news-time">${f.type==='BULL'?'BULLISH':'BEARISH'} FAIR VALUE GAP</div>
-          <div class="sp-news-event" style="color:${f.type==='BULL'?'var(--green)':'var(--red)'}">Zone: ${f.low} — ${f.high}</div>
-          <div style="font-size:.6rem;color:var(--text-dim);margin-top:2px">3-candle imbalance. Price fills this gap 80% of the time. ${f.type==='BULL'?'Bullish gap — expect price to come back up into this zone.':'Bearish gap — expect price to come back down into this zone.'}</div>
+          <div class="sp-news-time" style="color:${f.type==='BULL'?'#00ff99':'#ff6680'};font-weight:700">${f.type==='BULL'?'⬆ BULLISH':'⬇ BEARISH'} FAIR VALUE GAP</div>
+          <div class="sp-news-event" style="color:${f.type==='BULL'?'#00ff99':'#ff6680'};font-size:.82rem">Zone: ${f.low} — ${f.high}</div>
+          <div style="font-size:.72rem;color:#90b8d8;margin-top:4px;font-weight:600;line-height:1.7">3-candle imbalance — price fills these 80% of the time.<br>${f.type==='BULL'?'<span style=\"color:#00ff99\">Bullish gap — expect price to return UP into this zone.</span>':'<span style=\"color:#ff6680\">Bearish gap — expect price to return DOWN into this zone.</span>'}</div>
         </div>`).join('');
     } else {
-      fvgEl.innerHTML='<div style="color:var(--text-dim);font-size:.6rem;padding:8px">No significant fair value gaps in recent candles.</div>';
+      fvgEl.innerHTML='<div style="color:#7090a8;font-size:.72rem;padding:10px;font-weight:600">No significant fair value gaps detected in recent candles.</div>';
     }
   }
 
@@ -1035,12 +1037,12 @@ function sageRenderPanel(d){
     const swH20 = parseFloat(d.swing_high_20);
     const swL20 = parseFloat(d.swing_low_20);
     liqEl.innerHTML = `
-      <div style="font-size:.65rem;line-height:1.9">
-        <div>💧 <strong style="color:var(--red)">BUY STOPS (liquidity above):</strong> ${d.swing_high_20} — equal highs. Institutions will sweep this before moving down.</div>
-        <div>💧 <strong style="color:var(--green)">SELL STOPS (liquidity below):</strong> ${d.swing_low_20} — equal lows. Institutions will sweep this before moving up.</div>
-        ${d.pdh?`<div>📅 <strong style="color:var(--sage)">PDH liquidity:</strong> ${d.pdh} — yesterday's high has buy stops above it.</div>`:''}
-        ${d.pdl?`<div>📅 <strong style="color:var(--sage)">PDL liquidity:</strong> ${d.pdl} — yesterday's low has sell stops below it.</div>`:''}
-        <div style="color:var(--text-dim);margin-top:4px;font-size:.6rem">ICT: Price sweeps liquidity first, THEN makes the real move in the opposite direction.</div>
+      <div style="font-size:.75rem;line-height:2.0;font-weight:600">
+        <div>💧 <strong style="color:#ff6680">BUY STOPS above:</strong> <span style="color:#ffcc44;font-family:var(--mono)">${d.swing_high_20}</span> — equal highs. Institutions sweep this before going down.</div>
+        <div>💧 <strong style="color:#00ff99">SELL STOPS below:</strong> <span style="color:#ffcc44;font-family:var(--mono)">${d.swing_low_20}</span> — equal lows. Institutions sweep this before going up.</div>
+        ${d.pdh?`<div>📅 <strong style="color:#80d8ff">PDH liquidity:</strong> <span style="color:#ffcc44;font-family:var(--mono)">${d.pdh}</span> — yesterday's high. Buy stops sitting above it.</div>`:''}
+        ${d.pdl?`<div>📅 <strong style="color:#80d8ff">PDL liquidity:</strong> <span style="color:#ffcc44;font-family:var(--mono)">${d.pdl}</span> — yesterday's low. Sell stops sitting below it.</div>`:''}
+        <div style="color:#60d0ff;margin-top:6px;font-size:.72rem;border-top:1px solid rgba(64,224,255,0.15);padding-top:5px">⚡ ICT rule: Price SWEEPS liquidity first, then makes the real move in the OPPOSITE direction.</div>
       </div>`;
   }
 
@@ -1049,11 +1051,11 @@ function sageRenderPanel(d){
   if(oteEl && d.fib618 && d.fib786){
     const oteColor = d.stack==='BULL STACK'?'var(--green)':d.stack==='BEAR STACK'?'var(--red)':'var(--text-mid)';
     oteEl.innerHTML = `
-      <div style="font-size:.65rem;line-height:1.9">
-        <div><strong style="color:${oteColor}">OTE ZONE: ${d.fib618} — ${d.fib786}</strong></div>
-        <div style="color:var(--text-dim)">The 61.8%–78.6% retracement zone after a displacement move. This is where institutions re-enter in the direction of the trend.</div>
-        <div style="margin-top:4px;color:${oteColor}">
-          ${d.stack==='BULL STACK'?'✅ In a bullish market: if price pulls back INTO the OTE zone — that is the highest probability BUY entry.':d.stack==='BEAR STACK'?'✅ In a bearish market: if price rallies INTO the OTE zone — that is the highest probability SELL entry.':'⚪ Wait for clear directional bias before using OTE entries.'}
+      <div style="font-size:.75rem;line-height:1.9;font-weight:600">
+        <div style="font-size:.85rem;margin-bottom:5px"><strong style="color:${oteColor}">OTE ZONE: <span style="font-family:var(--mono)">${d.fib618} — ${d.fib786}</span></strong></div>
+        <div style="color:#90b8d8;margin-bottom:5px">The 61.8%–78.6% retracement after displacement. This is where institutions re-enter with the trend.</div>
+        <div style="color:${oteColor};background:rgba(64,224,255,0.05);border:1px solid rgba(64,224,255,0.15);padding:6px 8px;border-radius:3px">
+          ${d.stack==='BULL STACK'?'✅ BULLISH MARKET: If price pulls back INTO the OTE zone → highest probability BUY entry. Wait for rejection candle.':d.stack==='BEAR STACK'?'✅ BEARISH MARKET: If price rallies INTO the OTE zone → highest probability SELL entry. Wait for rejection candle.':'⚪ No clear bias yet. Wait for EMA stack alignment before using OTE entries.'}
         </div>
       </div>`;
   }
