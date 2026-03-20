@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>🔮 SAGE OF 6 PATHS — JayDaWolfFX</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#040810;--surface:#080f1a;--surface2:#0d1625;--border:#1a3050;
+  --green:#00ff88;--cyan:#40e0ff;--gold:#ffd700;--red:#ff4466;
+  --purple:#aa66ff;--sage:#60d0ff;--orange:#ff8800;
+  --text:#f0f4f8;--text-mid:#a0c8e8;--text-dim:#5a7a90;
+  --mono:'Share Tech Mono',monospace;--head:'Orbitron',monospace;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);overflow:hidden;}
+
+/* ── NAV ── */
+.nav{position:fixed;top:0;left:0;right:0;height:48px;z-index:200;
+  background:rgba(4,8,16,0.98);border-bottom:2px solid var(--purple);
+  display:flex;align-items:center;padding:0 16px;gap:12px;}
+.nav-logo{font-family:var(--head);font-size:12px;font-weight:900;
+  color:var(--gold);letter-spacing:3px;white-space:nowrap;
+  text-shadow:0 0 20px rgba(255,215,0,0.4);}
+.nav-logo span{color:var(--cyan);}
+.nav-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+.nav-clock{font-size:11px;color:var(--text-mid);}
+.nav-plan{font-size:10px;letter-spacing:2px;padding:2px 8px;
+  border:1px solid var(--purple);color:var(--purple);border-radius:2px;}
+.nav-logout{font-size:11px;color:var(--text-dim);text-decoration:none;
+  padding:3px 8px;border:1px solid var(--border);border-radius:2px;}
+.nav-logout:hover{color:var(--red);border-color:var(--red);}
+
+/* ── MAIN LAYOUT ── */
+.sage-shell{position:fixed;top:48px;left:0;right:0;bottom:0;display:flex;flex-direction:column;}
+.sage-ai-section{flex:1;display:flex;flex-direction:column;min-height:0;}
+.sage-ai-box{flex:1;display:flex;flex-direction:column;min-height:0;}
+
+/* ── HEADER BAR ── */
+.sage-hdr{display:flex;align-items:center;gap:12px;padding:8px 16px;
+  background:rgba(170,102,255,0.06);border-bottom:1px solid var(--border);flex-shrink:0;}
+.sage-hdr-title{font-family:var(--head);font-size:13px;font-weight:900;
+  letter-spacing:4px;color:var(--sage);text-shadow:0 0 16px rgba(96,208,255,0.4);}
+.sage-hdr-sub{font-size:11px;letter-spacing:2px;color:var(--purple);}
+.sage-live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px var(--green);animation:sdot 2s infinite;flex-shrink:0;}
+@keyframes sdot{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── KEY BAR ── */
+#sageKeyBar{padding:8px 16px;background:rgba(96,208,255,0.03);
+  border-bottom:1px solid rgba(96,208,255,0.12);flex-shrink:0;}
+#sageKeyBar.hidden{display:none;}
+.sak-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;}
+.sak-label{font-size:11px;letter-spacing:2px;color:var(--sage);}
+.sak-input{flex:1;min-width:240px;background:var(--surface2);border:1px solid var(--border);
+  color:var(--text);padding:6px 10px;font-family:var(--mono);font-size:12px;outline:none;}
+.sak-input:focus{border-color:var(--sage);}
+.sak-input::placeholder{color:var(--text-dim);}
+.sak-save{background:rgba(96,208,255,0.1);border:1px solid var(--sage);color:var(--sage);
+  padding:6px 14px;font-family:var(--mono);font-size:12px;cursor:pointer;letter-spacing:1px;}
+.sak-save:hover{background:var(--sage);color:var(--bg);}
+.sak-note{font-size:11px;color:var(--text-dim);}
+.sak-note a{color:var(--cyan);text-decoration:none;}
+.sak-change{background:transparent;border:none;color:var(--text-dim);
+  font-family:var(--mono);font-size:11px;cursor:pointer;margin-left:auto;}
+.sak-change:hover{color:var(--sage);}
+
+/* ── BODY SPLIT ── */
+.sage-body{flex:1;display:grid;grid-template-columns:400px 1fr;min-height:0;overflow:hidden;}
+@media(max-width:900px){.sage-body{grid-template-columns:1fr;}}
+
+/* ══════════════════════════════════
+   LEFT PANEL — INTELLIGENCE BRIEFING
+══════════════════════════════════ */
+.sage-panel{border-right:1px solid var(--border);display:flex;flex-direction:column;
+  overflow:hidden;height:100%;background:var(--surface);}
+
+/* Pair selector */
+.sage-pair-row{padding:6px 8px;border-bottom:1px solid var(--border);
+  display:flex;gap:4px;overflow-x:auto;flex-shrink:0;background:var(--surface2);}
+.sage-pair-row::-webkit-scrollbar{height:2px;}
+.sage-pair-row::-webkit-scrollbar-thumb{background:var(--border);}
+.sp-btn{padding:4px 9px;font-family:var(--mono);font-size:11px;letter-spacing:1px;
+  background:transparent;border:1px solid var(--border);color:var(--text-dim);
+  cursor:pointer;white-space:nowrap;transition:.15s;}
+.sp-btn:hover{border-color:var(--sage);color:var(--sage);}
+.sp-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(64,224,255,0.07);}
+
+/* Price header */
+.sage-price-hdr{padding:8px 12px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
+  background:rgba(13,22,37,0.8);}
+.sph-left{display:flex;flex-direction:column;gap:2px;}
+.sph-pair{font-family:var(--head);font-size:.7rem;letter-spacing:2px;color:var(--cyan);}
+.sph-price{font-family:var(--mono);font-size:1.3rem;font-weight:700;color:var(--text);}
+.sph-chg{font-size:.7rem;}
+.sph-right{text-align:right;}
+.sph-session{font-family:var(--head);font-size:.6rem;letter-spacing:2px;margin-bottom:2px;}
+.sph-status{font-size:.55rem;color:var(--text-dim);}
+
+/* Panel tabs */
+.sage-panel-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.spt{flex:1;padding:7px 4px;font-family:var(--mono);font-size:10px;letter-spacing:1px;
+  background:transparent;border:none;color:var(--text-dim);cursor:pointer;
+  border-bottom:2px solid transparent;transition:.15s;text-align:center;}
+.spt:hover{color:var(--text-mid);}
+.spt.active{color:var(--cyan);border-bottom-color:var(--cyan);background:rgba(64,224,255,0.04);}
+
+/* Scrollable panel content */
+.sage-panel-content{flex:1;overflow-y:auto;min-height:0;}
+.sage-panel-content::-webkit-scrollbar{width:3px;}
+.sage-panel-content::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* Section blocks */
+.sp-section{border-bottom:1px solid var(--border);padding:10px 12px;}
+.sp-sec-title{font-family:var(--head);font-size:.55rem;letter-spacing:2px;
+  color:var(--text-dim);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.sp-sec-title span{color:var(--cyan);}
+
+/* 2/3-col grids */
+.sp-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.sp-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;}
+.sp-cell{background:var(--surface2);border:1px solid var(--border);
+  border-radius:2px;padding:5px 7px;}
+.sp-cell-lbl{font-size:.55rem;color:var(--text-dim);margin-bottom:2px;letter-spacing:1px;}
+.sp-cell-val{font-family:var(--mono);font-size:.8rem;font-weight:700;color:var(--text);}
+
+/* Level rows */
+.sp-level-row{display:flex;align-items:center;gap:6px;padding:4px 0;
+  border-bottom:1px solid rgba(26,48,80,0.5);}
+.sp-level-row:last-child{border-bottom:none;}
+.sp-lvl-tag{font-size:.6rem;letter-spacing:1px;padding:1px 5px;border-radius:2px;
+  font-weight:700;min-width:42px;text-align:center;flex-shrink:0;}
+.sp-lvl-tag.res{background:rgba(255,68,102,0.12);color:var(--red);border:1px solid rgba(255,68,102,0.25);}
+.sp-lvl-tag.sup{background:rgba(0,255,136,0.08);color:var(--green);border:1px solid rgba(0,255,136,0.2);}
+.sp-lvl-tag.ema{background:rgba(170,102,255,0.1);color:var(--purple);border:1px solid rgba(170,102,255,0.25);}
+.sp-lvl-tag.fib{background:rgba(64,224,255,0.08);color:var(--cyan);border:1px solid rgba(64,224,255,0.2);}
+.sp-lvl-tag.ob{background:rgba(255,136,0,0.1);color:var(--orange);border:1px solid rgba(255,136,0,0.25);}
+.sp-lvl-tag.fvg{background:rgba(255,215,0,0.08);color:var(--gold);border:1px solid rgba(255,215,0,0.2);}
+.sp-lvl-tag.pdh{background:rgba(64,224,255,0.06);color:var(--sage);border:1px solid rgba(64,224,255,0.15);}
+.sp-lvl-tag.rnd{background:rgba(255,255,255,0.04);color:var(--text-mid);border:1px solid var(--border);}
+.sp-lvl-price{font-family:var(--mono);font-size:.8rem;font-weight:700;flex:1;}
+.sp-lvl-desc{font-size:.6rem;color:var(--text-dim);text-align:right;}
+
+/* News/alert rows */
+.sp-news-row{padding:6px 8px;border-left:2px solid;margin-bottom:4px;background:rgba(13,22,37,0.6);}
+.sp-news-row.high{border-color:var(--red);}
+.sp-news-row.medium{border-color:var(--gold);}
+.sp-news-row.low{border-color:var(--text-dim);}
+.sp-news-time{font-size:.6rem;color:var(--text-dim);margin-bottom:2px;}
+.sp-news-event{font-size:.7rem;color:var(--text-mid);font-weight:700;}
+.sp-news-imp{font-size:.6rem;padding:1px 5px;border-radius:2px;margin-left:4px;}
+.sp-news-imp.high{background:rgba(255,68,102,0.15);color:var(--red);}
+.sp-news-imp.medium{background:rgba(255,215,0,0.12);color:var(--gold);}
+
+/* Regime badge */
+.sp-regime{padding:6px 10px;border-radius:2px;margin-bottom:6px;font-size:.7rem;
+  font-weight:700;letter-spacing:1px;text-align:center;}
+.sp-regime.bull{background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.3);color:var(--green);}
+.sp-regime.bear{background:rgba(255,68,102,0.06);border:1px solid rgba(255,68,102,0.25);color:var(--red);}
+.sp-regime.range{background:rgba(90,122,144,0.1);border:1px solid var(--border);color:var(--text-dim);}
+.sp-regime.trans{background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.25);color:var(--gold);}
+
+/* Bias bar */
+.sp-bias-bar{display:flex;align-items:center;gap:6px;padding:5px 10px;
+  border-radius:2px;margin-bottom:4px;font-size:.7rem;}
+.sp-bias-bar.buy{background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);}
+.sp-bias-bar.sell{background:rgba(255,68,102,0.06);border:1px solid rgba(255,68,102,0.2);}
+.sp-bias-bar.wait{background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.15);}
+
+/* ══════════════════════════════════
+   RIGHT — CHAT
+══════════════════════════════════ */
+.sage-chat{display:flex;flex-direction:column;height:100%;overflow:hidden;}
+
+.sage-quick-btns{display:flex;flex-wrap:wrap;gap:4px;padding:7px 10px;
+  border-bottom:1px solid var(--border);background:rgba(170,102,255,0.03);flex-shrink:0;}
+.sqb{background:transparent;border:1px solid rgba(170,102,255,0.3);color:#aa77dd;
+  padding:4px 9px;font-family:var(--mono);font-size:11px;letter-spacing:1px;cursor:pointer;transition:.15s;}
+.sqb:hover{border-color:var(--sage);color:var(--sage);background:rgba(96,208,255,0.05);}
+
+.sage-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;
+  flex-direction:column;gap:10px;scroll-behavior:smooth;min-height:0;}
+.sage-msgs::-webkit-scrollbar{width:3px;}
+.sage-msgs::-webkit-scrollbar-thumb{background:var(--border);}
+
+.sage-welcome{text-align:center;padding:24px 12px;}
+.sw-icon{font-size:2.8rem;filter:drop-shadow(0 0 16px rgba(96,208,255,.6));display:block;margin-bottom:10px;}
+.sw-title{font-family:var(--head);font-size:15px;font-weight:900;letter-spacing:3px;
+  color:var(--sage);text-shadow:0 0 16px rgba(96,208,255,.4);margin-bottom:6px;}
+.sw-sub{font-size:12px;letter-spacing:2px;color:var(--purple);margin-bottom:4px;}
+.sw-cta{font-size:11px;color:var(--green);letter-spacing:1px;}
+
+/* Messages */
+.smsg-user{display:flex;justify-content:flex-end;animation:sfade .2s ease;}
+@keyframes sfade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.smsg-user .sbbl{background:rgba(96,208,255,0.07);border:1px solid rgba(96,208,255,0.22);
+  color:#d0f0ff;padding:9px 12px;font-size:12px;line-height:1.65;max-width:92%;}
+.smsg-sage{animation:sfade .2s ease;}
+.smsg-sage .sbbl{background:var(--surface2);border:1px solid var(--border);
+  border-left:2px solid var(--sage);padding:11px 13px;font-size:12px;line-height:1.85;
+  color:#e2f8f0;}
+.smsg-sage .sbbl strong{color:var(--sage);}
+.smsg-sage .sbbl .s-up{color:var(--green);}
+.smsg-sage .sbbl .s-dn{color:var(--red);}
+.smsg-sage .sbbl .s-cy{color:var(--cyan);}
+.smsg-sage .sbbl .s-pu{color:var(--purple);}
+.smsg-sage .sbbl p{margin-bottom:.5rem;}
+.smsg-sage .sbbl p:last-child{margin-bottom:0;}
+
+/* Thinking */
+.sage-thinking{display:flex;align-items:center;gap:8px;padding:9px 12px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-left:2px solid var(--purple);font-size:12px;letter-spacing:2px;
+  color:var(--purple);animation:sfade .2s ease;}
+.sdots{display:flex;gap:3px;}
+.sdots span{width:4px;height:4px;background:var(--purple);border-radius:50%;animation:sdot 1.2s infinite;}
+.sdots span:nth-child(2){animation-delay:.2s}.sdots span:nth-child(3){animation-delay:.4s}
+
+/* Trade card */
+.sage-card{background:var(--bg);border:1px solid var(--border);border-top:2px solid var(--sage);margin-top:8px;}
+.sc-hdr{display:flex;justify-content:space-between;align-items:center;
+  padding:7px 11px;background:rgba(96,208,255,.03);border-bottom:1px solid var(--border);}
+.sc-sym{font-family:var(--head);font-size:14px;font-weight:900;letter-spacing:2px;}
+.sc-sig{font-family:var(--mono);font-size:12px;padding:2px 10px;}
+.sc-sig.BUY{background:rgba(0,255,136,.1);color:var(--green);border:1px solid var(--green);}
+.sc-sig.SELL{background:rgba(255,68,102,.1);color:var(--red);border:1px solid var(--red);}
+.sc-sig.WAIT{background:rgba(255,215,0,.1);color:var(--gold);border:1px solid var(--gold);}
+.sc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);}
+.sc-cell{background:var(--bg);padding:6px 9px;}
+.sc-lbl{font-size:10px;letter-spacing:1px;color:var(--text-dim);margin-bottom:2px;}
+.sc-val{font-family:var(--mono);font-size:12px;font-weight:700;}
+.sc-footer{padding:7px 11px;border-top:1px solid var(--border);
+  font-size:11px;color:var(--text-dim);line-height:1.6;}
+
+/* Input area */
+.sage-input-area{padding:8px 10px;background:var(--surface);
+  border-top:1px solid var(--border);display:flex;gap:7px;align-items:flex-end;flex-shrink:0;}
+.sage-textarea{flex:1;background:var(--bg);border:1px solid var(--border);
+  color:var(--text);padding:8px 10px;font-family:var(--mono);font-size:12px;
+  outline:none;resize:none;min-height:36px;max-height:80px;line-height:1.5;}
+.sage-textarea:focus{border-color:rgba(96,208,255,.4);}
+.sage-textarea::placeholder{color:var(--text-dim);font-size:12px;}
+.sage-send{background:rgba(96,208,255,.1);border:1px solid var(--sage);
+  color:var(--sage);width:36px;height:36px;cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sage-send:hover{background:var(--sage);color:var(--bg);}
+.sage-send:disabled{background:transparent;border-color:var(--border);color:var(--text-dim);cursor:not-allowed;}
+.sage-disc{text-align:center;font-size:10px;color:var(--text-dim);
+  padding:3px 10px 5px;background:var(--surface);
+  border-top:1px solid rgba(255,255,255,.02);flex-shrink:0;}
+
+/* Spinner */
+.sp-spinner{width:14px;height:14px;border:2px solid var(--border);
+  border-top:2px solid var(--cyan);border-radius:50%;animation:spin 1s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* News badge */
+.news-alert-badge{display:inline-block;padding:2px 7px;border-radius:2px;
+  font-size:.6rem;letter-spacing:1px;font-weight:700;margin-right:4px;}
+.badge-red{background:rgba(255,68,102,.15);color:var(--red);border:1px solid rgba(255,68,102,.3);}
+.badge-gold{background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.25);}
+.badge-clear{background:rgba(0,255,136,.06);color:var(--green);border:1px solid rgba(0,255,136,.2);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">🔮 SAGE <span>OF 6 PATHS</span></div>
+  <div class="nav-right">
+    <span class="nav-clock" id="sageClock">--:-- ET</span>
+    <span class="nav-plan">6 PATHS</span>
+    <a href="/auth/logout" class="nav-logout">LOGOUT</a>
+  </div>
+</nav>
+
+<div class="sage-shell">
+<div class="sage-ai-section">
+<div class="sage-ai-box">
+
+  <!-- Header -->
+  <div class="sage-hdr">
+    <div class="sage-live-dot"></div>
+    <div>
+      <div class="sage-hdr-title">🔮 SAGE OF 6 PATHS — INTELLIGENCE TERMINAL</div>
+      <div class="sage-hdr-sub">LIVE DATA · INSTITUTIONAL ANALYSIS · NO EXECUTION · EDUCATIONAL USE ONLY</div>
+    </div>
+    <button class="sak-change" onclick="document.getElementById('sageKeyBar').classList.toggle('hidden')" style="margin-left:auto">⚙ API KEY</button>
+  </div>
+
+  <!-- API Key -->
+  <div id="sageKeyBar">
+    <div class="sak-label">🔑 ANTHROPIC API KEY</div>
+    <div class="sak-row">
+      <input class="sak-input" id="sageKeyInput" type="password" placeholder="sk-ant-api03-..."/>
+      <button class="sak-save" onclick="saveSageKey()">SAVE KEY</button>
+      <span class="sak-note">Get yours → <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></span>
+    </div>
+  </div>
+
+  <!-- Body split -->
+  <div class="sage-body">
+
+    <!-- ════════ LEFT PANEL ════════ -->
+    <div class="sage-panel">
+
+      <!-- Pair selector -->
+      <div class="sage-pair-row" id="sagePairRow">
+        <button class="sp-btn active" data-sym="EURUSD=X" data-lbl="EUR/USD" onclick="sageSelectPair(this)">EUR/USD</button>
+        <button class="sp-btn" data-sym="GBPUSD=X" data-lbl="GBP/USD" onclick="sageSelectPair(this)">GBP/USD</button>
+        <button class="sp-btn" data-sym="USDJPY=X" data-lbl="USD/JPY" onclick="sageSelectPair(this)">USD/JPY</button>
+        <button class="sp-btn" data-sym="GBPJPY=X" data-lbl="GBP/JPY" onclick="sageSelectPair(this)">GBP/JPY</button>
+        <button class="sp-btn" data-sym="AUDUSD=X" data-lbl="AUD/USD" onclick="sageSelectPair(this)">AUD/USD</button>
+        <button class="sp-btn" data-sym="USDCAD=X" data-lbl="USD/CAD" onclick="sageSelectPair(this)">USD/CAD</button>
+        <button class="sp-btn" data-sym="USDCHF=X" data-lbl="USD/CHF" onclick="sageSelectPair(this)">USD/CHF</button>
+        <button class="sp-btn" data-sym="EURJPY=X" data-lbl="EUR/JPY" onclick="sageSelectPair(this)">EUR/JPY</button>
+        <button class="sp-btn" data-sym="EURGBP=X" data-lbl="EUR/GBP" onclick="sageSelectPair(this)">EUR/GBP</button>
+        <button class="sp-btn" data-sym="NZDUSD=X" data-lbl="NZD/USD" onclick="sageSelectPair(this)">NZD/USD</button>
+        <button class="sp-btn" data-sym="GC=F"     data-lbl="GOLD"    onclick="sageSelectPair(this)">GOLD 🥇</button>
+        <button class="sp-btn" data-sym="NVDA"     data-lbl="NVIDIA"  onclick="sageSelectPair(this)">NVDA</button>
+        <button class="sp-btn" data-sym="AAPL"     data-lbl="APPLE"   onclick="sageSelectPair(this)">AAPL</button>
+        <button class="sp-btn" data-sym="TSLA"     data-lbl="TESLA"   onclick="sageSelectPair(this)">TSLA</button>
+        <button class="sp-btn" data-sym="SPY"      data-lbl="S&P 500" onclick="sageSelectPair(this)">SPY</button>
+        <button class="sp-btn" data-sym="QQQ"      data-lbl="NASDAQ"  onclick="sageSelectPair(this)">QQQ</button>
+      </div>
+
+      <!-- Price header -->
+      <div class="sage-price-hdr">
+        <div class="sph-left">
+          <div class="sph-pair" id="sagePanelPair">EUR/USD</div>
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <div class="sph-price" id="sagePanelPrice">--</div>
+            <div class="sph-chg" id="sagePanelChg">--</div>
+          </div>
+          <div style="font-size:.58rem;color:var(--text-dim);margin-top:2px" id="sagePanelHL">H: -- | L: --</div>
+        </div>
+        <div class="sph-right">
+          <div class="sph-session" id="sagePanelSession" style="color:var(--cyan)">--</div>
+          <div class="sph-status" id="sagePanelStatus">⏳ LOADING</div>
+          <div style="margin-top:4px"><span class="sp-spinner" id="sagePanelSpinner"></span></div>
+        </div>
+      </div>
+
+      <!-- Panel tabs -->
+      <div class="sage-panel-tabs">
+        <button class="spt active" id="sptLevels" onclick="sageTab('levels')">📍 LEVELS</button>
+        <button class="spt" id="sptIndicators" onclick="sageTab('indicators')">📊 INDICATORS</button>
+        <button class="spt" id="sptInstitutional" onclick="sageTab('institutional')">🏦 SMART MONEY</button>
+        <button class="spt" id="sptNews" onclick="sageTab('news')">📰 NEWS</button>
+      </div>
+
+      <!-- Panel content -->
+      <div class="sage-panel-content">
+
+        <!-- ── TAB: LEVELS ── -->
+        <div id="tabLevels">
+
+          <!-- Regime + Bias -->
+          <div class="sp-section">
+            <div class="sp-sec-title">⚡ <span>MARKET REGIME & TREND BIAS</span></div>
+            <div class="sp-regime range" id="sageRegime">LOADING...</div>
+            <div class="sp-bias-bar wait" id="sageBiasBar">
+              <span style="font-size:.75rem" id="sageBiasIcon">⚪</span>
+              <span style="font-size:.7rem;font-weight:700" id="sageBiasText">LOADING LIVE DATA...</span>
+            </div>
+            <div style="font-size:.6rem;color:var(--text-dim);margin-top:4px;line-height:1.6" id="sageRegimeDesc">--</div>
+          </div>
+
+          <!-- Resistance zones -->
+          <div class="sp-section">
+            <div class="sp-sec-title">🔴 <span>RESISTANCE ABOVE PRICE</span></div>
+            <div id="sageLevelsRes">
+              <div style="text-align:center;padding:12px;color:var(--text-dim);font-size:.65rem">Loading levels...</div>
+            </div>
+          </div>
+
+          <!-- Support zones -->
+          <div class="sp-section">
+            <div class="sp-sec-title">🟢 <span>SUPPORT BELOW PRICE</span></div>
+            <div id="sageLevelsSup">
+              <div style="text-align:center;padding:12px;color:var(--text-dim);font-size:.65rem">Loading levels...</div>
+            </div>
+          </div>
+
+          <!-- EMA levels -->
+          <div class="sp-section">
+            <div class="sp-sec-title">📈 <span>EMA DYNAMIC LEVELS</span></div>
+            <div id="sageLevelsEMA">
+              <div class="sp-grid-2">
+                <div class="sp-cell"><div class="sp-cell-lbl">EMA 8</div><div class="sp-cell-val" id="sageEma8">--</div></div>
+                <div class="sp-cell"><div class="sp-cell-lbl">EMA 21</div><div class="sp-cell-val" id="sageEma21">--</div></div>
+                <div class="sp-cell"><div class="sp-cell-lbl">EMA 50</div><div class="sp-cell-val" id="sageEma50">--</div></div>
+                <div class="sp-cell"><div class="sp-cell-lbl" style="color:var(--purple)">EMA 200 ★</div><div class="sp-cell-val" id="sageEma200" style="color:var(--purple)">--</div></div>
+              </div>
+              <div style="margin-top:6px;font-size:.6rem;color:var(--text-dim);line-height:1.6" id="sageEmaContext">--</div>
+            </div>
+          </div>
+
+          <!-- Fibonacci levels -->
+          <div class="sp-section">
+            <div class="sp-sec-title">🌀 <span>FIBONACCI RETRACEMENT</span></div>
+            <div id="sageLevelsFib">
+              <div style="text-align:center;padding:8px;color:var(--text-dim);font-size:.65rem">Loading...</div>
+            </div>
+          </div>
+
+          <!-- PDH/PDL + Range -->
+          <div class="sp-section">
+            <div class="sp-sec-title">📅 <span>PREVIOUS DAY & WEEKLY</span></div>
+            <div class="sp-grid-2">
+              <div class="sp-cell">
+                <div class="sp-cell-lbl" style="color:var(--red)">PREV DAY HIGH</div>
+                <div class="sp-cell-val" id="sagePDH" style="color:var(--red)">--</div>
+              </div>
+              <div class="sp-cell">
+                <div class="sp-cell-lbl" style="color:var(--green)">PREV DAY LOW</div>
+                <div class="sp-cell-val" id="sagePDL" style="color:var(--green)">--</div>
+              </div>
+              <div class="sp-cell">
+                <div class="sp-cell-lbl" style="color:var(--text-dim)">SWING HIGH (50)</div>
+                <div class="sp-cell-val" id="sageSH50" style="color:var(--red)">--</div>
+              </div>
+              <div class="sp-cell">
+                <div class="sp-cell-lbl" style="color:var(--text-dim)">SWING LOW (50)</div>
+                <div class="sp-cell-val" id="sageSL50" style="color:var(--green)">--</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /tabLevels -->
+
+        <!-- ── TAB: INDICATORS ── -->
+        <div id="tabIndicators" style="display:none">
+
+          <div class="sp-section">
+            <div class="sp-sec-title">📊 <span>LIVE INDICATORS (1H)</span></div>
+            <div class="sp-grid-3">
+              <div class="sp-cell">
+                <div class="sp-cell-lbl">RSI 14</div>
+                <div class="sp-cell-val" id="sageRsi">--</div>
+                <div style="font-size:.55rem;color:var(--text-dim);margin-top:2px" id="sageRsiNote">--</div>
+              </div>
+              <div class="sp-cell">
+                <div class="sp-cell-lbl">ADX 14</div>
+                <div class="sp-cell-val" id="sageAdx">--</div>
+                <div style="font-size:.55rem;color:var(--text-dim);margin-top:2px" id="sageAdxNote">--</div>
+              </div>
+              <div class="sp-cell">
+                <div class="sp-cell-lbl">ATR 14</div>
+                <div class="sp-cell-val" id="sageAtr">--</div>
+                <div style="font-size:.55rem;color:var(--text-dim);margin-top:2px">volatility</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sp-section">
+            <div class="sp-sec-title">📉 <span>EMA STACK ANALYSIS</span></div>
+            <div style="font-size:.7rem;font-weight:700;padding:6px 0;margin-bottom:4px" id="sageStackLabel">--</div>
+            <div id="sageStackRows"></div>
+          </div>
+
+          <div class="sp-section">
+            <div class="sp-sec-title">🕐 <span>SESSION TIMING</span></div>
+            <div class="sp-grid-2">
+              <div class="sp-cell">
+                <div class="sp-cell-lbl">NEW YORK TIME</div>
+                <div class="sp-cell-val" id="sageClockET" style="color:var(--cyan)">--:--</div>
+                <div style="font-size:.55rem;color:var(--text-dim);margin-top:1px" id="sageClockDate">---</div>
+              </div>
+              <div class="sp-cell">
+                <div class="sp-cell-lbl">ACTIVE SESSION</div>
+                <div class="sp-cell-val" id="sageSessionLabel" style="font-size:.65rem">--</div>
+                <div style="font-size:.55rem;color:var(--text-dim);margin-top:1px" id="sageSessionNext">--</div>
+              </div>
+            </div>
+            <div style="margin-top:8px;font-size:.6rem;color:var(--text-dim);line-height:1.7" id="sageSessionAdvice">--</div>
+          </div>
+
+          <div class="sp-section">
+            <div class="sp-sec-title">⚡ <span>BEST STRATEGY RIGHT NOW</span></div>
+            <div style="font-size:.7rem;color:var(--text-mid);line-height:1.8" id="sageStrategyAdvice">--</div>
+          </div>
+
+        </div><!-- /tabIndicators -->
+
+        <!-- ── TAB: INSTITUTIONAL / SMART MONEY ── -->
+        <div id="tabInstitutional" style="display:none">
+
+          <div class="sp-section">
+            <div class="sp-sec-title">🏦 <span>ORDER BLOCKS</span>
+              <span style="font-size:.55rem;color:var(--text-dim);margin-left:4px">last institutional footprints</span>
+            </div>
+            <div id="sageOBSection">
+              <div style="text-align:center;padding:12px;color:var(--text-dim);font-size:.65rem">Loading...</div>
+            </div>
+          </div>
+
+          <div class="sp-section">
+            <div class="sp-sec-title">⚡ <span>FAIR VALUE GAPS</span>
+              <span style="font-size:.55rem;color:var(--text-dim);margin-left:4px">price fills these 80%</span>
+            </div>
+            <div id="sageFVGSection">
+              <div style="text-align:center;padding:12px;color:var(--text-dim);font-size:.65rem">Loading...</div>
+            </div>
+          </div>
+
+          <div class="sp-section">
+            <div class="sp-sec-title">🎯 <span>PREMIUM / DISCOUNT ZONES</span></div>
+            <div id="sagePremiumSection">
+              <div style="text-align:center;padding:8px;color:var(--text-dim);font-size:.65rem">Loading...</div>
+            </div>
+          </div>
+
+          <div class="sp-section">
+            <div class="sp-sec-title">💧 <span>LIQUIDITY POOLS</span>
+              <span style="font-size:.55rem;color:var(--text-dim);margin-left:4px">where stops are sitting</span>
+            </div>
+            <div id="sageLiqSection">
+              <div style="text-align:center;padding:8px;color:var(--text-dim);font-size:.65rem">Loading...</div>
+            </div>
+          </div>
+
+          <div class="sp-section">
+            <div class="sp-sec-title">🔵 <span>OTE ZONE</span>
+              <span style="font-size:.55rem;color:var(--text-dim);margin-left:4px">optimal trade entry 61.8–78.6%</span>
+            </div>
+            <div id="sageOTESection">
+              <div style="text-align:center;padding:8px;color:var(--text-dim);font-size:.65rem">Loading...</div>
+            </div>
+          </div>
+
+        </div><!-- /tabInstitutional -->
+
+        <!-- ── TAB: NEWS ── -->
+        <div id="tabNews" style="display:none">
+
+          <div class="sp-section">
+            <div class="sp-sec-title">🚨 <span>NEWS STATUS</span></div>
+            <div id="sageNewsStatus" style="padding:6px 0">
+              <div class="news-alert-badge badge-clear">CHECKING...</div>
+            </div>
+          </div>
+
+          <div class="sp-section">
+            <div class="sp-sec-title">📅 <span>UPCOMING ECONOMIC EVENTS</span></div>
+            <div id="sageNewsEvents">
+              <div style="text-align:center;padding:12px;color:var(--text-dim);font-size:.65rem">
+                Click <strong style="color:var(--sage)">📰 News Risk</strong> in chat to load live calendar
+              </div>
+            </div>
+          </div>
+
+          <div class="sp-section">
+            <div class="sp-sec-title">🌍 <span>MACRO CONTEXT</span></div>
+            <div style="font-size:.65rem;color:var(--text-mid);line-height:1.8" id="sageMacroContext">
+              Ask Sage: <span style="color:var(--cyan)">"What is the macro environment today?"</span><br>
+              or click <span style="color:var(--sage)">🌍 Macro Read</span> above.
+            </div>
+          </div>
+
+          <div class="sp-section">
+            <div class="sp-sec-title">⚠️ <span>TRADING CAUTION RULES</span></div>
+            <div style="font-size:.65rem;color:var(--text-dim);line-height:1.9">
+              🔴 <strong style="color:var(--red)">NFP / CPI / FOMC</strong> in next 30 min → NO TRADES<br>
+              🔴 <strong style="color:var(--red)">Central bank decision</strong> today → reduce size or wait<br>
+              🟡 <strong style="color:var(--gold)">Medium impact event</strong> in 1hr → half size only<br>
+              🟢 <strong style="color:var(--green)">Calendar clear</strong> → normal risk. Trust the setup.<br>
+              ⏰ <strong style="color:var(--text-mid)">Friday after 2pm ET</strong> → no new scalp trades<br>
+              😴 <strong style="color:var(--text-dim)">Dead zone 5-8pm ET</strong> → skip all scalping
+            </div>
+          </div>
+
+        </div><!-- /tabNews -->
+
+      </div><!-- /sage-panel-content -->
+    </div><!-- /sage-panel -->
+
+    <!-- ════════ RIGHT CHAT ════════ -->
+    <div class="sage-chat">
+
+      <!-- Quick buttons -->
+      <div class="sage-quick-btns">
+        <button class="sqb" onclick="sageQuick('Apply all 6 paths right now. Give me the complete picture — trend, levels, best setup.')">🔮 Full Analysis</button>
+        <button class="sqb" onclick="sageQuick('List every important level on this pair right now. Resistance zones, support zones, institutional order blocks, fair value gaps, Fibonacci levels, and areas of interest.')">📍 All Levels</button>
+        <button class="sqb" onclick="sageQuick('Give me the ICT smart money read. Order blocks, fair value gaps, liquidity pools, Power of 3 cycle, and premium vs discount.')">🏦 Smart Money</button>
+        <button class="sqb" onclick="sageQuick('Give me a full trade setup right now. Entry, SL, TP1, TP2, R/R, pips, confidence score, and full reasoning.')">🎯 Trade Setup</button>
+        <button class="sqb" onclick="sageQuick('What is the macro environment telling us today? DXY direction, risk sentiment, any central bank news, and how it affects this pair.')">🌍 Macro Read</button>
+        <button class="sqb" onclick="sageQuick('What session are we in right now? What moves should I expect, which pairs are active, and is this a good time to trade?')">🕐 Session</button>
+        <button class="sqb" onclick="sageQuick('Check the economic calendar right now. Any high impact news today or tomorrow that could affect this pair? What should I watch out for?')">📰 News Risk</button>
+        <button class="sqb" onclick="sageQuick('Run a full Fibonacci analysis from the last major swing. Show all retracement levels and extension targets.')">🌀 Fibonacci</button>
+      </div>
+
+      <!-- Messages -->
+      <div class="sage-msgs" id="sageMsgs">
+        <div class="sage-welcome" id="sageWelcome">
+          <span class="sw-icon">🔮</span>
+          <div class="sw-title">SAGE OF 6 PATHS</div>
+          <div class="sw-sub">Live data · Institutional analysis · 6-path methodology</div>
+          <div class="sw-cta">Select a pair → ask anything about the market 💚</div>
+        </div>
+      </div>
+
+      <!-- Input -->
+      <div class="sage-input-area">
+        <textarea class="sage-textarea" id="sageInput"
+          placeholder="Ask Sage about this pair — levels, setup, macro context..."
+          onkeydown="sageHandleKey(event)" oninput="sageAutoResize(this)"></textarea>
+        <button class="sage-send" id="sageSendBtn" onclick="sageSend()">➤</button>
+      </div>
+      <div class="sage-disc">⚠ EDUCATIONAL ONLY · NOT FINANCIAL ADVICE · ALWAYS MANAGE YOUR OWN RISK</div>
+
+    </div><!-- /sage-chat -->
+  </div><!-- /sage-body -->
+
+</div></div></div>
+
+<script>
+/* ════════════════════════════════════════
+   SAGE STATE
+════════════════════════════════════════ */
+const SAGE = {
+  sym: 'EURUSD=X',
+  lbl: 'EUR/USD',
+  loading: false,
+  key: localStorage.getItem('sageai_key') || '',
+  history: [],
+  intel: null,
+  etInfo: {}
+};
+
+(function initKey(){
+  if(SAGE.key) document.getElementById('sageKeyBar').classList.add('hidden');
+})();
+
+function saveSageKey(){
+  const v = document.getElementById('sageKeyInput').value.trim();
+  if(!v.startsWith('sk-')){
+    document.getElementById('sageKeyInput').style.borderColor='var(--red)';
+    setTimeout(()=>document.getElementById('sageKeyInput').style.borderColor='',1500);
+    return;
+  }
+  SAGE.key=v; localStorage.setItem('sageai_key',v);
+  document.getElementById('sageKeyBar').classList.add('hidden');
+}
+
+/* ════════════════════════════════════════
+   CLOCK + SESSION
+════════════════════════════════════════ */
+function sageGetETInfo(){
+  const now = new Date();
+  const etTime = now.toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+  const etDate = now.toLocaleDateString('en-US',{timeZone:'America/New_York',weekday:'short',month:'short',day:'numeric'});
+  const etH = parseInt(now.toLocaleString('en-US',{timeZone:'America/New_York',hour:'numeric',hour12:false}));
+  let session='--', sessionColor='var(--text-dim)', next='--', advice='--', killZone=false;
+  if(etH>=2&&etH<5){
+    session='🇬🇧 LONDON KILL ZONE'; sessionColor='var(--cyan)'; killZone=true;
+    next='NY opens 8am ET';
+    advice='PRIME TIME for ICT entries. Watch for liquidity sweeps above/below previous session highs and lows. London is where institutions set the real move.';
+  } else if(etH>=5&&etH<8){
+    session='🇬🇧 LONDON OPEN'; sessionColor='var(--text)';
+    next='NY Kill Zone 8am ET';
+    advice='EUR and GBP pairs most active. Trend strategies working well. Avoid over-trading — wait for clean setups.';
+  } else if(etH>=8&&etH<11){
+    session='🔥 NY KILL ZONE'; sessionColor='var(--gold)'; killZone=true;
+    next='Overlap ends 12pm ET';
+    advice='PEAK SESSION. All USD majors are explosive. Best setups of the day here. ICT Kill Zone entries, Break & Retest, EMA Pullbacks all valid.';
+  } else if(etH>=11&&etH<12){
+    session='🌍 OVERLAP'; sessionColor='var(--green)';
+    next='London closes 12pm ET';
+    advice='London/NY overlap — highest volume period. Momentum continues. Watch for exhaustion signals near key levels.';
+  } else if(etH>=12&&etH<17){
+    session='🇺🇸 NY SESSION'; sessionColor='var(--text)';
+    next='NY closes 5pm ET';
+    advice='USD pairs remain active. Momentum may slow after 2pm ET. Stick to your plan — no chasing moves.';
+  } else if(etH>=17&&etH<20){
+    session='😴 DEAD ZONE'; sessionColor='var(--text-dim)';
+    next='Tokyo 8pm ET';
+    advice='Low volume, wide spreads, random moves. Skip scalping completely. Use this time to review your plan for the next session.';
+  } else {
+    session='🇯🇵 TOKYO SESSION'; sessionColor='var(--cyan)';
+    next='London Kill Zone 2am ET';
+    advice='JPY, AUD, and NZD pairs most active. Thinner liquidity on EUR/USD and GBP/USD. Best for Asian pairs and Gold.';
+  }
+  return {etTime, etDate, etH, session, sessionColor, next, advice, killZone};
+}
+
+function sageUpdateClock(){
+  const info = sageGetETInfo();
+  SAGE.etInfo = info;
+  const ck = document.getElementById('sageClock');
+  const et = document.getElementById('sageClockET');
+  const dt = document.getElementById('sageClockDate');
+  const sl = document.getElementById('sageSessionLabel');
+  const sn = document.getElementById('sageSessionNext');
+  const sa = document.getElementById('sageSessionAdvice');
+  if(ck) ck.textContent = info.etTime;
+  if(et){ et.textContent = info.etTime; et.style.color = info.sessionColor; }
+  if(dt) dt.textContent = info.etDate;
+  if(sl){ sl.textContent = info.session; sl.style.color = info.sessionColor; }
+  if(sn) sn.textContent = info.next;
+  if(sa) sa.textContent = info.advice;
+}
+setInterval(sageUpdateClock, 1000);
+sageUpdateClock();
+
+/* ════════════════════════════════════════
+   PAIR SELECTION
+════════════════════════════════════════ */
+function sageSelectPair(btn){
+  document.querySelectorAll('.sp-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  SAGE.sym = btn.dataset.sym;
+  SAGE.lbl = btn.dataset.lbl;
+  document.getElementById('sagePanelPair').textContent = SAGE.lbl;
+  sageRefreshIntel();
+}
+
+/* ════════════════════════════════════════
+   PANEL TABS
+════════════════════════════════════════ */
+function sageTab(tab){
+  ['levels','indicators','institutional','news'].forEach(t=>{
+    const el = document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1));
+    const btn = document.getElementById('spt'+t.charAt(0).toUpperCase()+t.slice(1));
+    if(el) el.style.display = t===tab ? 'block' : 'none';
+    if(btn) btn.classList.toggle('active', t===tab);
+  });
+}
+
+/* ════════════════════════════════════════
+   INTEL REFRESH — pulls from /api/sage-intel
+════════════════════════════════════════ */
+let _intelTimer = null;
+
+async function sageRefreshIntel(){
+  const spinner = document.getElementById('sagePanelSpinner');
+  const status  = document.getElementById('sagePanelStatus');
+  if(spinner) spinner.style.display='inline-block';
+  if(status)  status.textContent='LOADING...';
+
+  for(let attempt=1; attempt<=3; attempt++){
+    try{
+      const r = await fetch('/api/sage-intel',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        credentials:'include',
+        body: JSON.stringify({symbol: SAGE.sym, interval:'1h'})
+      });
+      if(r.status===401){ if(status) status.textContent='LOGIN REQUIRED'; return; }
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const d = await r.json();
+      if(d.error) throw new Error(d.error);
+      SAGE.intel = d;
+      sageRenderPanel(d);
+      if(status) status.textContent='LIVE · '+new Date().toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',hour12:true})+' ET';
+      if(spinner) spinner.style.display='none';
+      return;
+    } catch(e){
+      if(attempt<3) await new Promise(res=>setTimeout(res,attempt*2000));
+      else{ if(status) status.textContent='DATA ERROR'; if(spinner) spinner.style.display='none'; }
+    }
+  }
+}
+
+/* ════════════════════════════════════════
+   RENDER PANEL — all sections from intel data
+════════════════════════════════════════ */
+function sageRenderPanel(d){
+  const fmt = v => v || '--';
+  const price = parseFloat(d.price) || 0;
+  const isJPY = d.pair && d.pair.includes('JPY');
+  const isStock = !d.pair?.includes('/');
+  const pips = v => {
+    if(!v || !price) return '';
+    const diff = Math.abs(parseFloat(v) - price);
+    if(isJPY) return `${(diff*100).toFixed(1)}p`;
+    if(isStock) return `$${diff.toFixed(2)}`;
+    return `${(diff*10000).toFixed(0)}p`;
+  };
+
+  // Price header
+  const chg = d.change || 0;
+  const chgColor = chg >= 0 ? 'var(--green)' : 'var(--red)';
+  set('sagePanelPrice', fmt(d.price));
+  set('sagePanelChg', `${chg>=0?'+':''}${chg}%`, chgColor);
+  set('sagePanelHL', `H: ${fmt(d.high)} | L: ${fmt(d.low)}`);
+
+  // Session from backend
+  const sess = d.session || '--';
+  const sessColor = sess.includes('KILL')?'var(--gold)':sess.includes('LONDON')||sess.includes('TOKYO')?'var(--cyan)':'var(--text-mid)';
+  set('sagePanelSession', sess, sessColor);
+
+  // ── REGIME + BIAS ──
+  const regime = d.regime || 'RANGING';
+  const regimeEl = document.getElementById('sageRegime');
+  const biasBar  = document.getElementById('sageBiasBar');
+  const biasIcon = document.getElementById('sageBiasIcon');
+  const biasText = document.getElementById('sageBiasText');
+  const regimeDesc = document.getElementById('sageRegimeDesc');
+  if(regimeEl){
+    regimeEl.className = 'sp-regime';
+    if(regime==='TRENDING BULL'){ regimeEl.classList.add('bull'); regimeEl.textContent='📈 TRENDING BULL — Strong uptrend. Use trend strategies.'; }
+    else if(regime==='TRENDING BEAR'){ regimeEl.classList.add('bear'); regimeEl.textContent='📉 TRENDING BEAR — Strong downtrend. Sell only.'; }
+    else if(regime==='RANGING'){ regimeEl.classList.add('range'); regimeEl.textContent='↔️ RANGING — No clear trend. Use S/R Bounce only.'; }
+    else{ regimeEl.classList.add('trans'); regimeEl.textContent='⚡ TRANSITIONING — Wait for direction before entering.'; }
+  }
+  if(biasBar && biasIcon && biasText){
+    const bias = d.bias || 'NO CLEAR BIAS';
+    biasBar.className = 'sp-bias-bar';
+    if(bias.includes('BUY')){ biasBar.classList.add('buy'); biasIcon.textContent='🟢'; biasText.textContent='BUY ONLY — EMA stack bullish. Price above EMA 200.'; biasText.style.color='var(--green)'; }
+    else if(bias.includes('SELL')){ biasBar.classList.add('sell'); biasIcon.textContent='🔴'; biasText.textContent='SELL ONLY — EMA stack bearish. Price below EMA 200.'; biasText.style.color='var(--red)'; }
+    else{ biasBar.classList.add('wait'); biasIcon.textContent='⚪'; biasText.textContent='NO CLEAR BIAS — EMAs mixed. Wait for a key level.'; biasText.style.color='var(--text-dim)'; }
+  }
+  if(regimeDesc){
+    const above200 = d.above_200;
+    const rsi = parseFloat(d.rsi) || 0;
+    const adx = parseFloat(d.adx) || 0;
+    let desc = `Price ${above200?'ABOVE':'BELOW'} EMA 200 (${d.ema200}). `;
+    desc += adx>25 ? `ADX ${adx} — strong trend. ` : adx<20 ? `ADX ${adx} — ranging, no trend. ` : `ADX ${adx} — transitioning. `;
+    desc += rsi>70 ? `RSI ${rsi} — strong momentum (not overbought in trend).` : rsi<30 ? `RSI ${rsi} — strong selling pressure.` : `RSI ${rsi} — neutral.`;
+    regimeDesc.textContent = desc;
+  }
+
+  // ── RESISTANCE LEVELS (above price) ──
+  const resEl = document.getElementById('sageLevelsRes');
+  if(resEl && price){
+    const resLevels = [];
+    if(d.swing_high_20 && parseFloat(d.swing_high_20)>price) resLevels.push({price:d.swing_high_20, tag:'res', label:'R', desc:'Swing High (20)'});
+    if(d.swing_high_50 && parseFloat(d.swing_high_50)>price && d.swing_high_50!==d.swing_high_20) resLevels.push({price:d.swing_high_50, tag:'res', label:'R', desc:'Swing High (50)'});
+    if(d.pdh && parseFloat(d.pdh)>price) resLevels.push({price:d.pdh, tag:'pdh', label:'PDH', desc:'Previous Day High'});
+    if(d.ema8 && parseFloat(d.ema8)>price) resLevels.push({price:d.ema8, tag:'ema', label:'EMA8', desc:'Short-term momentum'});
+    if(d.ema21 && parseFloat(d.ema21)>price) resLevels.push({price:d.ema21, tag:'ema', label:'EMA21', desc:'Pullback entry zone'});
+    if(d.ema50 && parseFloat(d.ema50)>price) resLevels.push({price:d.ema50, tag:'ema', label:'EMA50', desc:'Trend health line'});
+    if(d.ema200 && parseFloat(d.ema200)>price) resLevels.push({price:d.ema200, tag:'ema', label:'EMA200', desc:'⭐ Major institutional level'});
+    if(d.fib236 && parseFloat(d.fib236)>price) resLevels.push({price:d.fib236, tag:'fib', label:'23.6%', desc:'Fib retracement'});
+    if(d.fib382 && parseFloat(d.fib382)>price) resLevels.push({price:d.fib382, tag:'fib', label:'38.2%', desc:'Fib retracement'});
+    if(d.fib500 && parseFloat(d.fib500)>price) resLevels.push({price:d.fib500, tag:'fib', label:'50.0%', desc:'Fib midpoint'});
+    if(d.fib618 && parseFloat(d.fib618)>price) resLevels.push({price:d.fib618, tag:'fib', label:'61.8%★', desc:'Golden zone — high probability'});
+    if(d.fib786 && parseFloat(d.fib786)>price) resLevels.push({price:d.fib786, tag:'fib', label:'78.6%', desc:'Deep retracement'});
+    if(d.bear_ob) resLevels.push({price:d.bear_ob.high, tag:'ob', label:'BEAR OB', desc:`Bearish OB zone ${d.bear_ob.low}–${d.bear_ob.high}`});
+    if(d.round_numbers) d.round_numbers.filter(r=>parseFloat(r)>price).forEach(r=>resLevels.push({price:r,tag:'rnd',label:'ROUND',desc:'Psychological level'}));
+    resLevels.sort((a,b)=>parseFloat(a.price)-parseFloat(b.price));
+    const top5 = resLevels.slice(0,6);
+    resEl.innerHTML = top5.length ? top5.map(l=>`
+      <div class="sp-level-row">
+        <span class="sp-lvl-tag ${l.tag}">${l.label}</span>
+        <span class="sp-lvl-price" style="color:var(--red)">${l.price}</span>
+        <span class="sp-lvl-desc">${pips(l.price)} · ${l.desc}</span>
+      </div>`).join('') : '<div style="color:var(--text-dim);font-size:.6rem;padding:8px">No resistance levels above price</div>';
+  }
+
+  // ── SUPPORT LEVELS (below price) ──
+  const supEl = document.getElementById('sageLevelsSup');
+  if(supEl && price){
+    const supLevels = [];
+    if(d.swing_low_20 && parseFloat(d.swing_low_20)<price) supLevels.push({price:d.swing_low_20, tag:'sup', label:'S', desc:'Swing Low (20)'});
+    if(d.swing_low_50 && parseFloat(d.swing_low_50)<price && d.swing_low_50!==d.swing_low_20) supLevels.push({price:d.swing_low_50, tag:'sup', label:'S', desc:'Swing Low (50)'});
+    if(d.pdl && parseFloat(d.pdl)<price) supLevels.push({price:d.pdl, tag:'pdh', label:'PDL', desc:'Previous Day Low'});
+    if(d.ema8 && parseFloat(d.ema8)<price) supLevels.push({price:d.ema8, tag:'ema', label:'EMA8', desc:'Short-term support'});
+    if(d.ema21 && parseFloat(d.ema21)<price) supLevels.push({price:d.ema21, tag:'ema', label:'EMA21', desc:'Pullback buy zone'});
+    if(d.ema50 && parseFloat(d.ema50)<price) supLevels.push({price:d.ema50, tag:'ema', label:'EMA50', desc:'Trend support'});
+    if(d.ema200 && parseFloat(d.ema200)<price) supLevels.push({price:d.ema200, tag:'ema', label:'EMA200', desc:'⭐ Major institutional floor'});
+    if(d.fib618 && parseFloat(d.fib618)<price) supLevels.push({price:d.fib618, tag:'fib', label:'61.8%★', desc:'Golden zone support'});
+    if(d.fib500 && parseFloat(d.fib500)<price) supLevels.push({price:d.fib500, tag:'fib', label:'50.0%', desc:'Fib midpoint support'});
+    if(d.fib382 && parseFloat(d.fib382)<price) supLevels.push({price:d.fib382, tag:'fib', label:'38.2%', desc:'Fib support'});
+    if(d.bull_ob) supLevels.push({price:d.bull_ob.low, tag:'ob', label:'BULL OB', desc:`Bullish OB zone ${d.bull_ob.low}–${d.bull_ob.high}`});
+    if(d.round_numbers) d.round_numbers.filter(r=>parseFloat(r)<price).forEach(r=>supLevels.push({price:r,tag:'rnd',label:'ROUND',desc:'Psychological level'}));
+    supLevels.sort((a,b)=>parseFloat(b.price)-parseFloat(a.price));
+    const bot5 = supLevels.slice(0,6);
+    supEl.innerHTML = bot5.length ? bot5.map(l=>`
+      <div class="sp-level-row">
+        <span class="sp-lvl-tag ${l.tag}">${l.label}</span>
+        <span class="sp-lvl-price" style="color:var(--green)">${l.price}</span>
+        <span class="sp-lvl-desc">${pips(l.price)} · ${l.desc}</span>
+      </div>`).join('') : '<div style="color:var(--text-dim);font-size:.6rem;padding:8px">No support levels below price</div>';
+  }
+
+  // ── EMA LEVELS ──
+  set('sageEma8',  d.ema8  || '--', parseFloat(d.ema8)  > price ? 'var(--red)' : 'var(--green)');
+  set('sageEma21', d.ema21 || '--', parseFloat(d.ema21) > price ? 'var(--red)' : 'var(--green)');
+  set('sageEma50', d.ema50 || '--', parseFloat(d.ema50) > price ? 'var(--red)' : 'var(--green)');
+  set('sageEma200',d.ema200|| '--', 'var(--purple)');
+  const emaCtx = document.getElementById('sageEmaContext');
+  if(emaCtx){
+    if(d.stack==='BULL STACK') emaCtx.textContent='✅ EMA 8 > 21 > 50 > 200 — Full bullish stack. Every dip to EMA 21 is a potential BUY.';
+    else if(d.stack==='BEAR STACK') emaCtx.textContent='❌ EMA 8 < 21 < 50 < 200 — Full bearish stack. Every rally to EMA 21 is a potential SELL.';
+    else emaCtx.textContent='⚠️ EMAs mixed/tangled — no clean stack. Avoid trend strategies. Wait for alignment.';
+    emaCtx.style.color = d.stack==='BULL STACK'?'var(--green)':d.stack==='BEAR STACK'?'var(--red)':'var(--gold)';
+  }
+
+  // ── FIBONACCI ──
+  const fibEl = document.getElementById('sageLevelsFib');
+  if(fibEl && d.fib618){
+    const fibLevels = [
+      {label:'78.6%', val:d.fib786, note:'deep retracement'},
+      {label:'61.8% ★', val:d.fib618, note:'GOLDEN ZONE — highest probability entry', gold:true},
+      {label:'50.0%', val:d.fib500, note:'midpoint'},
+      {label:'38.2%', val:d.fib382, note:'common pullback'},
+      {label:'23.6%', val:d.fib236, note:'shallow — strong trend'},
+      {label:'1.272 ext', val:d.ext127, note:'extension target 1'},
+      {label:'1.618 ext', val:d.ext162, note:'extension target 2'},
+    ];
+    fibEl.innerHTML = fibLevels.filter(f=>f.val&&f.val!=='--').map(f=>`
+      <div class="sp-level-row">
+        <span class="sp-lvl-tag fib" style="${f.gold?'background:rgba(255,215,0,0.12);border-color:var(--gold);color:var(--gold)':''}">${f.label}</span>
+        <span class="sp-lvl-price" style="color:${f.gold?'var(--gold)':'var(--cyan)'}">${f.val}</span>
+        <span class="sp-lvl-desc">${pips(f.val)} · ${f.note}</span>
+      </div>`).join('');
+  }
+
+  // ── PDH/PDL ──
+  set('sagePDH', d.pdh||'--');
+  set('sagePDL', d.pdl||'--');
+  set('sageSH50', d.swing_high_50||'--');
+  set('sageSL50', d.swing_low_50||'--');
+
+  // ── INDICATORS TAB ──
+  const rsi = parseFloat(d.rsi) || 0;
+  const adx = parseFloat(d.adx) || 0;
+  set('sageRsi', d.rsi||'--', rsi>70?'var(--green)':rsi<30?'var(--red)':'var(--text)');
+  set('sageAdx', d.adx||'--', adx>25?'var(--gold)':adx<20?'var(--text-dim)':'var(--text)');
+  set('sageAtr', d.atr||'--');
+  const rsiNote = document.getElementById('sageRsiNote');
+  const adxNote = document.getElementById('sageAdxNote');
+  if(rsiNote) rsiNote.textContent = rsi>70?'strong momentum':rsi>50?'bullish':rsi<30?'strong selling':rsi<50?'bearish':'neutral';
+  if(adxNote) adxNote.textContent = adx>25?'TRENDING':adx>20?'moderate':adx<20?'RANGING':'weak';
+
+  // Stack label
+  const stackLbl = document.getElementById('sageStackLabel');
+  if(stackLbl){
+    stackLbl.textContent = d.stack==='BULL STACK'?'🟢 BULLISH EMA STACK — BUY ONLY':d.stack==='BEAR STACK'?'🔴 BEARISH EMA STACK — SELL ONLY':'⚪ MIXED EMAs — WAIT FOR ALIGNMENT';
+    stackLbl.style.color = d.stack==='BULL STACK'?'var(--green)':d.stack==='BEAR STACK'?'var(--red)':'var(--text-dim)';
+  }
+  const stackRows = document.getElementById('sageStackRows');
+  if(stackRows && d.ema8 && d.ema21 && d.ema50 && d.ema200){
+    const emas = [{l:'EMA 8',v:d.ema8},{l:'EMA 21',v:d.ema21},{l:'EMA 50',v:d.ema50},{l:'EMA 200',v:d.ema200}];
+    stackRows.innerHTML = emas.map((e,i)=>{
+      const isAbove = i===0 ? parseFloat(e.v)>parseFloat(emas[1].v) : i===1 ? parseFloat(e.v)>parseFloat(emas[2].v) : i===2 ? parseFloat(e.v)>parseFloat(emas[3].v) : parseFloat(e.v)<price;
+      return `<div class="sp-level-row">
+        <span class="sp-lvl-tag ema">${e.l}</span>
+        <span class="sp-lvl-price" style="color:var(--purple)">${e.v}</span>
+        <span class="sp-lvl-desc">${pips(e.v)} from price</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Strategy advice
+  const stratEl = document.getElementById('sageStrategyAdvice');
+  if(stratEl){
+    let strat = '';
+    const h = SAGE.etInfo.etH || 0;
+    const inKZ = (h>=2&&h<5)||(h>=8&&h<11);
+    if(inKZ && (regime==='TRENDING BULL'||regime==='TRENDING BEAR')) strat='⚡ ICT KILL ZONE active + trending market = HIGH PROBABILITY. Watch for liquidity sweep of previous session high/low. Enter on reversal candle.';
+    else if(regime==='TRENDING BULL') strat='📈 Best strategy: EMA Pullback (wait for dip to EMA 21 area). Also watch for Break & Retest of key support turning into new floor.';
+    else if(regime==='TRENDING BEAR') strat='📉 Best strategy: EMA Pullback short (rally to EMA 21 = sell). Also watch for Break & Retest of key resistance.';
+    else if(regime==='RANGING') strat='↔️ Best strategy: S/R Range Bounce. Buy at support with rejection candle. Sell at resistance. Target: midpoint of range. ADX < 20 — avoid trend strategies.';
+    else strat='⚡ Market transitioning. Wait for clearer direction. Look for a break of EMA structure or a clean liquidity sweep to confirm direction.';
+    stratEl.textContent = strat;
+  }
+
+  // ── INSTITUTIONAL TAB ──
+  // Order Blocks
+  const obEl = document.getElementById('sageOBSection');
+  if(obEl){
+    let obHtml = '';
+    if(d.bull_ob) obHtml += `
+      <div class="sp-news-row medium" style="border-color:var(--green)">
+        <div class="sp-news-time">BULLISH ORDER BLOCK</div>
+        <div class="sp-news-event" style="color:var(--green)">Zone: ${d.bull_ob.low} — ${d.bull_ob.high}</div>
+        <div style="font-size:.6rem;color:var(--text-dim);margin-top:2px;line-height:1.6">
+          Last bearish candle before bullish displacement. Price tends to return here for institutional re-entry. 
+          ${parseFloat(d.bull_ob.low)<price?'✅ Below price — watch for pullback buy here.':'⚠️ Above price — already broken.'}
+        </div>
+      </div>`;
+    if(d.bear_ob) obHtml += `
+      <div class="sp-news-row medium" style="border-color:var(--red)">
+        <div class="sp-news-time">BEARISH ORDER BLOCK</div>
+        <div class="sp-news-event" style="color:var(--red)">Zone: ${d.bear_ob.low} — ${d.bear_ob.high}</div>
+        <div style="font-size:.6rem;color:var(--text-dim);margin-top:2px;line-height:1.6">
+          Last bullish candle before bearish displacement. Institutions may sell here on any rally. 
+          ${parseFloat(d.bear_ob.high)>price?'✅ Above price — watch for rally rejection.':'⚠️ Below price — already traded through.'}
+        </div>
+      </div>`;
+    if(!obHtml) obHtml = '<div style="color:var(--text-dim);font-size:.6rem;padding:8px">No clear order blocks detected in recent 30 candles.</div>';
+    obEl.innerHTML = obHtml;
+  }
+
+  // FVGs
+  const fvgEl = document.getElementById('sageFVGSection');
+  if(fvgEl){
+    if(d.fvgs && d.fvgs.length){
+      fvgEl.innerHTML = d.fvgs.map(f=>`
+        <div class="sp-news-row low" style="border-color:${f.type==='BULL'?'var(--green)':'var(--red)'}">
+          <div class="sp-news-time">${f.type==='BULL'?'BULLISH':'BEARISH'} FAIR VALUE GAP</div>
+          <div class="sp-news-event" style="color:${f.type==='BULL'?'var(--green)':'var(--red)'}">Zone: ${f.low} — ${f.high}</div>
+          <div style="font-size:.6rem;color:var(--text-dim);margin-top:2px">3-candle imbalance. Price fills this gap 80% of the time. ${f.type==='BULL'?'Bullish gap — expect price to come back up into this zone.':'Bearish gap — expect price to come back down into this zone.'}</div>
+        </div>`).join('');
+    } else {
+      fvgEl.innerHTML='<div style="color:var(--text-dim);font-size:.6rem;padding:8px">No significant fair value gaps in recent candles.</div>';
+    }
+  }
+
+  // Premium / Discount
+  const premEl = document.getElementById('sagePremiumSection');
+  if(premEl && d.swing_high_50 && d.swing_low_50){
+    const sh = parseFloat(d.swing_high_50), sl = parseFloat(d.swing_low_50);
+    const mid = ((sh+sl)/2).toFixed(isJPY?2:5);
+    const isPremium = price > (sh+sl)/2;
+    const fmtN = n => isJPY ? n.toFixed(2) : n.toFixed(5);
+    premEl.innerHTML = `
+      <div style="font-size:.65rem;line-height:1.8">
+        <div style="margin-bottom:4px">
+          <span class="sp-lvl-tag res">PREMIUM</span>
+          <span style="font-family:var(--mono);font-size:.7rem;color:var(--red);margin-left:6px">${mid} — ${fmtN(sh)}</span>
+          <span style="font-size:.6rem;color:var(--text-dim);margin-left:4px">above midpoint — SELL zone</span>
+        </div>
+        <div style="margin-bottom:8px">
+          <span class="sp-lvl-tag sup">DISCOUNT</span>
+          <span style="font-family:var(--mono);font-size:.7rem;color:var(--green);margin-left:6px">${fmtN(sl)} — ${mid}</span>
+          <span style="font-size:.6rem;color:var(--text-dim);margin-left:4px">below midpoint — BUY zone</span>
+        </div>
+        <div style="color:${isPremium?'var(--red)':'var(--green)'};font-weight:700">
+          📍 PRICE IS IN THE ${isPremium?'PREMIUM (SELL) ZONE':'DISCOUNT (BUY) ZONE'}
+        </div>
+        <div style="color:var(--text-dim);margin-top:4px;font-size:.6rem">
+          ${isPremium?'Price is expensive relative to current range. ICT says look for SELL setups — institutions sell premium.':'Price is cheap relative to current range. ICT says look for BUY setups — institutions buy discount.'}
+        </div>
+      </div>`;
+  }
+
+  // Liquidity pools
+  const liqEl = document.getElementById('sageLiqSection');
+  if(liqEl){
+    const swH20 = parseFloat(d.swing_high_20);
+    const swL20 = parseFloat(d.swing_low_20);
+    liqEl.innerHTML = `
+      <div style="font-size:.65rem;line-height:1.9">
+        <div>💧 <strong style="color:var(--red)">BUY STOPS (liquidity above):</strong> ${d.swing_high_20} — equal highs. Institutions will sweep this before moving down.</div>
+        <div>💧 <strong style="color:var(--green)">SELL STOPS (liquidity below):</strong> ${d.swing_low_20} — equal lows. Institutions will sweep this before moving up.</div>
+        ${d.pdh?`<div>📅 <strong style="color:var(--sage)">PDH liquidity:</strong> ${d.pdh} — yesterday's high has buy stops above it.</div>`:''}
+        ${d.pdl?`<div>📅 <strong style="color:var(--sage)">PDL liquidity:</strong> ${d.pdl} — yesterday's low has sell stops below it.</div>`:''}
+        <div style="color:var(--text-dim);margin-top:4px;font-size:.6rem">ICT: Price sweeps liquidity first, THEN makes the real move in the opposite direction.</div>
+      </div>`;
+  }
+
+  // OTE zone
+  const oteEl = document.getElementById('sageOTESection');
+  if(oteEl && d.fib618 && d.fib786){
+    const oteColor = d.stack==='BULL STACK'?'var(--green)':d.stack==='BEAR STACK'?'var(--red)':'var(--text-mid)';
+    oteEl.innerHTML = `
+      <div style="font-size:.65rem;line-height:1.9">
+        <div><strong style="color:${oteColor}">OTE ZONE: ${d.fib618} — ${d.fib786}</strong></div>
+        <div style="color:var(--text-dim)">The 61.8%–78.6% retracement zone after a displacement move. This is where institutions re-enter in the direction of the trend.</div>
+        <div style="margin-top:4px;color:${oteColor}">
+          ${d.stack==='BULL STACK'?'✅ In a bullish market: if price pulls back INTO the OTE zone — that is the highest probability BUY entry.':d.stack==='BEAR STACK'?'✅ In a bearish market: if price rallies INTO the OTE zone — that is the highest probability SELL entry.':'⚪ Wait for clear directional bias before using OTE entries.'}
+        </div>
+      </div>`;
+  }
+
+  // Build context string for Sage AI
+  sageRebuildCtx(d);
+}
+
+/* ════════════════════════════════════════
+   BUILD AI CONTEXT FROM INTEL DATA
+════════════════════════════════════════ */
+function sageRebuildCtx(d){
+  if(!d) return;
+  const etInfo = SAGE.etInfo;
+  SAGE.marketCtx = `
+
+[LIVE MARKET DATA — TwelveData — ${etInfo.etTime||'--'} ET | ${etInfo.session||'--'}]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAIR: ${d.pair} | Price: ${d.price} | Change: ${d.change}% | High: ${d.high} | Low: ${d.low}
+EMA8: ${d.ema8} | EMA21: ${d.ema21} | EMA50: ${d.ema50} | EMA200: ${d.ema200}
+EMA Stack: ${d.stack} | Regime: ${d.regime} | Bias: ${d.bias}
+RSI(14): ${d.rsi} | ADX(14): ${d.adx} | ATR(14): ${d.atr}
+Swing High (20): ${d.swing_high_20} | Swing Low (20): ${d.swing_low_20}
+Swing High (50): ${d.swing_high_50} | Swing Low (50): ${d.swing_low_50}
+PDH: ${d.pdh||'--'} | PDL: ${d.pdl||'--'}
+Fib 23.6%: ${d.fib236} | 38.2%: ${d.fib382} | 50%: ${d.fib500}
+Fib 61.8% GOLDEN: ${d.fib618} | 78.6%: ${d.fib786}
+Extensions: 127.2%: ${d.ext127} | 161.8%: ${d.ext162}
+Bull OB: ${d.bull_ob?d.bull_ob.low+'–'+d.bull_ob.high:'none'} | Bear OB: ${d.bear_ob?d.bear_ob.low+'–'+d.bear_ob.high:'none'}
+FVGs: ${d.fvgs&&d.fvgs.length?d.fvgs.map(f=>f.type+' '+f.low+'–'+f.high).join(', '):'none'}
+Session: ${d.session}
+🚨 USE ONLY THESE PRICES FOR ALL TRADE ENTRIES. DO NOT use web search prices for entries.`;
+}
+
+/* ════════════════════════════════════════
+   CHAT ENGINE
+════════════════════════════════════════ */
+function sageEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function sageScrollBottom(){ const m=document.getElementById('sageMsgs'); m.scrollTop=m.scrollHeight; }
+function sageHandleKey(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sageSend();} }
+function sageAutoResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,80)+'px'; }
+function sageQuick(q){ document.getElementById('sageInput').value=q; sageSend(); }
+function set(id,val,color){ const el=document.getElementById(id); if(el){el.textContent=val;if(color)el.style.color=color;} }
+
+function sageParseCard(text){
+  const m = text.match(/TRADE_CARD:([\s\S]*?)END_TRADE_CARD/);
+  if(!m) return {clean:text, card:null};
+  const block = m[1];
+  const d = {};
+  const FIELDS = ['SIGNAL','PAIR','STRATEGY','TIMEFRAME','ENTRY','STOP','TP1','TP2','PIPS','CONFIDENCE','REASON','INVALIDATION','WATCH_LEVEL'];
+  const pat = new RegExp('('+FIELDS.join('|')+')\\s*:\\s*([\\s\\S]*?)(?=(?:'+FIELDS.join('|')+')\\s*:|$)','g');
+  let match;
+  while((match=pat.exec(block))!==null){
+    const key=match[1].trim();
+    let val=match[2].replace(/^\[|\]$/g,'').replace(/\n/g,' ').trim();
+    val=val.replace(/\s*(SIGNAL|PAIR|STRATEGY|TIMEFRAME|ENTRY|STOP|TP1|TP2|PIPS|CONFIDENCE|REASON|INVALIDATION|WATCH_LEVEL)\s*$/,'').trim();
+    if(key&&val) d[key]=val;
+  }
+  if(!d.SIGNAL) return {clean:text, card:null};
+  return {clean:text.replace(m[0],'').trim(), card:d};
+}
+
+function sageBuildCard(d){
+  if(!d) return '';
+  const sig=(d.SIGNAL||'WAIT').toUpperCase();
+  const sc=sig.includes('BUY')?'BUY':sig.includes('SELL')?'SELL':'WAIT';
+  const clr=sc==='BUY'?'var(--green)':sc==='SELL'?'var(--red)':'var(--gold)';
+  if(sc==='WAIT') return `
+    <div class="sage-card" style="border-top-color:var(--gold)">
+      <div class="sc-hdr">
+        <span class="sc-sym" style="color:var(--gold)">${d.PAIR||'MARKET'}</span>
+        <span class="sc-sig WAIT">👁 WATCHING</span>
+      </div>
+      <div style="padding:10px 12px;font-size:11px;color:var(--text-mid);line-height:1.7">
+        ${d.WATCH_LEVEL?`<div style="margin-bottom:4px">⚡ <strong style="color:var(--gold)">Watching: ${d.WATCH_LEVEL}</strong></div>`:''}
+        <div>${d.REASON||'Waiting for entry signal'}</div>
+        ${d.INVALIDATION?`<div style="color:var(--text-dim);margin-top:4px">Invalidation: ${d.INVALIDATION}</div>`:''}
+      </div>
+    </div>`;
+  return `
+    <div class="sage-card">
+      <div class="sc-hdr">
+        <span class="sc-sym" style="color:${clr}">${d.PAIR||'MARKET'}</span>
+        <span class="sc-sig ${sc}">${sig}</span>
+      </div>
+      <div class="sc-grid">
+        <div class="sc-cell"><div class="sc-lbl">ENTRY</div><div class="sc-val" style="color:var(--gold)">${d.ENTRY||'--'}</div></div>
+        <div class="sc-cell"><div class="sc-lbl">STOP LOSS</div><div class="sc-val" style="color:var(--red)">${d.STOP||'--'}</div></div>
+        <div class="sc-cell"><div class="sc-lbl">PIPS RISK</div><div class="sc-val" style="color:var(--text-dim)">${d.PIPS||'--'}</div></div>
+        <div class="sc-cell"><div class="sc-lbl">TP1</div><div class="sc-val" style="color:var(--green)">${d.TP1||'--'}</div></div>
+        <div class="sc-cell"><div class="sc-lbl">TP2</div><div class="sc-val" style="color:var(--cyan)">${d.TP2||'--'}</div></div>
+        <div class="sc-cell"><div class="sc-lbl">CONFIDENCE</div><div class="sc-val" style="color:var(--sage)">${d.CONFIDENCE||'--'}</div></div>
+      </div>
+      <div class="sc-footer">
+        📋 <strong style="color:var(--text-mid)">${d.STRATEGY||'--'}</strong> · ${d.TIMEFRAME||'1H'}<br>
+        ${d.REASON||''}<br>
+        ${d.INVALIDATION?`⚠️ Invalidation: ${d.INVALIDATION}`:''}
+      </div>
+    </div>`;
+}
+
+function sageRenderProse(text){
+  text=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  text=text.replace(/`([^`]+)`/g,'<span style="color:var(--sage);background:rgba(96,208,255,.07);padding:0 3px">$1</span>');
+  text=text.replace(/### (.*)/g,'<div style="font-size:11px;letter-spacing:2px;color:var(--cyan);margin:10px 0 4px;border-bottom:1px solid var(--border);padding-bottom:3px">$1</div>');
+  text=text.replace(/\b(\d{1,3}\.\d{4,5})\b/g,'<span style="color:var(--gold);font-weight:700">$1</span>');
+  text=text.replace(/\$\s?(\d{1,5}(?:\.\d{1,2})?)\b/g,'<span style="color:var(--gold);font-weight:700">$$$1</span>');
+  text=text.replace(/(\d+)\s*(pip[s]?)/gi,'<span style="color:var(--gold);font-weight:700">$1 $2</span>');
+  text=text.replace(/(\d{2,3})\/100/g,'<span style="color:var(--gold);font-weight:700">$1/100</span>');
+  text=text.replace(/(\d{2,3})%/g,'<span style="color:var(--gold);font-weight:700">$1%</span>');
+  text=text.replace(/🟢(.*)/g,'<span class="s-up">🟢$1</span>');
+  text=text.replace(/🔴(.*)/g,'<span class="s-dn">🔴$1</span>');
+  const bull=/\b(support|bullish|buy zone|demand zone|long|bounce|going up|upside)\b/gi;
+  const bear=/\b(resistance|bearish|sell zone|supply zone|short|rejection|going down|downside)\b/gi;
+  const lvl=/\b(stop loss|take profit|order block|fair value gap|FVG|kill zone|EMA|RSI|ADX|ATR|Fibonacci|61\.8%|38\.2%|confluence|invalidation)\b/gi;
+  text=text.replace(bull,'<span style="color:var(--green);font-weight:600">$1</span>');
+  text=text.replace(bear,'<span style="color:var(--red);font-weight:600">$1</span>');
+  text=text.replace(lvl,'<span style="color:var(--cyan);font-weight:600">$1</span>');
+  text=text.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
+  return text;
+}
+
+async function sageSend(){
+  if(SAGE.loading) return;
+  if(!SAGE.key){
+    document.getElementById('sageKeyBar').classList.remove('hidden');
+    document.getElementById('sageKeyInput').focus();
+    return;
+  }
+  const inp = document.getElementById('sageInput');
+  const text = inp.value.trim();
+  if(!text) return;
+  inp.value=''; sageAutoResize(inp);
+  SAGE.loading=true;
+  document.getElementById('sageSendBtn').disabled=true;
+  document.getElementById('sageWelcome')?.remove();
+
+  // User message
+  const um=document.createElement('div');
+  um.className='smsg-user';
+  um.innerHTML=`<div class="sbbl">${sageEsc(text)}</div>`;
+  document.getElementById('sageMsgs').appendChild(um);
+
+  // Thinking
+  const tm=document.createElement('div');
+  tm.id='sageThinking'; tm.className='sage-thinking';
+  tm.innerHTML=`<div class="sdots"><span></span><span></span><span></span></div>Sage is reading the market and consulting the 6 paths...`;
+  document.getElementById('sageMsgs').appendChild(tm);
+  sageScrollBottom();
+
+  // Build message with context
+  const ctx = SAGE.marketCtx || '';
+  const etStr = SAGE.etInfo.etTime ? `\n\n[TIME: ${SAGE.etInfo.etTime} ET | SESSION: ${SAGE.etInfo.session||'--'}]` : '';
+  SAGE.history.push({role:'user', content: text + ctx + etStr});
+
+  try{
+    // Agentic loop — handles tool_use for web_search
+    let msgs = [...SAGE.history];
+    let fullText = '';
+    let loopCount = 0;
+
+    const callAPI = async(messages) => {
+      const r = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'x-api-key': SAGE.key,
+          'anthropic-version':'2023-06-01',
+          'anthropic-dangerous-direct-browser-access':'true'
+        },
+        body:JSON.stringify({
+          model:'claude-sonnet-4-20250514',
+          max_tokens:2000,
+          system: window.__SAGE_SYSTEM__ || '',
+          tools:[{type:'web_search_20250305',name:'web_search'}],
+          messages
+        })
+      });
+      return r.json();
+    };
+
+    let data = await callAPI(msgs);
+
+    // Tool-use agentic loop
+    while(data.stop_reason==='tool_use' && loopCount<5){
+      loopCount++;
+      msgs.push({role:'assistant', content:data.content});
+      const results=[];
+      for(const block of data.content){
+        if(block.type==='tool_use') results.push({type:'tool_result',tool_use_id:block.id,content:'Search completed. Now provide full Sage analysis with all 6 paths.'});
+      }
+      msgs.push({role:'user', content:results});
+      data = await callAPI(msgs);
+    }
+
+    if(data.content) for(const b of data.content) if(b.type==='text') fullText+=b.text+'\n';
+
+    if(!fullText && data.error){
+      fullText=`Error: ${data.error.message||'Unknown error'}`;
+      if(data.error.type==='authentication_error'){
+        SAGE.key=''; localStorage.removeItem('sageai_key');
+        document.getElementById('sageKeyBar').classList.remove('hidden');
+      }
+    }
+
+    SAGE.history.push({role:'assistant', content:fullText});
+    document.getElementById('sageThinking')?.remove();
+
+    const {clean, card} = sageParseCard(fullText);
+    const wm=document.createElement('div');
+    wm.className='smsg-sage';
+    wm.innerHTML=`<div class="sbbl"><p>${sageRenderProse(clean)}</p>${sageBuildCard(card)}</div>`;
+    document.getElementById('sageMsgs').appendChild(wm);
+
+    // Auto-update news tab if news mentioned
+    if(/news|calendar|nfp|fomc|cpi|central bank|risk/i.test(fullText)) sageUpdateNewsFromResponse(fullText);
+
+  } catch(err){
+    document.getElementById('sageThinking')?.remove();
+    const em=document.createElement('div'); em.className='smsg-sage';
+    em.innerHTML=`<div class="sbbl"><span style="color:var(--red)">Connection error: ${sageEsc(err.message)}</span></div>`;
+    document.getElementById('sageMsgs').appendChild(em);
+  }
+
+  SAGE.loading=false;
+  document.getElementById('sageSendBtn').disabled=false;
+  sageScrollBottom();
+}
+
+/* ════════════════════════════════════════
+   NEWS TAB AUTO-UPDATE
+════════════════════════════════════════ */
+function sageUpdateNewsFromResponse(text){
+  const newsEventsEl = document.getElementById('sageNewsEvents');
+  const macroEl = document.getElementById('sageMacroContext');
+  const statusEl = document.getElementById('sageNewsStatus');
+
+  // Extract news content from Sage response
+  const noNews = /calendar.*clear|no.*high.*impact|clear.*news|no.*nfp|no.*fomc/i.test(text);
+  const hasHighImpact = /nfp|fomc|cpi|central bank|rate decision|interest rate/i.test(text);
+  const riskOn = /risk.on|risk on/i.test(text);
+  const riskOff = /risk.off|risk off/i.test(text);
+
+  if(statusEl){
+    if(hasHighImpact) statusEl.innerHTML='<span class="news-alert-badge badge-red">⚠️ HIGH IMPACT EVENT DETECTED</span>';
+    else if(noNews) statusEl.innerHTML='<span class="news-alert-badge badge-clear">✅ CALENDAR CLEAR</span>';
+    else statusEl.innerHTML='<span class="news-alert-badge badge-gold">📅 EVENTS THIS SESSION</span>';
+  }
+
+  // Pull the macro paragraph from response
+  const macroMatch = text.match(/(?:risk sentiment|macro|dxy|dollar|fundamental)[^\n]{0,300}/i);
+  if(macroEl && macroMatch) macroEl.textContent = macroMatch[0].replace(/[*#]/g,'').trim();
+}
+
+/* ════════════════════════════════════════
+   FETCH SAGE SYSTEM FROM SERVER
+════════════════════════════════════════ */
+async function fetchSageSystem(){
+  // The system prompt lives on the server — fetch it once
+  // If server-side chat proxy available, use that instead
+  // For now, we embed a lightweight version in the page
+  // (full system is in sage_app.py SAGE_SYSTEM)
+  window.__SAGE_SYSTEM__ = `You are Sage — the 6 Path Intelligence trading analyst by JayDaWolfX. Wise, calm, highly experienced. You always search live data first. You explain every trade with full reasoning through the 6 paths. You provide ALL key levels — EMAs, Fibonacci, order blocks, FVGs, PDH/PDL, round numbers, liquidity pools, OTE zones, and premium/discount areas. Minimum 2:1 R/R. Use TRADE_CARD format. Always check news calendar first with web_search. Never use web prices for entries — use [LIVE MARKET DATA] only.
+
+KEY LEVELS FORMAT: Always show resistance zones (R1 nearest, R2, R3), support zones (S1 nearest, S2, S3), EMAs, Fibonacci full retracement and extensions, order blocks, FVGs, liquidity pools, OTE zone, and premium/discount areas.
+
+TRADE_CARD:\nSIGNAL:[BUY/SELL/WAIT]\nPAIR:[pair]\nSTRATEGY:[strategy]\nTIMEFRAME:[tf]\nENTRY:[price from live data only]\nSTOP:[price]\nTP1:[price]\nTP2:[price]\nPIPS:[distance]\nCONFIDENCE:[score/100]\nREASON:[confluence]\nINVALIDATION:[what cancels]\nWATCH_LEVEL:[if WAIT]\nEND_TRADE_CARD`;
+}
+
+/* ════════════════════════════════════════
+   BOOT
+════════════════════════════════════════ */
+fetchSageSystem();
+sageRefreshIntel();
+if(_intelTimer) clearInterval(_intelTimer);
+_intelTimer = setInterval(sageRefreshIntel, 30000);
+
+</script>
+</body>
+</html>
