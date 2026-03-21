@@ -280,7 +280,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 
 <div class="sage-shell">
 <div class="sage-ai-section">
-<div class="sage-ai-box" style="position:relative">
+<div class="sage-ai-box">
 
   <!-- Header -->
   <div class="sage-hdr">
@@ -316,7 +316,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
       </div>
 
   <!-- SAGE Panel -->
-  <div id="sagePanelSage" style="display:flex;flex:1;flex-direction:column;min-height:0">
+  <div id="sagePanelSage" style="display:block">
   <!-- Body split -->
   <div class="sage-body">
 
@@ -630,34 +630,37 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 
     </div><!-- /sage-chat -->
   </div><!-- /sage-body -->
-
+  </div><!-- /sagePanelSage -->
 
       <!-- EDUCATION PANEL -->
-      <div id="sagePanelEdu" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;background:var(--surface)">
-        <div style="display:flex;height:100%;overflow:hidden">
-          <!-- Left sidebar -->
-          <div id="sageEduSidebar" style="width:240px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;background:var(--surface2)">
-            <div style="padding:12px;border-bottom:1px solid var(--border)">
-              <div style="font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--cyan);margin-bottom:4px">TRADING ACADEMY</div>
-              <div style="font-size:11px;color:var(--text-mid)">51 Lessons · Progress Saved</div>
-              <div style="margin-top:8px;height:5px;background:var(--border);border-radius:3px;overflow:hidden">
+      <div id="sagePanelEdu" style="display:none;padding:0">
+        <div style="display:flex;height:620px;overflow:hidden">
+
+          <!-- Left: Lesson list -->
+          <div id="sageEduSidebar" style="width:260px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;background:var(--surface2)">
+            <div style="padding:14px 12px;border-bottom:1px solid var(--border)">
+              <div style="font-family:var(--head);font-size:13px;letter-spacing:2px;color:var(--cyan);margin-bottom:4px">TRADING ACADEMY</div>
+              <div style="font-size:12px;color:var(--text-mid)">51 Lessons · Progress Saved</div>
+              <div style="margin-top:8px;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
                 <div id="sageEduProgress" style="height:100%;background:var(--cyan);width:0%;transition:.3s;border-radius:3px"></div>
               </div>
-              <div id="sageEduProgressText" style="font-size:11px;color:var(--text-mid);margin-top:4px">0 / 51 Complete</div>
+              <div id="sageEduProgressText" style="font-size:12px;color:var(--text-mid);margin-top:4px">0 / 51 Complete</div>
             </div>
             <div id="sageEduLessonList"></div>
           </div>
-          <!-- Right content -->
+
+          <!-- Right: Lesson content -->
           <div style="flex:1;overflow-y:auto;padding:20px;background:var(--surface)">
             <div id="sageEduContent">
               <div style="text-align:center;padding:60px 20px">
                 <div style="font-size:48px;margin-bottom:16px">📚</div>
-                <div style="font-family:var(--head);font-size:16px;letter-spacing:2px;color:var(--cyan);margin-bottom:8px">TRADING ACADEMY</div>
-                <div style="font-size:13px;color:var(--text-mid);line-height:1.7;max-width:400px;margin:0 auto">51 structured lessons covering Forex, Stocks, and Crypto. Complete each lesson and pass the quiz to unlock the next.</div>
-                <div style="margin-top:16px;font-size:12px;color:var(--text-dim)">← Select a lesson from the left to begin</div>
+                <div style="font-family:var(--head);font-size:18px;letter-spacing:2px;color:var(--cyan);margin-bottom:8px">TRADING ACADEMY</div>
+                <div style="font-size:14px;color:var(--text-mid);line-height:1.7;max-width:400px;margin:0 auto">51 structured lessons covering Forex, Stocks, and Crypto. Complete each lesson and pass the quiz to unlock the next. When you finish — you are ready for Sage.</div>
+                <div style="margin-top:20px;font-size:13px;color:var(--text-dim)">← Select a lesson from the left to begin</div>
               </div>
             </div>
           </div>
+
         </div>
       </div><!-- /sagePanelEdu -->
 
@@ -1389,7 +1392,7 @@ function sageSwitchTab(tab) {
   const sageBtn   = document.getElementById('sageTabSage');
   const eduBtn    = document.getElementById('sageTabEdu');
   if (tab === 'sage') {
-    if (sagePanel) sagePanel.style.display = 'flex';
+    if (sagePanel) sagePanel.style.display = 'block';
     if (eduPanel)  eduPanel.style.display  = 'none';
     if (sageBtn) { sageBtn.style.background='rgba(96,208,255,0.1)'; sageBtn.style.color='var(--cyan)'; sageBtn.style.borderBottom='2px solid var(--cyan)'; }
     if (eduBtn)  { eduBtn.style.background='transparent'; eduBtn.style.color='var(--text-dim)'; eduBtn.style.borderBottom='2px solid transparent'; }
@@ -1398,7 +1401,7 @@ function sageSwitchTab(tab) {
     if (eduPanel)  eduPanel.style.display  = 'block';
     if (eduBtn)  { eduBtn.style.background='rgba(96,208,255,0.1)'; eduBtn.style.color='var(--cyan)'; eduBtn.style.borderBottom='2px solid var(--cyan)'; }
     if (sageBtn) { sageBtn.style.background='transparent'; sageBtn.style.color='var(--text-dim)'; sageBtn.style.borderBottom='2px solid transparent'; }
-    if (typeof sageInitEdu === 'function') sageInitEdu();
+    sageInitEdu();
   }
 }
 
