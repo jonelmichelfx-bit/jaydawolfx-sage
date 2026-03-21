@@ -106,7 +106,7 @@ def auth_logout():
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('sage_page'))
-    return redirect(url_for('login_page'))
+    return render_template('landing.html')
 
 @app.route('/pricing')
 def pricing_page():
@@ -115,7 +115,7 @@ def pricing_page():
 @app.route('/sage-mode')
 @login_required
 def sage_page():
-    return render_template('sage.html')
+    return render_template('sage_mode.html')
 
 # ── STRIPE CHECKOUT ────────────────────────────────────────
 @app.route('/create-checkout-session', methods=['POST'])
