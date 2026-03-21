@@ -1,731 +1,761 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sage of Six Paths — You'll Never Have to Read a Chart Again</title>
-<meta name="description" content="The first AI trading intelligence that replaces chart reading entirely. Ask Sage any pair. Get the trend, key levels, exact entry, stop loss, and take profit — in seconds. No charts. No guessing. No more wasted hours.">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sage of Six Paths — The AI That Trades While You Sleep</title>
+<meta name="description" content="Food up 28%. Jobs disappearing to AI. Your salary not keeping up. Sage of Six Paths is the first AI trading intelligence built for people who need a second income — not a second job."/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#040810;--s1:#080f1a;--s2:#0d1625;
-  --cyan:#40e0ff;--green:#00ff99;--red:#ff4466;--purple:#aa66ff;--gold:#ffd700;--orange:#ff8c42;
-  --text:#ffffff;--mid:#c8dff0;--dim:#7a9ab5;
-  --mono:'Share Tech Mono',monospace;--head:'Orbitron',sans-serif;--body:'Inter',sans-serif;
+  --bg:#03060d;--s1:#06101e;--s2:#0a1628;
+  --cyan:#38d9f5;--green:#00e87a;--red:#ff3d5a;
+  --purple:#9d6fff;--gold:#f5c842;--orange:#ff7a3d;
+  --text:#f0f6ff;--mid:#8fb0ce;--dim:#4a6a85;
+  --mono:'DM Mono',monospace;--head:'Syne',sans-serif;--body:'DM Sans',sans-serif;
+  --glow-c:rgba(56,217,245,0.15);
 }
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:var(--body);overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;
-  background-image:linear-gradient(rgba(64,224,255,0.02) 1px,transparent 1px),
-  linear-gradient(90deg,rgba(64,224,255,0.02) 1px,transparent 1px);
-  background-size:44px 44px;pointer-events:none;z-index:0}
+body{background:var(--bg);color:var(--text);font-family:var(--body);overflow-x:hidden;line-height:1.6}
+
+/* GRID BG */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(56,217,245,0.025) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(56,217,245,0.025) 1px,transparent 1px);
+  background-size:60px 60px}
 
 /* NAV */
-.nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:14px 44px;background:rgba(4,8,16,0.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(64,224,255,0.06);transition:.3s}
-.nav-logo{font-family:var(--head);font-size:14px;letter-spacing:3px;color:var(--cyan);text-decoration:none}
-.nav-links{display:flex;align-items:center;gap:32px}
-.nav-a{font-size:12px;color:var(--dim);text-decoration:none;transition:.2s;font-family:var(--mono);letter-spacing:1px}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;
+  justify-content:space-between;padding:16px 48px;
+  background:rgba(3,6,13,0.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(56,217,245,0.08);transition:.3s}
+.nav-logo{font-family:var(--head);font-size:15px;letter-spacing:2px;color:var(--cyan);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-links{display:flex;align-items:center;gap:36px}
+.nav-a{font-size:12px;color:var(--dim);text-decoration:none;font-family:var(--mono);letter-spacing:1px;transition:.2s}
 .nav-a:hover{color:var(--cyan)}
-.nav-cta{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:2px;color:#040810;background:var(--cyan);padding:10px 22px;border-radius:3px;text-decoration:none;transition:.2s}
-.nav-cta:hover{background:#60e8ff;transform:translateY(-1px)}
+.nav-cta{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:2px;
+  color:var(--bg);background:var(--cyan);padding:10px 22px;border-radius:2px;
+  text-decoration:none;transition:.2s}
+.nav-cta:hover{background:#60e8ff;box-shadow:0 0 24px rgba(56,217,245,0.4)}
 
-/* UTILS */
+/* UTILITIES */
 section{position:relative;z-index:1}
-.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
-.tag{font-family:var(--mono);font-size:11px;letter-spacing:4px;color:var(--cyan);margin-bottom:14px;display:block}
-.h2{font-family:sans-serif;font-size:clamp(30px,4.5vw,50px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px}
-.h2 span{color:var(--cyan)}
-.h2 em{color:var(--purple);font-style:normal}
-.sub{font-size:clamp(15px,2vw,18px);color:var(--mid);line-height:1.75;font-weight:300;max-width:600px}
-.center{text-align:center;margin-left:auto;margin-right:auto}
-.btn{display:inline-block;font-family:var(--mono);font-weight:800;letter-spacing:2px;border-radius:4px;text-decoration:none;transition:.25s}
+.wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:4px;color:var(--cyan);margin-bottom:12px;display:block;opacity:.8}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-weight:500;
+  letter-spacing:2px;border-radius:2px;text-decoration:none;transition:.25s;cursor:pointer;border:none}
 .btn:hover{transform:translateY(-2px)}
-.btn-lg{font-size:15px;padding:18px 40px}
-.btn-sm{font-size:12px;padding:12px 24px}
-.btn-cyan{background:var(--cyan);color:#040810}
-.btn-cyan:hover{background:#60e8ff}
-.btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.14);color:var(--dim)}
-.btn-outline:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-lg{font-size:14px;padding:16px 36px}
+.btn-sm{font-size:12px;padding:11px 22px}
+.btn-cyan{background:var(--cyan);color:var(--bg)}
+.btn-cyan:hover{background:#60e8ff;box-shadow:0 0 30px rgba(56,217,245,0.35)}
+.btn-outline{background:transparent;border:1px solid rgba(56,217,245,0.3);color:var(--cyan)}
+.btn-outline:hover{border-color:var(--cyan);box-shadow:0 0 20px rgba(56,217,245,0.15)}
+.btn-red{background:var(--red);color:#fff}
 .btn-purple{background:var(--purple);color:#fff}
-.btn-purple:hover{background:#bb88ff}
+.btn-purple:hover{background:#b088ff;box-shadow:0 0 30px rgba(157,111,255,0.4)}
 
-/* CTA ROW */
-.cta-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.cta-row.center{justify-content:center}
-.cta-note{font-size:12px;color:var(--dim);font-family:var(--mono);letter-spacing:.5px}
-.cta-note span{color:var(--green)}
+/* ══════════════════════════════════
+   HERO — THE PAIN
+══════════════════════════════════ */
+.hero{min-height:100vh;display:flex;align-items:center;padding:120px 28px 80px;overflow:hidden;position:relative}
 
-/* ──────────────────────────────
-   HERO
-────────────────────────────── */
-.hero{min-height:100vh;display:flex;align-items:center;padding:130px 24px 80px;overflow:hidden}
-.hero-bg{position:absolute;inset:0;z-index:0}
-.hg1{position:absolute;width:700px;height:700px;border-radius:50%;background:rgba(64,224,255,0.05);top:-200px;left:-200px;filter:blur(100px)}
-.hg2{position:absolute;width:500px;height:500px;border-radius:50%;background:rgba(170,102,255,0.04);bottom:-100px;right:-100px;filter:blur(80px)}
+/* Animated noise/atmosphere */
+.hero-atmos{position:absolute;inset:0;z-index:0;pointer-events:none}
+.atmos-blob{position:absolute;border-radius:50%;filter:blur(120px);opacity:.12}
+.blob1{width:600px;height:600px;background:var(--cyan);top:-150px;right:-100px;animation:blob1 8s ease-in-out infinite alternate}
+.blob2{width:400px;height:400px;background:var(--purple);bottom:-100px;left:-80px;animation:blob2 11s ease-in-out infinite alternate}
+.blob3{width:300px;height:300px;background:var(--red);top:40%;right:20%;animation:blob3 7s ease-in-out infinite alternate;opacity:.08}
+@keyframes blob1{from{transform:translate(0,0) scale(1)}to{transform:translate(-60px,40px) scale(1.1)}}
+@keyframes blob2{from{transform:translate(0,0) scale(1)}to{transform:translate(40px,-50px) scale(1.08)}}
+@keyframes blob3{from{transform:translate(0,0)}to{transform:translate(-30px,30px)}}
 
-@keyframes hline{0%{left:-55%;opacity:0}15%{opacity:1}85%{opacity:.5}100%{left:110%;opacity:0}}
-.hline{position:absolute;height:1px;width:50%;pointer-events:none;animation:hline linear infinite}
-.hl1{background:linear-gradient(90deg,transparent,rgba(64,224,255,0.22),transparent);top:25%;animation-duration:9s}
-.hl2{background:linear-gradient(90deg,transparent,rgba(0,255,153,0.14),transparent);top:52%;animation-duration:13s;animation-delay:-5s}
-.hl3{background:linear-gradient(90deg,transparent,rgba(170,102,255,0.1),transparent);top:71%;animation-duration:11s;animation-delay:-8s}
+/* Scanning line */
+@keyframes scanline{0%{top:-2px;opacity:0}10%{opacity:.4}90%{opacity:.2}100%{top:100%;opacity:0}}
+.scanline{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);animation:scanline 6s linear infinite;pointer-events:none;z-index:1}
 
-@keyframes cfloat{0%{opacity:.07;transform:scaleY(.55)}100%{opacity:.18;transform:scaleY(1)}}
-.hcandle{position:absolute;width:5px;border-radius:1px;bottom:60px;animation:cfloat ease-in-out infinite alternate}
+.hero-inner{position:relative;z-index:2;max-width:1000px}
 
-.hero-inner{position:relative;z-index:2;width:100%;max-width:920px}
-.hero-kicker{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--cyan);background:rgba(64,224,255,0.07);border:1px solid rgba(64,224,255,0.18);padding:8px 18px;border-radius:20px;margin-bottom:36px}
-.hero-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+/* Urgency badge */
+.urgency-badge{display:inline-flex;align-items:center;gap:10px;
+  background:rgba(255,61,90,0.1);border:1px solid rgba(255,61,90,0.3);
+  padding:8px 18px;border-radius:2px;margin-bottom:32px;font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--red)}
+.urgency-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(255,61,90,0.5)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(255,61,90,0)}}
 
-.hero-h1{font-family:sans-serif;font-size:clamp(42px,7.5vw,88px);font-weight:800;line-height:1.0;letter-spacing:-3px;margin-bottom:28px}
-.hero-h1 .cyan{color:var(--cyan)}
-.hero-h1 .strike{position:relative;color:rgba(255,255,255,0.35)}
-.hero-h1 .strike::after{content:'';position:absolute;left:0;top:50%;right:0;height:3px;background:var(--red);border-radius:2px}
+.hero-h1{font-family:var(--head);font-size:clamp(44px,7vw,90px);font-weight:800;line-height:.97;letter-spacing:-3px;margin-bottom:28px}
+.hero-h1 .line1{display:block;color:var(--text)}
+.hero-h1 .line2{display:block;color:var(--red);position:relative}
+.hero-h1 .line3{display:block;color:var(--cyan)}
 
-.hero-sub{font-size:clamp(16px,2.2vw,20px);color:var(--mid);line-height:1.75;max-width:640px;margin-bottom:44px;font-weight:300}
-.hero-sub strong{color:#fff;font-weight:600}
+/* Typewriter counter */
+.counter-wrap{display:flex;align-items:baseline;gap:12px;margin-bottom:20px}
+.counter-num{font-family:var(--mono);font-size:clamp(28px,4vw,48px);font-weight:500;color:var(--red);border-right:3px solid var(--red);padding-right:8px;animation:blink 1s step-end infinite}
+@keyframes blink{50%{border-color:transparent}}
+.counter-label{font-size:14px;color:var(--mid)}
 
-/* Stats */
-.hero-stats{display:flex;gap:40px;flex-wrap:wrap;margin-top:60px;padding-top:48px;border-top:1px solid rgba(255,255,255,0.06)}
-.stat-item{display:flex;flex-direction:column;gap:6px}
-.stat-n{font-size:36px;font-weight:800;font-family:sans-serif;color:var(--cyan);line-height:1}
-.stat-l{font-size:11px;color:var(--dim);font-family:var(--mono);letter-spacing:2px}
+.hero-sub{font-size:clamp(16px,2vw,20px);color:var(--mid);line-height:1.8;max-width:620px;margin-bottom:44px;font-weight:300}
+.hero-sub strong{color:var(--text);font-weight:500}
 
-/* ──────────────────────────────
-   REVOLUTION STATEMENT
-────────────────────────────── */
-.revolution{padding:0 24px 100px}
-.rev-box{background:linear-gradient(135deg,rgba(64,224,255,0.05),rgba(170,102,255,0.04));border:1px solid rgba(64,224,255,0.14);border-radius:12px;padding:64px 56px;text-align:center;max-width:900px;margin:0 auto;position:relative;overflow:hidden}
-.rev-box::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(64,224,255,0.07),transparent 60%);pointer-events:none}
-.rev-h{font-size:clamp(26px,4vw,44px);font-weight:800;font-family:sans-serif;letter-spacing:-1px;line-height:1.2;margin-bottom:20px;position:relative;z-index:1}
-.rev-h span{color:var(--cyan)}
-.rev-p{font-size:clamp(15px,2vw,18px);color:var(--mid);line-height:1.8;max-width:680px;margin:0 auto 36px;font-weight:300;position:relative;z-index:1}
-.rev-cta{position:relative;z-index:1}
+.hero-stats{display:flex;gap:0;margin-top:60px;padding-top:48px;border-top:1px solid rgba(56,217,245,0.1);flex-wrap:wrap}
+.hstat{padding:0 40px 0 0;border-right:1px solid rgba(255,255,255,0.06);margin-right:40px}
+.hstat:last-child{border:none}
+.hstat-n{font-family:var(--head);font-size:36px;font-weight:800;color:var(--cyan);line-height:1}
+.hstat-l{font-size:11px;color:var(--dim);font-family:var(--mono);letter-spacing:2px;margin-top:4px}
 
-/* ──────────────────────────────
-   PAIN (The old way)
-────────────────────────────── */
-.pain{padding:100px 24px;background:rgba(8,15,26,0.5)}
-.pain-vs{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1000px;margin:48px auto 0}
-.vs-box{border-radius:10px;padding:36px 32px}
-.vs-old{background:rgba(255,40,60,0.04);border:1px solid rgba(255,68,102,0.15)}
-.vs-new{background:rgba(0,255,153,0.03);border:1px solid rgba(0,255,153,0.15)}
-.vs-title{font-size:13px;font-family:var(--mono);letter-spacing:3px;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.06)}
-.vs-title.red{color:var(--red)}
-.vs-title.green{color:var(--green)}
-.vs-item{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;font-size:14px;line-height:1.6}
-.vs-item.bad{color:rgba(255,255,255,0.5)}
-.vs-item.good{color:var(--mid)}
-.vs-icon{flex-shrink:0;margin-top:1px;font-size:14px}
+/* ══════════════════════════════════
+   REALITY SECTION — THE NUMBERS
+══════════════════════════════════ */
+.reality{padding:100px 28px}
+.reality-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:56px;background:var(--s2)}
+.reality-card{background:var(--s1);padding:36px 28px;position:relative;overflow:hidden}
+.reality-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.rc-red::before{background:var(--red)}
+.rc-gold::before{background:var(--gold)}
+.rc-purple::before{background:var(--purple)}
+.rc-num{font-family:var(--head);font-size:52px;font-weight:800;line-height:1;margin-bottom:8px}
+.rc-red .rc-num{color:var(--red)}
+.rc-gold .rc-num{color:var(--gold)}
+.rc-purple .rc-num{color:var(--purple)}
+.rc-label{font-size:13px;color:var(--mid);line-height:1.6;font-family:var(--mono);font-size:11px;letter-spacing:1px}
+.rc-source{font-size:10px;color:var(--dim);margin-top:12px;font-family:var(--mono)}
 
-/* ──────────────────────────────
-   HOW IT WORKS
-────────────────────────────── */
-.howitworks{padding:100px 24px}
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;max-width:1000px;margin:56px auto 0}
-.step{text-align:center;padding:36px 28px;background:rgba(8,15,26,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:10px;position:relative}
-.step-num{font-family:var(--head);font-size:42px;font-weight:800;color:rgba(64,224,255,0.12);position:absolute;top:16px;right:20px}
-.step-icon{font-size:32px;margin-bottom:16px}
-.step-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:10px;font-family:sans-serif}
-.step-text{font-size:14px;color:var(--dim);line-height:1.7}
-.step-arrow{position:absolute;right:-18px;top:50%;transform:translateY(-50%);color:var(--cyan);font-size:20px;z-index:2}
+/* ══════════════════════════════════
+   AI TAKEOVER SECTION
+══════════════════════════════════ */
+.ai-takeover{padding:100px 28px;background:linear-gradient(180deg,var(--bg),var(--s1),var(--bg))}
+.ai-content{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;max-width:1000px;margin:0 auto}
+.ai-text .h2{font-family:var(--head);font-size:clamp(32px,4vw,52px);font-weight:800;line-height:1.1;letter-spacing:-2px;margin-bottom:20px}
+.ai-text .h2 em{color:var(--red);font-style:normal}
+.ai-text p{color:var(--mid);font-size:16px;line-height:1.8;margin-bottom:16px}
 
-/* ──────────────────────────────
-   DEMO TERMINAL
-────────────────────────────── */
-.demo{padding:100px 24px;background:rgba(8,15,26,0.5)}
-.demo-wrap{max-width:1000px;margin:0 auto}
-.demo-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:40px;align-items:center;margin-top:56px}
-.demo-text h3{font-size:clamp(22px,3vw,32px);font-weight:800;font-family:sans-serif;letter-spacing:-0.5px;margin-bottom:20px}
-.demo-text h3 span{color:var(--cyan)}
-.demo-point{display:flex;gap:14px;margin-bottom:18px}
-.dp-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);flex-shrink:0;margin-top:7px}
-.dp-text{font-size:15px;color:var(--mid);line-height:1.6}
-.dp-text strong{color:#fff;font-weight:600}
+/* Job ticker */
+.job-ticker{background:var(--s2);border:1px solid rgba(255,61,90,0.2);border-left:3px solid var(--red);padding:20px;border-radius:0 4px 4px 0}
+.jt-title{font-family:var(--mono);font-size:10px;letter-spacing:3px;color:var(--red);margin-bottom:12px}
+.jt-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px}
+.jt-item:last-child{border:none}
+.jt-company{color:var(--text);font-weight:500}
+.jt-jobs{color:var(--red);font-family:var(--mono);font-size:12px}
+.jt-ai{font-size:10px;color:var(--gold);font-family:var(--mono);letter-spacing:1px;background:rgba(245,200,66,0.1);padding:2px 6px;border-radius:2px}
 
-.terminal{background:#020810;border:1px solid rgba(64,224,255,0.14);border-radius:10px;overflow:hidden;font-family:var(--mono);font-size:12.5px}
-.t-bar{background:#080f1a;padding:12px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(64,224,255,0.08)}
-.t-dot{width:10px;height:10px;border-radius:50%}
-.t-title{font-size:11px;letter-spacing:2px;color:var(--dim);margin-left:8px}
-.t-body{padding:20px}
-.t-user{color:rgba(255,255,255,0.3);margin-bottom:12px}
-.t-user span{color:var(--cyan)}
-.t-line{padding:3px 0;line-height:1.7}
-.t-line.cyan{color:var(--cyan)}
-.t-line.green{color:var(--green)}
-.t-line.red{color:var(--red)}
-.t-line.gold{color:var(--gold)}
-.t-line.dim{color:var(--dim)}
-.t-line.white{color:#fff;font-weight:700}
-.t-line.purple{color:var(--purple)}
-.t-div{height:1px;background:rgba(255,255,255,0.04);margin:10px 0}
-.t-cursor{display:inline-block;width:8px;height:14px;background:var(--cyan);margin-left:2px;animation:blink .8s step-end infinite;vertical-align:middle}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+/* ══════════════════════════════════
+   THE BRIDGE — SOLUTION
+══════════════════════════════════ */
+.bridge{padding:100px 28px;text-align:center;position:relative;overflow:hidden}
+.bridge-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(56,217,245,0.08),transparent 70%);pointer-events:none}
+.bridge-icon{font-size:72px;display:block;margin-bottom:24px;filter:drop-shadow(0 0 30px rgba(56,217,245,0.4))}
+.bridge h2{font-family:var(--head);font-size:clamp(36px,5vw,64px);font-weight:800;line-height:1.05;letter-spacing:-2.5px;margin-bottom:20px}
+.bridge h2 .hl{color:var(--cyan)}
+.bridge p{font-size:18px;color:var(--mid);max-width:640px;margin:0 auto 44px;line-height:1.8;font-weight:300}
 
-/* ──────────────────────────────
-   WHAT SAGE REPLACES
-────────────────────────────── */
-.replaces{padding:100px 24px}
-.rep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1000px;margin:56px auto 0}
-.rep-card{background:rgba(8,15,26,0.7);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:28px 22px;transition:.3s}
-.rep-card:hover{border-color:rgba(64,224,255,0.2);transform:translateY(-3px)}
-.rep-was{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--red);margin-bottom:10px}
-.rep-old{font-size:15px;color:rgba(255,255,255,0.4);margin-bottom:12px;text-decoration:line-through;text-decoration-color:var(--red)}
-.rep-now{font-size:15px;color:var(--green);font-weight:600;line-height:1.5}
-.rep-icon{font-size:22px;margin-bottom:14px}
+/* ══════════════════════════════════
+   HOW IT WORKS — INTERACTIVE
+══════════════════════════════════ */
+.how{padding:100px 28px}
+.how-tabs{display:flex;gap:2px;margin:48px 0 0;background:var(--s2);padding:2px}
+.hw-tab{flex:1;padding:14px;font-family:var(--mono);font-size:11px;letter-spacing:2px;
+  background:transparent;border:none;color:var(--dim);cursor:pointer;transition:.2s;text-align:center}
+.hw-tab.active{background:var(--s1);color:var(--cyan)}
+.hw-panel{display:none;margin-top:2px}
+.hw-panel.active{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--s2)}
+.hw-left{background:var(--s1);padding:40px}
+.hw-right{background:rgba(56,217,245,0.03);padding:40px;border-left:1px solid rgba(56,217,245,0.1)}
+.hw-step-num{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--cyan);margin-bottom:16px}
+.hw-step-title{font-family:var(--head);font-size:26px;font-weight:700;margin-bottom:16px}
+.hw-step-body{color:var(--mid);line-height:1.8;font-size:15px}
+.hw-chat{background:var(--bg);border:1px solid var(--s2);padding:20px;font-family:var(--mono);font-size:12px}
+.hw-user{background:rgba(56,217,245,0.06);border:1px solid rgba(56,217,245,0.2);padding:10px 14px;margin-bottom:12px;color:#c0e8f0;border-radius:0 6px 6px 6px}
+.hw-sage{background:var(--s2);border-left:2px solid var(--cyan);padding:12px 14px;color:var(--mid);line-height:1.7;border-radius:0 4px 4px 0}
+.hw-sage .hl{color:var(--cyan);font-weight:500}
+.hw-sage .gr{color:var(--green);font-weight:500}
+.hw-sage .rd{color:var(--red);font-weight:500}
 
-/* INLINE CTA BAND */
-.cta-band{padding:60px 24px;text-align:center;background:linear-gradient(135deg,rgba(64,224,255,0.05),rgba(170,102,255,0.03));border-top:1px solid rgba(64,224,255,0.08);border-bottom:1px solid rgba(64,224,255,0.08)}
-.cta-band h3{font-size:clamp(22px,3.5vw,36px);font-weight:800;font-family:sans-serif;letter-spacing:-0.5px;margin-bottom:10px}
-.cta-band h3 span{color:var(--cyan)}
-.cta-band p{font-size:15px;color:var(--dim);margin-bottom:28px}
+/* Trade card display */
+.demo-card{background:var(--bg);border:1px solid rgba(56,217,245,0.15);border-top:2px solid var(--cyan);font-family:var(--mono);font-size:12px;margin-top:12px}
+.dc-hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--s2);background:rgba(56,217,245,0.03)}
+.dc-pair{font-family:var(--head);font-size:16px;font-weight:700;color:var(--cyan)}
+.dc-sig{padding:3px 12px;font-size:11px;font-weight:700;letter-spacing:2px}
+.dc-sig.buy{background:rgba(0,232,122,0.12);color:var(--green);border:1px solid var(--green)}
+.dc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--s2)}
+.dc-cell{background:var(--bg);padding:10px 12px}
+.dc-lbl{font-size:9px;color:var(--dim);letter-spacing:2px;margin-bottom:3px}
+.dc-val{font-size:13px;font-weight:500}
 
-/* ──────────────────────────────
-   OTHERS VS SAGE
-────────────────────────────── */
-.compare{padding:100px 24px;background:rgba(8,15,26,0.5)}
-.comp-table-wrap{max-width:900px;margin:56px auto 0;overflow-x:auto}
-.comp-table{width:100%;border-collapse:collapse}
-.comp-table th{font-size:12px;font-family:var(--mono);letter-spacing:2px;color:var(--dim);padding:12px 20px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06)}
-.comp-table th:nth-child(2){color:rgba(255,255,255,0.3)}
-.comp-table th:nth-child(3){color:var(--cyan)}
-.comp-table td{font-size:14px;color:var(--mid);padding:13px 20px;border-bottom:.5px solid rgba(255,255,255,0.04)}
-.comp-table td:nth-child(2){color:rgba(255,255,255,0.28)}
-.comp-table td:nth-child(3){color:var(--text)}
-.comp-table tr:hover td{background:rgba(255,255,255,0.02)}
-.tick-y{color:var(--green);font-size:16px}
-.tick-n{color:var(--red);font-size:16px}
-.tick-c{color:var(--cyan);font-size:16px}
-.sage-col{background:rgba(64,224,255,0.03)}
+/* ══════════════════════════════════
+   PATHS SECTION
+══════════════════════════════════ */
+.paths{padding:100px 28px;background:var(--s1)}
+.paths-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:56px;background:var(--s2)}
+.path-card{background:var(--s1);padding:32px 28px;transition:.3s;cursor:default}
+.path-card:hover{background:rgba(56,217,245,0.03);transform:translateY(-2px)}
+.pc-num{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--dim);margin-bottom:12px}
+.pc-title{font-family:var(--head);font-size:18px;font-weight:700;margin-bottom:10px;color:var(--text)}
+.pc-desc{font-size:13px;color:var(--mid);line-height:1.7}
 
-/* ──────────────────────────────
-   FEATURES
-────────────────────────────── */
-.features{padding:100px 24px}
-.feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:1000px;margin:56px auto 0}
-.feat-card{background:rgba(8,15,26,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:30px 26px;display:flex;gap:18px;transition:.3s}
-.feat-card:hover{border-color:rgba(64,224,255,0.18)}
-.feat-icon{width:46px;height:46px;border-radius:8px;background:rgba(64,224,255,0.07);border:1px solid rgba(64,224,255,0.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px}
-.feat-body h4{font-size:16px;font-weight:700;color:#fff;margin-bottom:6px;font-family:sans-serif}
-.feat-body p{font-size:13px;color:var(--dim);line-height:1.65}
+/* ══════════════════════════════════
+   BEFORE/AFTER COMPARISON
+══════════════════════════════════ */
+.compare{padding:100px 28px}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:56px;max-width:900px;margin-left:auto;margin-right:auto}
+.cmp-col{padding:32px}
+.cmp-before{background:rgba(255,61,90,0.04);border:1px solid rgba(255,61,90,0.15);border-top:2px solid var(--red)}
+.cmp-after{background:rgba(56,217,245,0.04);border:1px solid rgba(56,217,245,0.15);border-top:2px solid var(--cyan)}
+.cmp-label{font-family:var(--mono);font-size:11px;letter-spacing:3px;margin-bottom:20px;display:block}
+.cmp-before .cmp-label{color:var(--red)}
+.cmp-after .cmp-label{color:var(--cyan)}
+.cmp-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;line-height:1.5}
+.cmp-item:last-child{border:none}
+.cmp-icon{flex-shrink:0;font-size:14px;margin-top:1px}
 
-/* ──────────────────────────────
-   TESTIMONIALS
-────────────────────────────── */
-.proof{padding:100px 24px;background:rgba(8,15,26,0.5)}
-.proof-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1000px;margin:56px auto 0}
-.proof-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:28px}
-.proof-stars{color:var(--gold);font-size:13px;letter-spacing:3px;margin-bottom:16px}
-.proof-quote{font-size:14px;color:var(--mid);line-height:1.75;font-style:italic;margin-bottom:22px}
-.proof-quote strong{color:var(--cyan);font-style:normal;font-weight:600}
-.proof-author{display:flex;align-items:center;gap:12px}
-.proof-av{width:38px;height:38px;border-radius:50%;background:rgba(64,224,255,0.1);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:var(--cyan);font-weight:700;flex-shrink:0}
-.proof-name{font-size:13px;font-weight:600;color:#fff}
-.proof-role{font-size:11px;color:var(--dim);font-family:var(--mono)}
+/* ══════════════════════════════════
+   SOCIAL PROOF — TICKER
+══════════════════════════════════ */
+.proof-ticker{padding:60px 0;overflow:hidden;border-top:1px solid rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.05)}
+.ticker-track{display:flex;gap:60px;white-space:nowrap;animation:ticker 28s linear infinite}
+.ticker-track:hover{animation-play-state:paused}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ticker-item{display:flex;align-items:center;gap:16px;flex-shrink:0}
+.tick-stars{color:var(--gold);font-size:12px;letter-spacing:2px}
+.tick-quote{font-size:13px;color:var(--mid);font-style:italic;max-width:280px;white-space:normal}
+.tick-name{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1px}
+.tick-div{width:1px;height:40px;background:var(--s2)}
 
-/* ──────────────────────────────
+/* ══════════════════════════════════
    PRICING
-────────────────────────────── */
-.pricing{padding:100px 24px}
-.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1000px;margin:56px auto 0;align-items:start}
-.pc{background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:32px 26px;display:flex;flex-direction:column}
-.pc.hot{border-color:rgba(64,224,255,0.4);background:rgba(64,224,255,0.03)}
-.pc.top{border-color:rgba(170,102,255,0.35);background:rgba(170,102,255,0.03)}
-.pc-badge{font-size:10px;letter-spacing:2px;font-family:var(--mono);padding:4px 12px;border-radius:3px;display:inline-block;margin-bottom:16px;font-weight:700}
-.pb-c{color:var(--cyan);background:rgba(64,224,255,0.1)}
-.pb-p{color:var(--purple);background:rgba(170,102,255,0.12)}
-.pc-name{font-size:20px;font-weight:700;color:#fff;font-family:sans-serif;margin-bottom:4px}
-.pc-desc{font-size:13px;color:var(--dim);margin-bottom:22px;line-height:1.5}
-.pc-price{font-size:46px;font-weight:800;font-family:sans-serif;line-height:1}
+══════════════════════════════════ */
+.pricing{padding:100px 28px}
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:56px;background:var(--s2)}
+.pc{background:var(--s1);padding:40px 32px;position:relative}
+.pc.hot{background:rgba(56,217,245,0.04);border:1px solid rgba(56,217,245,0.2)}
+.pc.top{background:rgba(157,111,255,0.04)}
+.pc-badge{font-family:var(--mono);font-size:10px;letter-spacing:3px;padding:4px 12px;border-radius:2px;margin-bottom:20px;display:inline-block}
+.pb-c{background:rgba(56,217,245,0.1);color:var(--cyan);border:1px solid rgba(56,217,245,0.2)}
+.pb-p{background:rgba(157,111,255,0.1);color:var(--purple);border:1px solid rgba(157,111,255,0.2)}
+.pc-name{font-family:var(--head);font-size:24px;font-weight:800;margin-bottom:8px}
+.pc-desc{font-size:13px;color:var(--dim);margin-bottom:24px;min-height:36px}
+.pc-price{font-family:var(--head);font-size:52px;font-weight:800;line-height:1;margin-bottom:4px}
 .pc-price.cyan{color:var(--cyan)}
 .pc-price.purple{color:var(--purple)}
-.pc-price sup{font-size:22px;vertical-align:top;margin-top:8px;opacity:.8}
-.pc-price sub{font-size:14px;color:var(--dim);font-weight:400}
-.pc-period{font-size:11px;color:var(--dim);letter-spacing:1px;font-family:var(--mono);margin:8px 0 24px}
-.pc-feats{list-style:none;margin-bottom:28px;flex:1}
-.pc-feats li{font-size:13px;padding:7px 0;border-bottom:.5px solid rgba(255,255,255,0.05);display:flex;gap:10px;align-items:flex-start;line-height:1.5}
-.pc-feats li::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px}
-.c-feat{color:var(--mid)}
-.c-feat::before{background:var(--cyan) !important}
-.p-feat{color:var(--mid)}
-.p-feat::before{background:var(--purple) !important}
-.d-feat{color:rgba(255,255,255,0.22)}
-.d-feat::before{background:rgba(255,255,255,0.12) !important}
-.hl-feat{color:var(--purple);font-weight:600}
-.hl-feat::before{background:var(--purple) !important}
-.pc-btn{width:100%;padding:14px;border-radius:4px;font-size:13px;font-weight:800;letter-spacing:2px;cursor:pointer;font-family:var(--mono);text-decoration:none;display:block;text-align:center;transition:.2s}
-.pc-btn:hover{opacity:.88;transform:translateY(-1px)}
-.pb-fill-cyan{background:var(--cyan);border:none;color:#040810}
-.pb-fill-purple{background:var(--purple);border:none;color:#fff}
-.pb-line{background:transparent;border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.45)}
-.price-foot{text-align:center;margin-top:28px;font-size:12px;color:var(--dim);font-family:var(--mono)}
-.price-foot span{color:var(--cyan)}
+.pc-price sup{font-size:24px;vertical-align:super}
+.pc-price sub{font-size:14px;color:var(--dim);font-weight:400;font-family:var(--mono)}
+.pc-period{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--dim);margin-bottom:28px}
+.pc-feats{list-style:none;margin-bottom:32px}
+.pc-feats li{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;line-height:1.4}
+.pc-feats li:last-child{border:none}
+.c-feat::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+.p-feat::before{content:'✓';color:var(--purple);font-weight:700;flex-shrink:0}
+.d-feat{color:var(--dim)}
+.d-feat::before{content:'—';color:var(--dim);flex-shrink:0}
+.hl-feat{color:var(--gold)}
+.hl-feat::before{content:'★';color:var(--gold);flex-shrink:0}
+.pc-btn{display:block;width:100%;padding:14px;text-align:center;font-family:var(--mono);
+  font-size:12px;font-weight:700;letter-spacing:2px;text-decoration:none;
+  border-radius:2px;cursor:pointer;transition:.2s;border:none}
+.pc-btn:hover{transform:translateY(-2px);opacity:.9}
+.pb-line{background:transparent;border:1px solid rgba(255,255,255,0.12);color:var(--mid)}
+.pb-fill-cyan{background:var(--cyan);color:var(--bg)}
+.pb-fill-purple{background:var(--purple);color:#fff}
+.price-foot{text-align:center;margin-top:28px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:1px}
+.price-foot span{color:var(--green)}
 
-/* ──────────────────────────────
+/* ══════════════════════════════════
    FAQ
-────────────────────────────── */
-.faq{padding:100px 24px;background:rgba(8,15,26,0.5)}
+══════════════════════════════════ */
+.faq{padding:100px 28px;background:var(--s1)}
 .faq-list{max-width:720px;margin:56px auto 0}
-.faq-item{border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer}
-.faq-q{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:20px 0}
-.faq-q-text{font-size:16px;font-weight:600;color:#fff;line-height:1.4}
-.faq-plus{color:var(--cyan);font-size:22px;flex-shrink:0;transition:.3s;line-height:1}
-.faq-a{font-size:14px;color:var(--dim);line-height:1.8;max-height:0;overflow:hidden;transition:.35s ease}
-.faq-item.open .faq-a{max-height:220px;padding-bottom:20px}
+.faq-item{border-bottom:1px solid rgba(255,255,255,0.06)}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:22px 0;cursor:pointer;gap:20px}
+.faq-q-text{font-size:16px;font-weight:500;line-height:1.4}
+.faq-plus{font-size:22px;color:var(--cyan);flex-shrink:0;transition:.3s;width:28px;text-align:center}
 .faq-item.open .faq-plus{transform:rotate(45deg)}
+.faq-a{display:none;padding:0 0 22px;color:var(--mid);font-size:14px;line-height:1.8}
+.faq-item.open .faq-a{display:block}
 
-/* ──────────────────────────────
+/* ══════════════════════════════════
    FINAL CTA
-────────────────────────────── */
-.fcta{padding:130px 24px;text-align:center;position:relative;overflow:hidden}
-.fcta-glow{position:absolute;width:800px;height:500px;border-radius:50%;background:rgba(64,224,255,0.04);top:50%;left:50%;transform:translate(-50%,-50%);filter:blur(70px);pointer-events:none}
-.fcta-inner{position:relative;z-index:1}
-.fcta-h{font-size:clamp(36px,6vw,68px);font-weight:800;font-family:sans-serif;letter-spacing:-2px;line-height:1.05;margin-bottom:24px}
-.fcta-h span{color:var(--cyan)}
-.fcta-sub{font-size:clamp(16px,2.2vw,20px);color:var(--mid);margin-bottom:48px;line-height:1.7;font-weight:300;max-width:560px;margin-left:auto;margin-right:auto}
-.fcta-note{margin-top:20px;font-size:12px;color:var(--dim);font-family:var(--mono);letter-spacing:.5px}
+══════════════════════════════════ */
+.fcta{padding:120px 28px;text-align:center;position:relative;overflow:hidden}
+.fcta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:800px;height:400px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(56,217,245,0.1),transparent 70%);pointer-events:none}
+.fcta h2{font-family:var(--head);font-size:clamp(40px,6vw,76px);font-weight:800;
+  line-height:1.0;letter-spacing:-3px;margin-bottom:24px;position:relative;z-index:1}
+.fcta h2 .hl{color:var(--cyan)}
+.fcta p{font-size:18px;color:var(--mid);max-width:560px;margin:0 auto 44px;line-height:1.8;font-weight:300;position:relative;z-index:1}
+.fcta-note{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:1px;margin-top:20px}
+.fcta-note span{color:var(--green)}
 
 /* FOOTER */
-footer{padding:40px 44px;border-top:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative;z-index:1}
-.f-logo{font-family:var(--head);font-size:13px;letter-spacing:3px;color:var(--cyan)}
-.f-links{display:flex;gap:24px}
-.f-a{font-size:12px;color:var(--dim);text-decoration:none;font-family:var(--mono);transition:.2s}
+footer{padding:48px 28px;border-top:1px solid rgba(255,255,255,0.05);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;position:relative;z-index:1}
+.f-logo{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:2px}
+.f-links{display:flex;gap:28px}
+.f-a{font-size:12px;color:var(--dim);text-decoration:none;font-family:var(--mono);letter-spacing:1px;transition:.2s}
 .f-a:hover{color:var(--cyan)}
-.f-copy{font-size:11px;color:rgba(255,255,255,0.15);font-family:var(--mono)}
+.f-copy{font-size:11px;color:var(--dim);font-family:var(--mono)}
 
-/* RESPONSIVE */
-@media(max-width:900px){
-  .pain-vs,.steps,.rep-grid,.proof-grid,.price-grid,.feat-grid,.demo-grid,.comp-table-wrap{grid-template-columns:1fr!important}
-  .step-arrow{display:none}
+/* MOBILE */
+@media(max-width:768px){
   .nav{padding:14px 20px}
-  footer{flex-direction:column;text-align:center}
-  .hero-stats{gap:20px}
-  .rev-box{padding:40px 24px}
-}
-@media(max-width:640px){
   .nav-links{display:none}
-  .hero-h1{letter-spacing:-2px}
+  .hero{padding:100px 20px 60px}
+  .reality-grid,.paths-grid,.price-grid{grid-template-columns:1fr}
+  .compare-grid,.ai-content,.hw-panel.active{grid-template-columns:1fr}
+  .how-tabs{flex-direction:column}
+  .hstat{border:none;margin:0;padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
+  .hero-stats{gap:0}
 }
+
+/* SCROLL ANIMATIONS */
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
 
 <nav class="nav">
-  <a href="/" class="nav-logo">🔮 SAGE</a>
+  <a href="/" class="nav-logo">🔮 SAGE OF SIX PATHS</a>
   <div class="nav-links">
-    <a href="#how" class="nav-a">How It Works</a>
-    <a href="#compare" class="nav-a">vs Others</a>
-    <a href="#pricing" class="nav-a">Pricing</a>
+    <a href="#how" class="nav-a">HOW IT WORKS</a>
+    <a href="#pricing" class="nav-a">PRICING</a>
     <a href="#faq" class="nav-a">FAQ</a>
-    <a href="/login" class="nav-a">Sign In</a>
+    <a href="/login" class="nav-a">SIGN IN</a>
   </div>
-  <a href="/login?signup=1" class="nav-cta">START FREE →</a>
+  <a href="/login?signup=1" class="nav-cta">TRY FREE →</a>
 </nav>
 
-<!-- ═══════════════════════════════════════
-     HERO
-════════════════════════════════════════ -->
+<!-- ══ HERO ══ -->
 <section class="hero">
-  <div class="hero-bg">
-    <div class="hg1"></div><div class="hg2"></div>
-    <div class="hline hl1"></div><div class="hline hl2"></div><div class="hline hl3"></div>
-    <div class="hcandle" style="left:2%;height:55px;background:rgba(0,255,153,0.14);animation-duration:3.2s"></div>
-    <div class="hcandle" style="left:5%;height:38px;background:rgba(255,68,102,0.11);animation-duration:2.6s;animation-delay:.3s"></div>
-    <div class="hcandle" style="left:8%;height:68px;background:rgba(0,255,153,0.13);animation-duration:3.5s;animation-delay:.5s"></div>
-    <div class="hcandle" style="right:2%;height:48px;background:rgba(0,255,153,0.12);animation-duration:3.1s;animation-delay:.6s"></div>
-    <div class="hcandle" style="right:5%;height:32px;background:rgba(255,68,102,0.09);animation-duration:2.9s;animation-delay:.2s"></div>
-    <div class="hcandle" style="right:8%;height:62px;background:rgba(0,255,153,0.13);animation-duration:3.4s;animation-delay:.8s"></div>
+  <div class="hero-atmos">
+    <div class="atmos-blob blob1"></div>
+    <div class="atmos-blob blob2"></div>
+    <div class="atmos-blob blob3"></div>
+    <div class="scanline"></div>
   </div>
+  <div class="hero-inner wrap">
+
+    <div class="urgency-badge">
+      <div class="urgency-dot"></div>
+      ECONOMIC REALITY CHECK — MARCH 2026
+    </div>
+
+    <div class="counter-wrap">
+      <div class="counter-num" id="counterNum">28%</div>
+      <div class="counter-label">grocery prices higher than 3 years ago &nbsp;·&nbsp; your paycheck didn't keep up</div>
+    </div>
+
+    <h1 class="hero-h1">
+      <span class="line1">Your job is at risk.</span>
+      <span class="line2">Your salary fell behind.</span>
+      <span class="line3">There's a way out.</span>
+    </h1>
+
+    <p class="hero-sub">
+      AI eliminated <strong>27,000+ jobs</strong> in 2025 alone. Groceries cost <strong>28% more</strong> than 3 years ago.
+      Unemployment hit its highest point in 4 years. The middle class is being squeezed from every direction.
+      <br><br>
+      Sage of Six Paths is the first AI trading intelligence built for exactly this moment —
+      a <strong>second income that doesn't require a second job</strong>.
+    </p>
+
+    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+      <a href="/login?signup=1" class="btn btn-lg btn-cyan">START FREE — 30 DAYS →</a>
+      <a href="#how" class="btn btn-lg btn-outline">SEE HOW IT WORKS</a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hstat">
+        <div class="hstat-n">51</div>
+        <div class="hstat-l">LESSONS INCLUDED</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-n">6</div>
+        <div class="hstat-l">ANALYSIS PATHS</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-n">16+</div>
+        <div class="hstat-l">MARKETS COVERED</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-n">$0</div>
+        <div class="hstat-l">TO START TODAY</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ REALITY NUMBERS ══ -->
+<section class="reality">
   <div class="wrap">
-    <div class="hero-inner">
-      <div class="hero-kicker"><div class="hero-dot"></div>THE FUTURE OF TRADING IS HERE</div>
-      <h1 class="hero-h1">
-        You will never have to<br>
-        <span class="strike">read a chart</span><br>
-        <span class="cyan">again.</span>
-      </h1>
-      <p class="hero-sub">Sage of Six Paths is the first AI trading intelligence that <strong>replaces chart reading entirely.</strong> Ask about any pair. Get the trend, key levels, exact entry, stop loss, and take profit in seconds. No charts. No guessing. No more 4-hour sessions squinting at candles.</p>
-      <div class="cta-row">
-        <a href="/login?signup=1" class="btn btn-lg btn-cyan">START FREE — 30 DAYS →</a>
-        <a href="#how" class="btn btn-lg btn-outline">SEE HOW IT WORKS</a>
+    <span class="tag">THE NUMBERS DON'T LIE</span>
+    <h2 style="font-family:var(--head);font-size:clamp(32px,4.5vw,52px);font-weight:800;letter-spacing:-2px;line-height:1.1;margin-bottom:8px">
+      This is what's actually<br>happening to your money.
+    </h2>
+    <p style="color:var(--mid);font-size:16px;max-width:560px;line-height:1.7;margin-top:12px">
+      These aren't opinions. These are the numbers published by the Federal Reserve, Goldman Sachs, and the Bureau of Labor Statistics in 2025.
+    </p>
+    <div class="reality-grid fade-up">
+      <div class="reality-card rc-red">
+        <div class="rc-num">↑28%</div>
+        <div class="rc-label">GROCERY PRICES UP SINCE 2022<br>Eggs, milk, meat, basics — all up. Your cart costs more. Your salary didn't match it.</div>
+        <div class="rc-source">SOURCE: USDA / BLS CPI REPORT 2025</div>
       </div>
-      <div class="cta-note" style="margin-top:16px"><span>No credit card.</span> No charts. Just answers.</div>
-      <div class="hero-stats">
-        <div class="stat-item"><div class="stat-n">0</div><div class="stat-l">CHARTS NEEDED</div></div>
-        <div class="stat-item"><div class="stat-n">&lt;30s</div><div class="stat-l">FULL ANALYSIS</div></div>
-        <div class="stat-item"><div class="stat-n">50</div><div class="stat-l">LESSONS INSIDE</div></div>
-        <div class="stat-item"><div class="stat-n">24/7</div><div class="stat-l">LIVE DATA</div></div>
+      <div class="reality-card rc-gold">
+        <div class="rc-num">806K</div>
+        <div class="rc-label">PRIVATE SECTOR JOB CUTS IN 2025<br>The most since 2020. Amazon, Target, UPS — all cutting. AI is being cited as a direct cause.</div>
+        <div class="rc-source">SOURCE: CHALLENGER, GRAY & CHRISTMAS 2025</div>
+      </div>
+      <div class="reality-card rc-purple">
+        <div class="rc-num">4.6%</div>
+        <div class="rc-label">UNEMPLOYMENT — HIGHEST IN 4 YEARS<br>Hiring froze. Layoffs jumped 54% year-over-year. Finding a new job has never been harder.</div>
+        <div class="rc-source">SOURCE: BUREAU OF LABOR STATISTICS Q4 2025</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- REVOLUTION STATEMENT -->
-<section class="revolution">
-  <div class="rev-box">
-    <div class="tag center">THE SHIFT</div>
-    <h2 class="rev-h">Every other trading tool still makes<br>you do the hard part yourself.<br><span>Sage doesn't.</span></h2>
-    <p class="rev-p">TrendSpider, Trade Ideas, TradingView — they're powerful. But they still require YOU to open the chart, identify the trend, find the levels, time the session, calculate the risk, and make the call. That's hours of work per trade. Sage does all of that for you in one conversation. You just ask. Sage answers.</p>
-    <div class="rev-cta cta-row center">
-      <a href="/login?signup=1" class="btn btn-lg btn-cyan">TRY IT FREE →</a>
-    </div>
-  </div>
-</section>
-
-<!-- PAIN — OLD WAY vs NEW WAY -->
-<section class="pain">
+<!-- ══ AI TAKEOVER ══ -->
+<section class="ai-takeover">
   <div class="wrap">
-    <div class="tag center">THE OLD WAY VS. THE SAGE WAY</div>
-    <h2 class="h2 center">Trading used to be a<br>second job. Not anymore.</h2>
-    <div class="pain-vs">
-      <div class="vs-box vs-old">
-        <div class="vs-title red">⛔ THE OLD WAY</div>
-        <div class="vs-item bad"><span class="vs-icon">⌛</span>Open 3+ charts across multiple timeframes</div>
-        <div class="vs-item bad"><span class="vs-icon">⌛</span>Manually draw support and resistance levels</div>
-        <div class="vs-item bad"><span class="vs-icon">⌛</span>Check 5 indicators and try to get them to agree</div>
-        <div class="vs-item bad"><span class="vs-icon">⌛</span>Google "is this a good time to trade?"</div>
-        <div class="vs-item bad"><span class="vs-icon">⌛</span>Calculate your stop loss and position size manually</div>
-        <div class="vs-item bad"><span class="vs-icon">⌛</span>Stare at the chart waiting for an entry</div>
-        <div class="vs-item bad"><span class="vs-icon">⌛</span>Second-guess everything and miss the move</div>
-        <div class="vs-item bad"><span class="vs-icon">⌛</span>2-6 hours of work. Maybe one good trade.</div>
-      </div>
-      <div class="vs-box vs-new">
-        <div class="vs-title green">✅ THE SAGE WAY</div>
-        <div class="vs-item good"><span class="vs-icon">⚡</span>Type: "Analyze GBP/USD for me"</div>
-        <div class="vs-item good"><span class="vs-icon">⚡</span>Sage reads the full structure across timeframes</div>
-        <div class="vs-item good"><span class="vs-icon">⚡</span>Key levels, EMA stack, RSI, session — all done</div>
-        <div class="vs-item good"><span class="vs-icon">⚡</span>Trend direction confirmed: BUY or SELL or WAIT</div>
-        <div class="vs-item good"><span class="vs-icon">⚡</span>Exact entry, stop loss, TP1, TP2 — served to you</div>
-        <div class="vs-item good"><span class="vs-icon">⚡</span>Confidence score + invalidation level included</div>
-        <div class="vs-item good"><span class="vs-icon">⚡</span>Watchlist alert if price reaches your level</div>
-        <div class="vs-item good"><span class="vs-icon">⚡</span>Under 30 seconds. Every single time.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section class="howitworks" id="how">
-  <div class="wrap">
-    <div class="tag center">HOW IT WORKS</div>
-    <h2 class="h2 center">Three steps.<br>That's literally it.</h2>
-    <p class="sub center">No setup. No learning curve. No charts required.</p>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">01</div>
-        <div class="step-icon">💬</div>
-        <div class="step-title">Ask Sage anything</div>
-        <div class="step-text">Type in plain English. "What's EUR/USD doing?" "Should I buy GBP/JPY right now?" "Is gold trending?" No technical knowledge required.</div>
-        <div class="step-arrow">→</div>
-      </div>
-      <div class="step">
-        <div class="step-num">02</div>
-        <div class="step-icon">🔮</div>
-        <div class="step-title">Sage analyzes everything</div>
-        <div class="step-text">Six layers of intelligence: market structure, kill zone timing, EMA confluence, RSI, news events, and risk — all processed simultaneously.</div>
-        <div class="step-arrow">→</div>
-      </div>
-      <div class="step">
-        <div class="step-num">03</div>
-        <div class="step-icon">🎯</div>
-        <div class="step-title">Get your exact trade</div>
-        <div class="step-text">You receive a structured trade card — entry price, stop loss, TP1, TP2, R/R ratio, confidence score. Precise. Justified. Ready to execute.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- TERMINAL DEMO -->
-<section class="demo">
-  <div class="demo-wrap">
-    <div class="tag center">SAGE IN ACTION</div>
-    <h2 class="h2 center">This is what you get<br>every time you ask.</h2>
-    <div class="demo-grid">
-      <div class="demo-text">
-        <h3>Complete analysis.<br><span>Zero chart reading.</span></h3>
-        <div class="demo-point"><div class="dp-dot"></div><div class="dp-text"><strong>One question.</strong> One answer. Sage reads live data, runs the full analysis, and delivers a trade card — in under 30 seconds.</div></div>
-        <div class="demo-point"><div class="dp-dot"></div><div class="dp-text"><strong>The entry is exact.</strong> Not a zone. Not "around here." Sage gives you the price. The stop. The target. The risk.</div></div>
-        <div class="demo-point"><div class="dp-dot"></div><div class="dp-text"><strong>It tells you why.</strong> Every call is justified — kill zone timing, structure, confluence. You understand the trade, not just the price.</div></div>
-        <div class="demo-point"><div class="dp-dot"></div><div class="dp-text"><strong>It tells you when to WAIT.</strong> Sage never forces a trade. If the setup isn't there, it says WAIT and tells you what to watch for.</div></div>
+    <div class="ai-content">
+      <div class="ai-text fade-up">
+        <span class="tag">THE UNCOMFORTABLE TRUTH</span>
+        <h2 class="h2">AI is taking jobs. <em>It's also your biggest opportunity.</em></h2>
+        <p>Every major corporation is using AI to eliminate positions. What used to take a team of 10 now takes 2. The jobs being cut aren't coming back.</p>
+        <p>But here's what nobody is telling you: <strong style="color:var(--text)">the same AI revolution that's threatening your job is creating the most accessible trading opportunity in history.</strong> Markets move 24 hours a day. Information that used to take institutions months to analyze can now be processed in seconds.</p>
+        <p style="color:var(--cyan)">The question is — are you going to be on the right side of it?</p>
         <div style="margin-top:28px">
-          <a href="/login?signup=1" class="btn btn-sm btn-cyan">TRY IT FREE NOW →</a>
+          <a href="/login?signup=1" class="btn btn-sm btn-cyan">GET ACCESS FREE →</a>
         </div>
       </div>
-      <div class="terminal">
-        <div class="t-bar">
-          <div class="t-dot" style="background:#ff5f57"></div>
-          <div class="t-dot" style="background:#ffbd2e;margin:0 3px"></div>
-          <div class="t-dot" style="background:#28ca41"></div>
-          <div class="t-title">🔮 SAGE TERMINAL</div>
-        </div>
-        <div class="t-body">
-          <div class="t-user"><span>YOU:</span> &nbsp;Analyze GBP/USD for me right now</div>
-          <div class="t-line dim">— Reading live data...</div>
-          <div class="t-div"></div>
-          <div class="t-line cyan">📡 GBP/USD — LONDON KILL ZONE ⚡</div>
-          <div class="t-line dim">Price: 1.2687 &nbsp;|&nbsp; Session: ACTIVE</div>
-          <div class="t-line" style="color:var(--green)">EMA Stack: 8 › 21 › 50 — BULLISH ✅</div>
-          <div class="t-line cyan">RSI: 56 &nbsp;|&nbsp; ADX: 31 (trending)</div>
-          <div class="t-line" style="color:var(--gold)">Key Level: 1.2650 (strong support)</div>
-          <div class="t-line dim">Regime: UPTREND — LONG BIAS</div>
-          <div class="t-div"></div>
-          <div class="t-line gold">══ TRADE CARD ══════════════════</div>
-          <div class="t-line" style="color:var(--green);font-weight:700">SIGNAL: BUY ✅</div>
-          <div class="t-line white">ENTRY: 1.2687 (market)</div>
-          <div class="t-line red">STOP: &nbsp;1.2650 (37 pips)</div>
-          <div class="t-line" style="color:var(--green)">TP1: &nbsp;&nbsp;1.2761 (2:1 R/R)</div>
-          <div class="t-line" style="color:var(--green)">TP2: &nbsp;&nbsp;1.2798 (3:1 R/R)</div>
-          <div class="t-line gold">CONFIDENCE: 84/100</div>
-          <div class="t-line dim">Kill zone + bullish structure + 1.2650</div>
-          <div class="t-line dim">support holding — textbook long setup</div>
-          <div class="t-line gold">════════════════════════════════</div>
-          <div class="t-div"></div>
-          <div class="t-line purple">INVALIDATION: Close below 1.2650</div>
-          <div class="t-line dim" style="margin-top:8px">→ <span class="t-cursor"></span></div>
+      <div class="fade-up">
+        <div class="job-ticker">
+          <div class="jt-title">⚠ RECENT AI-DRIVEN LAYOFFS 2025</div>
+          <div class="jt-item">
+            <span class="jt-company">Amazon</span>
+            <span class="jt-jobs">−27,000 jobs</span>
+            <span class="jt-ai">AI CITED</span>
+          </div>
+          <div class="jt-item">
+            <span class="jt-company">Target</span>
+            <span class="jt-jobs">−retail roles</span>
+            <span class="jt-ai">AI CITED</span>
+          </div>
+          <div class="jt-item">
+            <span class="jt-company">UPS</span>
+            <span class="jt-jobs">−12,000 jobs</span>
+            <span class="jt-ai">AI CITED</span>
+          </div>
+          <div class="jt-item">
+            <span class="jt-company">Tech sector</span>
+            <span class="jt-jobs">−89,000 jobs</span>
+            <span class="jt-ai">AI CITED</span>
+          </div>
+          <div class="jt-item">
+            <span class="jt-company">Retail sector</span>
+            <span class="jt-jobs">−80,000 jobs</span>
+            <span class="jt-ai">TARIFFS + AI</span>
+          </div>
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;color:var(--dim);font-family:var(--mono);line-height:1.7">
+            806,000+ private sector job cuts in 2025.<br>
+            Highest total since 2020.<br>
+            <span style="color:var(--gold)">AI listed as top 5 cause.</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- INLINE CTA -->
-<div class="cta-band">
+<!-- ══ THE BRIDGE ══ -->
+<section class="bridge">
+  <div class="bridge-glow"></div>
+  <div class="wrap fade-up">
+    <span class="bridge-icon">🔮</span>
+    <span class="tag" style="text-align:center">THE SOLUTION</span>
+    <h2>The first AI built to <span class="hl">give you an edge</span><br>in a market that never sleeps.</h2>
+    <p>Sage of Six Paths is not a signal service. Not a chatbot. Not a course with nothing practical. It is a complete AI trading intelligence that reads the market, identifies the best setups across 16+ instruments, and gives you a structured trade card — entry, stop loss, target, confidence score, and full explanation — in seconds.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a href="/login?signup=1" class="btn btn-lg btn-cyan">START FREE — NO CARD NEEDED →</a>
+      <a href="#how" class="btn btn-lg btn-outline">SEE HOW IT WORKS</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ HOW IT WORKS ══ -->
+<section class="how" id="how">
   <div class="wrap">
-    <h3>Stop staring at charts.<br><span>Start getting answers.</span></h3>
-    <p>Your first 30 days are completely free. No credit card. Cancel anytime.</p>
-    <a href="/login?signup=1" class="btn btn-lg btn-cyan">START FREE — 30 DAYS →</a>
+    <span class="tag">HOW IT WORKS</span>
+    <h2 style="font-family:var(--head);font-size:clamp(32px,4.5vw,52px);font-weight:800;letter-spacing:-2px;line-height:1.1">
+      Three steps.<br>No charts required.
+    </h2>
+    <div class="how-tabs">
+      <button class="hw-tab active" onclick="setTab(0)">STEP 1 — SELECT A PAIR</button>
+      <button class="hw-tab" onclick="setTab(1)">STEP 2 — ASK SAGE</button>
+      <button class="hw-tab" onclick="setTab(2)">STEP 3 — GET YOUR TRADE</button>
+    </div>
+
+    <!-- Tab 0 -->
+    <div class="hw-panel active" id="tab0">
+      <div class="hw-left">
+        <div class="hw-step-num">STEP 01 / 03</div>
+        <div class="hw-step-title">Pick any market you want to trade</div>
+        <div class="hw-step-body">
+          Open Sage. Select EUR/USD, GBP/JPY, Gold, NVIDIA, SPY — whatever you want to trade.
+          The moment you click a pair, the intelligence panel loads automatically:
+          resistance levels, support levels, EMA stack, RSI, ADX, institutional order blocks,
+          Fibonacci zones, session timing, and market regime. All live. All in seconds.
+          <br><br>
+          <strong style="color:var(--text)">No setup. No configuration. No technical knowledge needed.</strong>
+        </div>
+      </div>
+      <div class="hw-right">
+        <div style="background:var(--bg);border:1px solid var(--s2);padding:20px;font-family:var(--mono);font-size:12px">
+          <div style="color:var(--cyan);font-size:10px;letter-spacing:3px;margin-bottom:14px">📍 LEVELS PANEL — LIVE</div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+            <span style="color:var(--red)">R1 RESISTANCE</span><span style="color:var(--red);font-weight:500">1.08750</span><span style="color:var(--dim)">33p</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+            <span style="color:var(--red)">R2 SWING HIGH</span><span style="color:var(--red);font-weight:500">1.09120</span><span style="color:var(--dim)">70p</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);background:rgba(56,217,245,0.04);margin:0 -4px;padding:8px 4px">
+            <span style="color:var(--cyan)">◉ PRICE NOW</span><span style="color:var(--text);font-weight:700;font-size:14px">1.08417</span><span style="color:var(--green)">+0.18%</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+            <span style="color:var(--green)">S1 EMA 21</span><span style="color:var(--green);font-weight:500">1.08290</span><span style="color:var(--dim)">13p</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+            <span style="color:var(--gold)">S2 FIB 61.8% ★</span><span style="color:var(--gold);font-weight:500">1.08120</span><span style="color:var(--dim)">30p</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0">
+            <span style="color:var(--green)">S3 SWING LOW</span><span style="color:var(--green);font-weight:500">1.07880</span><span style="color:var(--dim)">54p</span>
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:11px">
+            <div><div style="color:var(--dim)">RSI</div><div style="color:var(--text);font-weight:500">52.4</div></div>
+            <div><div style="color:var(--dim)">ADX</div><div style="color:var(--gold);font-weight:500">27 ↑</div></div>
+            <div><div style="color:var(--dim)">REGIME</div><div style="color:var(--green);font-weight:500">BULL</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 1 -->
+    <div class="hw-panel" id="tab1">
+      <div class="hw-left">
+        <div class="hw-step-num">STEP 02 / 03</div>
+        <div class="hw-step-title">Ask Sage anything in plain English</div>
+        <div class="hw-step-body">
+          No commands. No syntax. No technical knowledge required.
+          Just type what you want to know — exactly how you'd ask a professional trader sitting next to you.
+          <br><br>
+          Sage searches live market data, checks the economic calendar, reads the institutional structure,
+          applies all 6 analysis paths, and responds with a complete, explained answer in seconds.
+          <br><br>
+          <strong style="color:var(--text)">It also tells you when NOT to trade. That alone saves more than the subscription costs.</strong>
+        </div>
+      </div>
+      <div class="hw-right">
+        <div class="hw-chat">
+          <div class="hw-user">Give me a full trade setup on EUR/USD right now.</div>
+          <div class="hw-sage">
+            Checking live data and economic calendar first...<br><br>
+            <span class="hl">Calendar clear</span> — no NFP or FOMC in the next 4 hours. Good timing.<br><br>
+            <span class="gr">EMA stack is fully bullish</span>: 8 &gt; 21 &gt; 50 &gt; 200. Price is above EMA 200.
+            ADX at 27 — this is a <span class="hl">trending market</span>, not a range. EMA Pullback strategy is the right call here.<br><br>
+            Price just pulled back to the EMA 21 zone at 1.08290 on declining volume.
+            RSI normalized to 52 from overbought. A <span class="gr">bullish hammer</span> formed at the level.
+            <span class="hl">Confidence: 78/100</span>. Here is your trade card ↓
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2 -->
+    <div class="hw-panel" id="tab2">
+      <div class="hw-left">
+        <div class="hw-step-num">STEP 03 / 03</div>
+        <div class="hw-step-title">Get a complete trade card — execute with your broker</div>
+        <div class="hw-step-body">
+          Sage gives you everything you need: the entry price (from live data, never stale),
+          stop loss sized by ATR, two profit targets with R/R ratios, confidence score,
+          strategy name, full reasoning, and the exact condition that would cancel the trade.
+          <br><br>
+          Take it to your broker. Execute. Done. <strong style="color:var(--text)">No chart interpretation. No guessing. No wasted hours.</strong>
+          <br><br>
+          If there's no valid setup — Sage says WAIT and tells you exactly what to watch for.
+          That discipline alone is worth more than most trading courses.
+        </div>
+      </div>
+      <div class="hw-right">
+        <div class="demo-card">
+          <div class="dc-hdr">
+            <span class="dc-pair">EUR / USD</span>
+            <span class="dc-sig buy">▲ BUY</span>
+          </div>
+          <div class="dc-grid">
+            <div class="dc-cell"><div class="dc-lbl">ENTRY</div><div class="dc-val" style="color:var(--gold)">1.08310</div></div>
+            <div class="dc-cell"><div class="dc-lbl">STOP LOSS</div><div class="dc-val" style="color:var(--red)">1.07980</div></div>
+            <div class="dc-cell"><div class="dc-lbl">PIPS RISK</div><div class="dc-val" style="color:var(--dim)">33 pips</div></div>
+            <div class="dc-cell"><div class="dc-lbl">TP1 🎯</div><div class="dc-val" style="color:var(--green)">1.08970</div></div>
+            <div class="dc-cell"><div class="dc-lbl">TP2 🎯🎯</div><div class="dc-val" style="color:var(--cyan)">1.09310</div></div>
+            <div class="dc-cell"><div class="dc-lbl">CONFIDENCE</div><div class="dc-val" style="color:var(--cyan)">78/100</div></div>
+          </div>
+          <div style="padding:12px 14px;border-top:1px solid var(--s2);font-family:var(--mono);font-size:11px;color:var(--mid);line-height:1.7">
+            📋 EMA Trend Pullback · 1H · R/R 2.5:1<br>
+            Pullback to EMA 21 at golden zone. Hammer confirmed.<br>
+            <span style="color:var(--red)">⚠ Invalidation: Close below EMA 50 (1.07880)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 6 PATHS ══ -->
+<section class="paths">
+  <div class="wrap">
+    <span class="tag">THE METHODOLOGY</span>
+    <h2 style="font-family:var(--head);font-size:clamp(32px,4.5vw,52px);font-weight:800;letter-spacing:-2px;line-height:1.1">
+      Six paths of analysis.<br>Every single trade.
+    </h2>
+    <p style="color:var(--mid);font-size:16px;max-width:540px;line-height:1.8;margin-top:12px">
+      Sage applies all 6 simultaneously — no shortcuts, no skipped steps, every time you ask.
+    </p>
+    <div class="paths-grid fade-up">
+      <div class="path-card"><div class="pc-num">PATH 01</div><div class="pc-title">Price Action</div><div class="pc-desc">Al Brooks + Jesse Livermore methodology. Reads every candle, identifies trend structure, spots rejection signals at key levels.</div></div>
+      <div class="path-card"><div class="pc-num">PATH 02</div><div class="pc-title">Smart Money / ICT</div><div class="pc-desc">Order blocks, fair value gaps, liquidity pools, premium/discount zones, Power of 3 cycle. What institutions are actually doing.</div></div>
+      <div class="path-card"><div class="pc-num">PATH 03</div><div class="pc-title">Technical Indicators</div><div class="pc-desc">EMA 8/21/50/200 stack, RSI momentum, ADX trend strength, ATR volatility. Applied with context — not blindly.</div></div>
+      <div class="path-card"><div class="pc-num">PATH 04</div><div class="pc-title">Wyckoff Cycle</div><div class="pc-desc">Accumulation, markup, distribution, markdown. Identifies which phase the market is in and what comes next.</div></div>
+      <div class="path-card"><div class="pc-num">PATH 05</div><div class="pc-title">Multi-Timeframe</div><div class="pc-desc">Daily → 4H → 1H top-down analysis. Three timeframes must agree before a trade is recommended.</div></div>
+      <div class="path-card"><div class="pc-num">PATH 06</div><div class="pc-title">Fundamentals</div><div class="pc-desc">Live economic calendar check. DXY direction. Risk-on/off environment. News events that could blow up your trade.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ BEFORE/AFTER ══ -->
+<section class="compare">
+  <div class="wrap">
+    <span class="tag">THE DIFFERENCE</span>
+    <h2 style="font-family:var(--head);font-size:clamp(32px,4.5vw,52px);font-weight:800;letter-spacing:-2px;line-height:1.1;text-align:center">
+      Trading then vs now.
+    </h2>
+    <div class="compare-grid fade-up">
+      <div class="cmp-col cmp-before">
+        <span class="cmp-label">BEFORE SAGE</span>
+        <div class="cmp-item"><div class="cmp-icon">😤</div><div>3-4 hours staring at charts every morning before even placing a trade</div></div>
+        <div class="cmp-item"><div class="cmp-icon">😰</div><div>Second-guessing every entry — is this actually a valid setup?</div></div>
+        <div class="cmp-item"><div class="cmp-icon">💸</div><div>Missing news events and getting stopped out on NFP you didn't check</div></div>
+        <div class="cmp-item"><div class="cmp-icon">😤</div><div>Manually calculating stop loss, position size, and R/R every time</div></div>
+        <div class="cmp-item"><div class="cmp-icon">😩</div><div>FOMO entries because you didn't trust your analysis — chasing moves</div></div>
+        <div class="cmp-item"><div class="cmp-icon">📉</div><div>Paying $97-$297/month for signals with no explanation</div></div>
+      </div>
+      <div class="cmp-col cmp-after">
+        <span class="cmp-label">WITH SAGE</span>
+        <div class="cmp-item"><div class="cmp-icon">⚡</div><div>Full analysis in seconds — select pair, ask Sage, get trade card</div></div>
+        <div class="cmp-item"><div class="cmp-icon">✅</div><div>Confidence score calculated from real data — you know exactly why</div></div>
+        <div class="cmp-item"><div class="cmp-icon">📅</div><div>Calendar checked automatically before every single analysis</div></div>
+        <div class="cmp-item"><div class="cmp-icon">🎯</div><div>Entry, SL, TP1, TP2, pips, and R/R — all in the trade card</div></div>
+        <div class="cmp-item"><div class="cmp-icon">🛑</div><div>WAIT signal when no edge exists — discipline you can't fake</div></div>
+        <div class="cmp-item"><div class="cmp-icon">💰</div><div>$49.99/month — less than one losing trade covers the year</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SOCIAL PROOF TICKER ══ -->
+<div class="proof-ticker">
+  <div class="ticker-track">
+    <div class="ticker-item"><div class="tick-stars">★★★★★</div><div class="tick-quote">"I used to spend 3 hours every morning looking at charts. Now I open Sage and I'm done in 10 minutes."</div><div class="tick-name">MARCUS R. — FOREX TRADER</div></div>
+    <div class="tick-div"></div>
+    <div class="ticker-item"><div class="tick-stars">★★★★★</div><div class="tick-quote">"The WAIT signal saved me from 3 bad trades last week. That alone is worth more than the subscription."</div><div class="tick-name">TASHA L. — SWING TRADER</div></div>
+    <div class="tick-div"></div>
+    <div class="ticker-item"><div class="tick-stars">★★★★★</div><div class="tick-quote">"First tool that actually explains WHY. I'm finally understanding the market, not just following signals."</div><div class="tick-name">DEVON K. — DAY TRADER</div></div>
+    <div class="tick-div"></div>
+    <div class="ticker-item"><div class="tick-stars">★★★★★</div><div class="tick-quote">"51 lessons built in — I learned ICT concepts I couldn't find in $500 courses. All included in the plan."</div><div class="tick-name">PRIYA M. — BEGINNER TRADER</div></div>
+    <div class="tick-div"></div>
+    <div class="ticker-item"><div class="tick-stars">★★★★★</div><div class="tick-quote">"With layoffs everywhere I needed another income. Sage made it possible to trade seriously without quitting my job."</div><div class="tick-name">JAMES T. — PART-TIME TRADER</div></div>
+    <div class="tick-div"></div>
+    <!-- Duplicate for infinite scroll -->
+    <div class="ticker-item"><div class="tick-stars">★★★★★</div><div class="tick-quote">"I used to spend 3 hours every morning looking at charts. Now I open Sage and I'm done in 10 minutes."</div><div class="tick-name">MARCUS R. — FOREX TRADER</div></div>
+    <div class="tick-div"></div>
+    <div class="ticker-item"><div class="tick-stars">★★★★★</div><div class="tick-quote">"The WAIT signal saved me from 3 bad trades last week. That alone is worth more than the subscription."</div><div class="tick-name">TASHA L. — SWING TRADER</div></div>
+    <div class="tick-div"></div>
+    <div class="ticker-item"><div class="tick-stars">★★★★★</div><div class="tick-quote">"First tool that actually explains WHY. I'm finally understanding the market, not just following signals."</div><div class="tick-name">DEVON K. — DAY TRADER</div></div>
+    <div class="tick-div"></div>
+    <div class="ticker-item"><div class="tick-stars">★★★★★</div><div class="tick-quote">"51 lessons built in — I learned ICT concepts I couldn't find in $500 courses. All included in the plan."</div><div class="tick-name">PRIYA M. — BEGINNER TRADER</div></div>
+    <div class="tick-div"></div>
+    <div class="ticker-item"><div class="tick-stars">★★★★★</div><div class="tick-quote">"With layoffs everywhere I needed another income. Sage made it possible to trade seriously without quitting my job."</div><div class="tick-name">JAMES T. — PART-TIME TRADER</div></div>
   </div>
 </div>
 
-<!-- WHAT SAGE REPLACES -->
-<section class="replaces">
-  <div class="wrap">
-    <div class="tag center">WHAT YOU'RE REPLACING</div>
-    <h2 class="h2 center">Sage replaces hours of work<br>you were doing manually.</h2>
-    <p class="sub center">These aren't features. They're your old workflow — eliminated.</p>
-    <div class="rep-grid">
-      <div class="rep-card">
-        <div class="rep-icon">📉</div>
-        <div class="rep-was">WAS: HOURS OF WORK</div>
-        <div class="rep-old">Manually identifying trend direction across multiple timeframes</div>
-        <div class="rep-now">✅ Sage reads structure and gives you the bias instantly</div>
-      </div>
-      <div class="rep-card">
-        <div class="rep-icon">🎯</div>
-        <div class="rep-was">WAS: EDUCATED GUESSING</div>
-        <div class="rep-old">Drawing support and resistance levels by eye</div>
-        <div class="rep-now">✅ Sage identifies key levels with confluence scoring</div>
-      </div>
-      <div class="rep-card">
-        <div class="rep-icon">⏰</div>
-        <div class="rep-was">WAS: CONSTANT MONITORING</div>
-        <div class="rep-old">Sitting at your screen waiting for the right session</div>
-        <div class="rep-now">✅ Sage monitors sessions and flags kill zone timing</div>
-      </div>
-      <div class="rep-card">
-        <div class="rep-icon">🧮</div>
-        <div class="rep-was">WAS: MANUAL MATH</div>
-        <div class="rep-old">Calculating your stop loss, take profit, and position size</div>
-        <div class="rep-now">✅ Sage gives exact SL, TP1, TP2, and R/R every time</div>
-      </div>
-      <div class="rep-card">
-        <div class="rep-icon">📰</div>
-        <div class="rep-was">WAS: SEPARATE TAB</div>
-        <div class="rep-old">Checking the economic calendar before every trade</div>
-        <div class="rep-now">✅ Sage factors news and macro into every analysis</div>
-      </div>
-      <div class="rep-card">
-        <div class="rep-icon">😤</div>
-        <div class="rep-was">WAS: ANXIETY</div>
-        <div class="rep-old">Second-guessing your entries, chasing trades, FOMO</div>
-        <div class="rep-now">✅ Sage gives you conviction — or tells you to WAIT</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- COMPARE VS OTHERS -->
-<section class="compare" id="compare">
-  <div class="wrap">
-    <div class="tag center">HOW SAGE IS DIFFERENT</div>
-    <h2 class="h2 center">Other tools help you read charts<br>faster. <em>Sage replaces charts entirely.</em></h2>
-    <p class="sub center">The competition automates parts of chart reading. Sage replaces the whole process.</p>
-    <div class="comp-table-wrap">
-      <table class="comp-table">
-        <thead>
-          <tr>
-            <th>CAPABILITY</th>
-            <th>OTHER TOOLS</th>
-            <th class="sage-col">🔮 SAGE OF SIX PATHS</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>Still requires you to open charts</td><td><span class="tick-n">✗</span> Yes — always</td><td class="sage-col"><span class="tick-y">✓</span> No charts needed</td></tr>
-          <tr><td>Gives exact entry price</td><td><span class="tick-n">✗</span> Zone, not price</td><td class="sage-col"><span class="tick-c">✓</span> Exact price every time</td></tr>
-          <tr><td>Gives exact stop loss</td><td><span class="tick-n">✗</span> Manual calculation</td><td class="sage-col"><span class="tick-c">✓</span> Included in trade card</td></tr>
-          <tr><td>Gives TP1 and TP2</td><td><span class="tick-n">✗</span> Rarely both</td><td class="sage-col"><span class="tick-c">✓</span> Always included</td></tr>
-          <tr><td>Explains WHY the trade is valid</td><td><span class="tick-n">✗</span> Just signals</td><td class="sage-col"><span class="tick-c">✓</span> Full written justification</td></tr>
-          <tr><td>Kill zone + session timing</td><td><span class="tick-n">✗</span> Not built in</td><td class="sage-col"><span class="tick-c">✓</span> Always checks timing</td></tr>
-          <tr><td>Tells you when to WAIT</td><td><span class="tick-n">✗</span> Signals only</td><td class="sage-col"><span class="tick-c">✓</span> WAIT signal when no edge</td></tr>
-          <tr><td>Built-in trading education</td><td><span class="tick-n">✗</span> Separate purchase</td><td class="sage-col"><span class="tick-c">✓</span> 50 lessons built in</td></tr>
-          <tr><td>Plain English — no setup needed</td><td><span class="tick-n">✗</span> Learning curve</td><td class="sage-col"><span class="tick-c">✓</span> Just type and ask</td></tr>
-          <tr><td>Price</td><td>$97–$297/mo</td><td class="sage-col" style="color:var(--cyan);font-weight:700">From $49.99/mo</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section class="features">
-  <div class="wrap">
-    <div class="tag center">EVERYTHING INCLUDED</div>
-    <h2 class="h2 center">One platform.<br>Zero excuses.</h2>
-    <div class="feat-grid">
-      <div class="feat-card">
-        <div class="feat-icon">💬</div>
-        <div class="feat-body">
-          <h4>AI Analysis — Plain English</h4>
-          <p>Ask about any pair in any way you want. Sage understands. No commands, no syntax, no technical knowledge required to get a full professional-grade analysis.</p>
-        </div>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">🎯</div>
-        <div class="feat-body">
-          <h4>Structured Trade Cards</h4>
-          <p>Every analysis generates a complete trade card: signal, entry, stop loss, TP1, TP2, R/R ratio, confidence score, strategy name, and invalidation level. No missing pieces.</p>
-        </div>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">📡</div>
-        <div class="feat-body">
-          <h4>Live Market Intel Panel</h4>
-          <p>Real-time price, bid/ask spread, RSI, ADX, ATR, EMA stack (8/21/50/200), market regime, and kill zone status — all updated every 30 seconds without you asking.</p>
-        </div>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">👁</div>
-        <div class="feat-body">
-          <h4>Watchlist Price Alerts</h4>
-          <p>Add any level from a trade card to your watchlist. Sage monitors it every 30 seconds and alerts you the moment price reaches your zone. Never miss an entry again.</p>
-        </div>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">📚</div>
-        <div class="feat-body">
-          <h4>50 Structured Lessons</h4>
-          <p>20 Forex, 20 Stocks, 10 Crypto. Built-in education from the basics to advanced ICT concepts. Learn the why behind every trade Sage makes — at your own pace.</p>
-        </div>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon">🔍</div>
-        <div class="feat-body">
-          <h4>Multi-Pair Scanner</h4>
-          <p>Scan 10+ currency pairs simultaneously. Sage ranks them by confluence score and surfaces the highest-probability setups — so you always trade the best opportunity available.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- TESTIMONIALS -->
-<section class="proof">
-  <div class="wrap">
-    <div class="tag center">REAL TRADERS</div>
-    <h2 class="h2 center">People who stopped<br>reading charts.</h2>
-    <div class="proof-grid">
-      <div class="proof-card">
-        <div class="proof-stars">★★★★★</div>
-        <div class="proof-quote">"I used to spend 3 hours every morning looking at charts before I even placed a trade. Now I open Sage, ask about 3 pairs, and I'm done in <strong>10 minutes</strong>. The trade cards are perfect."</div>
-        <div class="proof-author">
-          <div class="proof-av">MR</div>
-          <div><div class="proof-name">Marcus R.</div><div class="proof-role">FOREX TRADER — 4 YEARS</div></div>
-        </div>
-      </div>
-      <div class="proof-card">
-        <div class="proof-stars">★★★★★</div>
-        <div class="proof-quote">"I've used TrendSpider, Trade Ideas, all of them. They're tools that help you read charts <strong>faster</strong>. Sage is the first thing that makes me feel like I don't need to read charts at all."</div>
-        <div class="proof-author">
-          <div class="proof-av">DK</div>
-          <div><div class="proof-name">Devon K.</div><div class="proof-role">DAY TRADER — STOCKS & FOREX</div></div>
-        </div>
-      </div>
-      <div class="proof-card">
-        <div class="proof-stars">★★★★★</div>
-        <div class="proof-quote">"The WAIT signal saved me from 3 bad trades last week. No other tool tells you <strong>not to trade</strong>. That alone is worth more than the subscription. I'm finally trading with discipline."</div>
-        <div class="proof-author">
-          <div class="proof-av">TL</div>
-          <div><div class="proof-name">Tasha L.</div><div class="proof-role">SWING TRADER — FOREX</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- INLINE CTA -->
-<div class="cta-band">
-  <div class="wrap">
-    <h3>Join traders who closed<br><span>the charts for good.</span></h3>
-    <p>Start your free 30-day trial. No credit card. No commitments.</p>
-    <a href="/login?signup=1" class="btn btn-lg btn-cyan">START FREE — 30 DAYS →</a>
-  </div>
-</div>
-
-<!-- PRICING -->
+<!-- ══ PRICING ══ -->
 <section class="pricing" id="pricing">
   <div class="wrap">
-    <div class="tag center">SIMPLE PRICING</div>
-    <h2 class="h2 center">Less than one losing trade.<br>More than a mentor.</h2>
-    <p class="sub center">One bad trade costs more than a year of Sage. Start free.</p>
-    <div class="price-grid">
+    <span class="tag">SIMPLE PRICING</span>
+    <h2 style="font-family:var(--head);font-size:clamp(32px,4.5vw,52px);font-weight:800;letter-spacing:-2px;line-height:1.1;text-align:center">
+      Less than one losing trade.<br>More than a mentor.
+    </h2>
+    <p style="color:var(--mid);font-size:16px;text-align:center;max-width:520px;margin:12px auto 0;line-height:1.8">
+      One bad trade costs more than a year of Sage. Start free — no credit card, no commitment.
+    </p>
+    <div class="price-grid fade-up">
+      <!-- Student -->
       <div class="pc">
         <div class="pc-badge pb-c">30-DAY FREE TRIAL</div>
         <div class="pc-name">Student</div>
-        <div class="pc-desc">Learn before you pay. No risk.</div>
+        <div class="pc-desc">Learn before you pay. Zero risk.</div>
         <div class="pc-price"><sup>$</sup>0<sub>/mo</sub></div>
         <div class="pc-period">FREE FOR 30 DAYS</div>
         <ul class="pc-feats">
           <li class="c-feat">First 10 lessons unlocked</li>
-          <li class="c-feat">6 Sage messages per day</li>
+          <li class="c-feat">6 Sage AI messages per day</li>
           <li class="c-feat">Live market intel panel</li>
           <li class="c-feat">Basic trade cards</li>
-          <li class="d-feat">Full 50 lessons locked</li>
-          <li class="d-feat">Scanner + watchlist locked</li>
-          <li class="d-feat">Unlimited chat locked</li>
+          <li class="d-feat">Full 51 lessons (locked)</li>
+          <li class="d-feat">Unlimited chat (locked)</li>
+          <li class="d-feat">Multi-pair scanner (locked)</li>
         </ul>
         <a href="/login?signup=1" class="pc-btn pb-line">START FREE →</a>
       </div>
+
+      <!-- Sage -->
       <div class="pc hot">
         <div class="pc-badge pb-c">MOST POPULAR</div>
         <div class="pc-name">Sage</div>
         <div class="pc-desc">Full power. No limits. Zero charts.</div>
         <div class="pc-price cyan"><sup>$</sup>49<sub>.99/mo</sub></div>
-        <div class="pc-period">BILLED MONTHLY</div>
+        <div class="pc-period">BILLED MONTHLY · CANCEL ANYTIME</div>
         <ul class="pc-feats">
-          <li class="c-feat">All 50 lessons unlocked</li>
+          <li class="c-feat">All 51 lessons — Forex, Stocks, Crypto</li>
           <li class="c-feat">Unlimited Sage AI chat</li>
           <li class="c-feat">Full trade cards — entry, SL, TP1, TP2</li>
-          <li class="c-feat">Multi-pair scanner</li>
-          <li class="c-feat">Watchlist + 30s price alerts</li>
-          <li class="c-feat">6 Path deep analysis</li>
+          <li class="c-feat">6-path deep analysis on every request</li>
+          <li class="c-feat">Multi-pair scanner (10+ pairs)</li>
+          <li class="c-feat">Watchlist + 30s live price alerts</li>
           <li class="c-feat">Economic calendar integration</li>
+          <li class="c-feat">Institutional levels — OBs, FVGs, OTE</li>
         </ul>
         <a href="/login?signup=1" class="pc-btn pb-fill-cyan">GET SAGE →</a>
       </div>
+
+      <!-- Unleashed -->
       <div class="pc top">
         <div class="pc-badge pb-p">SIX PATHS UNLEASHED</div>
-        <div class="pc-name">Six Paths Unleashed</div>
+        <div class="pc-name">Unleashed</div>
         <div class="pc-desc">Everything. Forever. The complete experience.</div>
         <div class="pc-price purple"><sup>$</sup>149<sub>.99/mo</sub></div>
-        <div class="pc-period">BILLED MONTHLY</div>
+        <div class="pc-period">BILLED MONTHLY · CANCEL ANYTIME</div>
         <ul class="pc-feats">
-          <li class="p-feat">Everything in Sage</li>
+          <li class="p-feat">Everything in Sage plan</li>
           <li class="p-feat">Priority AI responses</li>
           <li class="p-feat">Advanced multi-timeframe breakdowns</li>
           <li class="p-feat">Extended trade journal + history</li>
           <li class="p-feat">Early access to all new features</li>
-          <li class="hl-feat">🔒 Free lifetime upgrades — forever</li>
+          <li class="p-feat">Direct support from JayDaWolfX</li>
+          <li class="hl-feat">Free lifetime upgrades — forever</li>
         </ul>
         <a href="/login?signup=1" class="pc-btn pb-fill-purple">GO UNLEASHED →</a>
       </div>
@@ -734,100 +764,110 @@ footer{padding:40px 44px;border-top:1px solid rgba(255,255,255,0.05);display:fle
   </div>
 </section>
 
-<!-- FAQ -->
+<!-- ══ FAQ ══ -->
 <section class="faq" id="faq">
   <div class="wrap">
-    <div class="tag center">QUESTIONS</div>
-    <h2 class="h2 center">Everything you need<br>to know.</h2>
+    <span class="tag" style="text-align:center;display:block">QUESTIONS</span>
+    <h2 style="font-family:var(--head);font-size:clamp(32px,4.5vw,52px);font-weight:800;letter-spacing:-2px;line-height:1.1;text-align:center;margin-bottom:0">Everything you need to know.</h2>
     <div class="faq-list">
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">
-          <div class="faq-q-text">Do I really never have to look at a chart again?</div>
-          <div class="faq-plus">+</div>
-        </div>
-        <div class="faq-a">That's the idea. Sage reads the market data, identifies the trend, finds the key levels, checks the session timing, calculates the entry and stops — and delivers it all in one trade card. You can execute directly with your broker without ever opening a chart. That said, some traders still like to glance at the chart to feel confident. Sage makes that optional, not mandatory.</div>
+        <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">Do I actually need trading experience to use Sage?</div><div class="faq-plus">+</div></div>
+        <div class="faq-a">No. Sage was built for people at all levels. If you're a beginner, the 51-lesson Academy walks you from the absolute basics (what a pip is, how lots work) all the way to advanced ICT methodology. Sage explains every trade it gives you — so you're learning the market at the same time. You don't need prior experience to start, but you'll gain real understanding as you use it.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">
-          <div class="faq-q-text">How is Sage different from just using ChatGPT?</div>
-          <div class="faq-plus">+</div>
-        </div>
-        <div class="faq-a">ChatGPT doesn't have live market data. It can't tell you what EUR/USD is doing right now, what the current EMA stack is, what the RSI reading is, or whether London is open. Sage has all of that built in — live price data, technical indicators, kill zone tracking, economic calendar, and 5 complete strategy rulebooks. It's purpose-built for trading, not general conversation.</div>
+        <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">How is this different from just using ChatGPT?</div><div class="faq-plus">+</div></div>
+        <div class="faq-a">ChatGPT doesn't have live market data. It can't tell you what EUR/USD is doing right now, what the EMA stack looks like, whether the London kill zone is active, or if NFP is firing in 30 minutes. Sage has real TwelveData live candles, technical indicator calculations, economic calendar integration, institutional level detection, and 5 complete strategy rulebooks. It's purpose-built for trading — not general conversation.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">
-          <div class="faq-q-text">I'm a beginner. Is Sage for me?</div>
-          <div class="faq-plus">+</div>
-        </div>
-        <div class="faq-a">Absolutely. In fact, Sage might be more valuable for beginners than experienced traders. You get 50 structured lessons built into the platform — starting from the absolute basics and building to advanced ICT concepts. Sage explains the WHY behind every trade it gives you, so you learn as you go. You don't need any technical knowledge to start asking questions and getting real answers.</div>
+        <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">What markets can Sage analyze?</div><div class="faq-plus">+</div></div>
+        <div class="faq-a">Forex (EUR/USD, GBP/USD, USD/JPY, GBP/JPY, AUD/USD, USD/CAD, USD/CHF, EUR/JPY, EUR/GBP, NZD/USD), Gold (XAU/USD), Stocks (NVDA, AAPL, TSLA, MSFT, AMZN, META, GOOGL, SPY, QQQ), and more. All with live TwelveData candle data and full 6-path analysis.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">
-          <div class="faq-q-text">Does Sage guarantee profits?</div>
-          <div class="faq-plus">+</div>
-        </div>
-        <div class="faq-a">No. No trading tool can honestly promise that — and we won't insult your intelligence by claiming otherwise. What Sage does is give you a systematic, data-driven edge on every trade you analyze. It removes guesswork, emotional decisions, and hours of manual work. The win rate depends on your execution, risk management, and market conditions. Sage gives you the best possible analysis. The trade is still yours to make.</div>
+        <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">Does Sage guarantee I'll make money?</div><div class="faq-plus">+</div></div>
+        <div class="faq-a">No — and we won't insult your intelligence by claiming otherwise. Trading carries risk and no tool can guarantee profits. What Sage does is give you a systematic, data-driven analytical edge on every trade. It removes guesswork, emotional decisions, and the hours of manual work. The trade is yours to make. Sage gives you the best possible analysis to make it from.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">
-          <div class="faq-q-text">What markets does Sage cover?</div>
-          <div class="faq-plus">+</div>
-        </div>
-        <div class="faq-a">Forex (all major and minor pairs — EUR/USD, GBP/JPY, USD/JPY, AUD/USD and more), Stocks (NVDA, AAPL, TSLA, META, SPY, QQQ and more), and Crypto (BTC, ETH). The live market intel panel and trade cards work across all these markets with real-time data.</div>
+        <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">What does "lifetime free upgrades" mean on Unleashed?</div><div class="faq-plus">+</div></div>
+        <div class="faq-a">Every future feature, improvement, or new capability ever added to Sage is automatically included in your Unleashed plan — at no extra cost, forever. You pay $149.99/month today and never pay more no matter how advanced Sage becomes. This is our commitment to members who believe in the platform early.</div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">
-          <div class="faq-q-text">What does "lifetime free upgrades" mean on Six Paths Unleashed?</div>
-          <div class="faq-plus">+</div>
-        </div>
-        <div class="faq-a">Every future feature, improvement, or new capability ever added to Sage is automatically included in your Six Paths Unleashed plan — at no extra cost, forever. You pay $149.99/month today and never pay more no matter how advanced Sage becomes. This is our commitment to our top-tier members who believed in the platform early.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">
-          <div class="faq-q-text">Can I cancel anytime?</div>
-          <div class="faq-plus">+</div>
-        </div>
-        <div class="faq-a">Yes. No contracts, no cancellation fees, no questions asked. Your 30-day free trial also requires zero credit card information. You only pay if you choose to upgrade — and even then, you can cancel any month.</div>
+        <div class="faq-q" onclick="toggleFaq(this)"><div class="faq-q-text">Can I cancel anytime?</div><div class="faq-plus">+</div></div>
+        <div class="faq-a">Yes. No contracts. No cancellation fees. No questions asked. Your 30-day free trial requires zero credit card information. You only pay if you choose to upgrade — and even then, you can cancel any month.</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FINAL CTA -->
+<!-- ══ FINAL CTA ══ -->
 <section class="fcta">
   <div class="fcta-glow"></div>
-  <div class="fcta-inner wrap">
-    <div class="tag center">THE DECISION</div>
-    <h2 class="fcta-h">The charts are closed.<br><span>The path is open.</span></h2>
-    <p class="fcta-sub">Thousands of traders are still spending hours every day staring at screens, drawing levels, calculating stops. You don't have to. Sage does all of it. Your only job is to ask.</p>
-    <div class="cta-row center">
-      <a href="/login?signup=1" class="btn btn-lg btn-cyan" style="font-size:16px;padding:20px 44px">START FREE — 30 DAYS →</a>
+  <div class="wrap" style="position:relative;z-index:1;text-align:center">
+    <span class="tag" style="text-align:center;display:block">YOUR MOVE</span>
+    <h2 class="fcta" style="font-family:var(--head);font-size:clamp(40px,6vw,76px);font-weight:800;line-height:1.0;letter-spacing:-3px;margin-bottom:24px">
+      The economy changed.<br><span style="color:var(--cyan)">Change with it.</span>
+    </h2>
+    <p style="font-size:18px;color:var(--mid);max-width:560px;margin:0 auto 44px;line-height:1.8;font-weight:300">
+      Food is up. Jobs are disappearing to AI. Your paycheck isn't keeping up.
+      You can wait and hope things improve — or you can build a second income with the same AI that's changing everything.
+    </p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a href="/login?signup=1" class="btn btn-lg btn-cyan" style="font-size:15px;padding:18px 44px">START FREE — 30 DAYS →</a>
     </div>
-    <div class="fcta-note" style="margin-top:20px">No credit card &nbsp;·&nbsp; 30-day free trial &nbsp;·&nbsp; No charts &nbsp;·&nbsp; Cancel anytime</div>
+    <div style="margin-top:20px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:1px">
+      No credit card &nbsp;·&nbsp; <span style="color:var(--green)">30-day free trial</span> &nbsp;·&nbsp; Cancel anytime
+    </div>
   </div>
 </section>
 
 <footer>
-  <div class="f-logo">🔮 SAGE OF SIX PATHS</div>
+  <div class="f-logo">🔮 SAGE OF SIX PATHS — JAYDAWOLFX</div>
   <div class="f-links">
     <a href="/pricing" class="f-a">Pricing</a>
     <a href="#faq" class="f-a">FAQ</a>
     <a href="/login" class="f-a">Sign In</a>
     <a href="/login?signup=1" class="f-a">Sign Up Free</a>
   </div>
-  <div class="f-copy">© JAYDAWOLFX · ALL RIGHTS RESERVED</div>
+  <div class="f-copy">© JAYDAWOLFX · ALL RIGHTS RESERVED · EDUCATIONAL PURPOSES ONLY · NOT FINANCIAL ADVICE</div>
 </footer>
 
 <script>
+// Tab switcher
+function setTab(idx) {
+  document.querySelectorAll('.hw-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.querySelectorAll('.hw-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+}
+
+// FAQ
 function toggleFaq(el) {
   const item = el.closest('.faq-item');
   const open = item.classList.contains('open');
   document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
   if (!open) item.classList.add('open');
 }
+
+// Scroll animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold: 0.15});
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+// Nav shadow on scroll
 window.addEventListener('scroll', () => {
-  document.querySelector('.nav').style.boxShadow = window.scrollY > 20 ? '0 2px 40px rgba(0,0,0,.5)' : 'none';
+  document.querySelector('.nav').style.boxShadow = window.scrollY > 20 ? '0 2px 40px rgba(0,0,0,.6)' : 'none';
 });
+
+// Counter animation
+const counts = ['28%', '806K', '4.6%', '27K+', '$49'];
+let ci = 0;
+setInterval(() => {
+  ci = (ci + 1) % counts.length;
+  const el = document.getElementById('counterNum');
+  if (el) {
+    el.style.opacity = '0';
+    setTimeout(() => { el.textContent = counts[ci]; el.style.opacity = '1'; }, 300);
+  }
+}, 3000);
+document.getElementById('counterNum').style.transition = 'opacity 0.3s';
 </script>
 </body>
 </html>
