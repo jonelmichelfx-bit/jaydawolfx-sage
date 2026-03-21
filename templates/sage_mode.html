@@ -316,7 +316,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
       </div>
 
   <!-- SAGE Panel -->
-  <div id="sagePanelSage" style="display:block">
+  <div id="sagePanelSage" style="display:flex;flex:1;flex-direction:column;min-height:0">
   <!-- Body split -->
   <div class="sage-body">
 
@@ -633,8 +633,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
   </div><!-- /sagePanelSage -->
 
       <!-- EDUCATION PANEL -->
-      <div id="sagePanelEdu" style="display:none;padding:0">
-        <div style="display:flex;height:620px;overflow:hidden">
+      <div id="sagePanelEdu" style="display:none;padding:0;flex:1;min-height:0">
+        <div style="display:flex;height:100%;min-height:500px;overflow:hidden">
 
           <!-- Left: Lesson list -->
           <div id="sageEduSidebar" style="width:260px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;background:var(--surface2)">
@@ -1392,13 +1392,13 @@ function sageSwitchTab(tab) {
   const sageBtn   = document.getElementById('sageTabSage');
   const eduBtn    = document.getElementById('sageTabEdu');
   if (tab === 'sage') {
-    if (sagePanel) sagePanel.style.display = 'block';
+    if (sagePanel) sagePanel.style.display = 'flex';
     if (eduPanel)  eduPanel.style.display  = 'none';
     if (sageBtn) { sageBtn.style.background='rgba(96,208,255,0.1)'; sageBtn.style.color='var(--cyan)'; sageBtn.style.borderBottom='2px solid var(--cyan)'; }
     if (eduBtn)  { eduBtn.style.background='transparent'; eduBtn.style.color='var(--text-dim)'; eduBtn.style.borderBottom='2px solid transparent'; }
   } else {
     if (sagePanel) sagePanel.style.display = 'none';
-    if (eduPanel)  eduPanel.style.display  = 'block';
+    if (eduPanel)  eduPanel.style.display  = 'flex';
     if (eduBtn)  { eduBtn.style.background='rgba(96,208,255,0.1)'; eduBtn.style.color='var(--cyan)'; eduBtn.style.borderBottom='2px solid var(--cyan)'; }
     if (sageBtn) { sageBtn.style.background='transparent'; sageBtn.style.color='var(--text-dim)'; sageBtn.style.borderBottom='2px solid transparent'; }
     sageInitEdu();
