@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sage of Six Paths — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#040810;--surface:#080f1a;--surface2:#0d1625;--border:#1a3050;
+  --cyan:#40e0ff;--green:#00ff99;--red:#ff4466;--purple:#aa66ff;
+  --text:#ffffff;--text-mid:#e8f4ff;--text-dim:#a0c8e8;
+  --mono:'Share Tech Mono',monospace;--head:'Orbitron',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--mono)}
+body{
+  background-image:linear-gradient(rgba(64,224,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(64,224,255,0.025) 1px,transparent 1px);
+  background-size:36px 36px;
+  min-height:100vh;display:flex;flex-direction:column;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse at 15% 25%,rgba(64,224,255,0.06) 0%,transparent 50%),
+             radial-gradient(ellipse at 85% 75%,rgba(170,102,255,0.05) 0%,transparent 50%);
+  pointer-events:none;z-index:0;
+}
+
+/* NAV */
+.nav{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 32px;border-bottom:1px solid rgba(64,224,255,0.08);background:rgba(4,8,16,0.9)}
+.nav-logo{font-family:var(--head);font-size:14px;letter-spacing:3px;color:var(--cyan)}
+.nav-links{display:flex;gap:20px}
+.nav-links a{font-size:12px;color:var(--text-dim);text-decoration:none;letter-spacing:1px;transition:.2s}
+.nav-links a:hover{color:var(--cyan)}
+
+/* MAIN LAYOUT */
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 20px;position:relative;z-index:1}
+
+/* CARD */
+.auth-card{display:grid;grid-template-columns:1fr 1fr;max-width:900px;width:100%;border-radius:10px;overflow:hidden;border:1px solid rgba(64,224,255,0.12)}
+
+/* LEFT */
+.auth-left{position:relative;overflow:hidden;background:#000;padding:48px 44px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid rgba(64,224,255,0.08)}
+.al-vbg{position:absolute;inset:0;background:#020810;z-index:0}
+.al-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(64,224,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(64,224,255,0.03) 1px,transparent 1px);background-size:32px 32px;z-index:1}
+.al-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(2,8,16,0.82) 0%,rgba(4,12,24,0.75) 100%);z-index:2}
+.al-glow1{position:absolute;width:280px;height:280px;border-radius:50%;background:rgba(64,224,255,0.055);top:-80px;left:-80px;z-index:1;animation:glowPulse 4s ease-in-out infinite alternate}
+.al-glow2{position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(0,255,153,0.03);bottom:-60px;right:-60px;z-index:1;animation:glowPulse 5s ease-in-out infinite alternate;animation-delay:-2s}
+@keyframes glowPulse{from{opacity:.5;transform:scale(1)}to{opacity:1;transform:scale(1.2)}}
+.al-pline{position:absolute;height:1.5px;width:200%;background:linear-gradient(90deg,transparent,rgba(64,224,255,0.35),rgba(64,224,255,0.55),rgba(64,224,255,0.35),transparent);z-index:2;animation:plineMove 5s linear infinite}
+.al-pline2{position:absolute;height:1px;width:200%;background:linear-gradient(90deg,transparent,rgba(0,255,153,0.2),rgba(0,255,153,0.3),transparent);z-index:2;animation:plineMove2 7s linear infinite;animation-delay:-3s}
+@keyframes plineMove{0%{left:-100%;top:38%}100%{left:0%;top:42%}}
+@keyframes plineMove2{0%{left:-100%;top:58%}100%{left:0%;top:54%}}
+.al-candles{position:absolute;bottom:60px;left:0;right:0;height:100px;z-index:2;display:flex;align-items:flex-end;gap:3px;padding:0 20px}
+.al-c{width:6px;border-radius:1px;animation:cGrow ease-in-out infinite alternate}
+@keyframes cGrow{from{opacity:.2;transform:scaleY(.7)}to{opacity:.5;transform:scaleY(1)}}
+.al-fnum{position:absolute;font-family:monospace;font-size:10px;color:rgba(64,224,255,0.35);z-index:2;animation:fUp 9s linear infinite}
+@keyframes fUp{0%{transform:translateY(20px);opacity:0}10%{opacity:1}85%{opacity:.25}100%{transform:translateY(-280px);opacity:0}}
+.al-badge{position:absolute;bottom:14px;left:14px;z-index:5;font-family:monospace;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.22);display:flex;align-items:center;gap:5px}
+.al-rec{width:5px;height:5px;border-radius:50%;background:rgba(255,80,80,0.55);animation:recBlink 2s ease-in-out infinite}
+@keyframes recBlink{0%,100%{opacity:1}50%{opacity:.25}}
+.al-inner{position:relative;z-index:5;display:flex;flex-direction:column;justify-content:space-between;height:100%}
+.al-logo{font-family:var(--head);font-size:11px;letter-spacing:4px;color:rgba(64,224,255,0.7);margin-bottom:36px}
+.al-title{font-size:36px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:16px;font-family:sans-serif}
+.al-title span{color:var(--cyan)}
+.al-sub{font-size:14px;color:rgba(255,255,255,0.5);line-height:1.8;max-width:270px;margin-bottom:0}
+.al-feats{margin-top:40px}
+.al-feat{display:flex;align-items:center;gap:10px;margin-bottom:15px}
+.al-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);flex-shrink:0}
+.al-feat-text{font-size:13px;color:rgba(255,255,255,0.6)}
+
+/* RIGHT */
+.auth-right{background:rgba(8,15,26,0.99);padding:48px 44px;display:flex;flex-direction:column;justify-content:center}
+.ar-toggle{display:flex;margin-bottom:32px;border:1px solid rgba(64,224,255,0.15);border-radius:5px;overflow:hidden}
+.ar-toggle button{flex:1;padding:10px;background:transparent;border:none;font-family:var(--mono);font-size:12px;letter-spacing:2px;cursor:pointer;transition:.2s}
+.ar-toggle button.active{background:rgba(64,224,255,0.12);color:var(--cyan)}
+.ar-toggle button:not(.active){color:rgba(255,255,255,0.3)}
+
+.ar-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;font-family:sans-serif}
+.ar-sub{font-size:12px;color:rgba(255,255,255,0.35);letter-spacing:2px;margin-bottom:28px}
+
+.form-section{display:none}
+.form-section.active{display:block}
+
+.fl{margin-bottom:18px}
+.fl label{display:block;font-size:11px;color:rgba(64,224,255,0.8);letter-spacing:2px;margin-bottom:7px}
+.fl input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(64,224,255,0.15);border-radius:4px;padding:12px 16px;color:#fff;font-size:14px;font-family:var(--mono);outline:none;transition:.2s}
+.fl input:focus{border-color:rgba(64,224,255,0.4);background:rgba(64,224,255,0.03)}
+.fl input::placeholder{color:rgba(255,255,255,0.2)}
+
+.btn-main{width:100%;padding:14px;background:var(--cyan);border:none;border-radius:4px;color:#040810;font-size:14px;font-weight:800;letter-spacing:2px;cursor:pointer;font-family:var(--mono);margin-top:4px;transition:.2s}
+.btn-main:hover{background:#60e8ff}
+
+.divider{display:flex;align-items:center;gap:10px;margin:22px 0;color:rgba(255,255,255,0.2);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:0.5px;background:rgba(255,255,255,0.1)}
+
+.btn-free{width:100%;padding:13px;background:transparent;border:1px solid rgba(64,224,255,0.25);border-radius:4px;color:var(--cyan);font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;font-family:var(--mono);transition:.2s;text-decoration:none;display:block;text-align:center}
+.btn-free:hover{background:rgba(64,224,255,0.06);border-color:rgba(64,224,255,0.4)}
+
+.ar-note{text-align:center;font-size:12px;color:rgba(255,255,255,0.3);margin-top:18px}
+.ar-note a{color:var(--cyan);text-decoration:none}
+
+.flash-msg{padding:10px 14px;border-radius:4px;font-size:13px;margin-bottom:16px;border-left:3px solid}
+.flash-error{background:rgba(255,68,102,0.08);border-color:var(--red);color:var(--red)}
+.flash-success{background:rgba(0,255,153,0.08);border-color:var(--green);color:var(--green)}
+
+/* FOOTER */
+.footer{position:relative;z-index:1;text-align:center;padding:16px;font-size:11px;color:rgba(255,255,255,0.2);letter-spacing:1px}
+
+@media(max-width:700px){
+  .auth-card{grid-template-columns:1fr}
+  .auth-left{display:none}
+  .auth-right{padding:36px 28px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">🔮 SAGE OF SIX PATHS</div>
+  <div class="nav-links">
+    <a href="/pricing">Pricing</a>
+  </div>
+</nav>
+
+<main class="main">
+  <div class="auth-card">
+    <div class="auth-left">
+      <!-- Background animation layers -->
+      <div class="al-vbg"></div>
+      <div class="al-grid"></div>
+      <div class="al-glow1"></div>
+      <div class="al-glow2"></div>
+      <div class="al-overlay"></div>
+      <div class="al-pline"></div>
+      <div class="al-pline2"></div>
+      <!-- Animated candlesticks -->
+      <div class="al-candles">
+        <div class="al-c" style="height:55px;background:rgba(0,255,153,0.4);animation-duration:2.5s"></div>
+        <div class="al-c" style="height:35px;background:rgba(255,68,102,0.4);animation-duration:2.1s;animation-delay:.2s"></div>
+        <div class="al-c" style="height:70px;background:rgba(0,255,153,0.4);animation-duration:2.8s;animation-delay:.4s"></div>
+        <div class="al-c" style="height:45px;background:rgba(0,255,153,0.35);animation-duration:2.3s;animation-delay:.1s"></div>
+        <div class="al-c" style="height:30px;background:rgba(255,68,102,0.35);animation-duration:2.6s;animation-delay:.5s"></div>
+        <div class="al-c" style="height:80px;background:rgba(0,255,153,0.45);animation-duration:2.2s;animation-delay:.3s"></div>
+        <div class="al-c" style="height:60px;background:rgba(0,255,153,0.4);animation-duration:2.9s;animation-delay:.6s"></div>
+        <div class="al-c" style="height:40px;background:rgba(255,68,102,0.35);animation-duration:2.4s;animation-delay:.7s"></div>
+        <div class="al-c" style="height:65px;background:rgba(0,255,153,0.4);animation-duration:2.7s;animation-delay:.2s"></div>
+        <div class="al-c" style="height:50px;background:rgba(0,255,153,0.35);animation-duration:2.1s;animation-delay:.4s"></div>
+        <div class="al-c" style="height:85px;background:rgba(0,255,153,0.45);animation-duration:2.5s;animation-delay:.8s"></div>
+        <div class="al-c" style="height:38px;background:rgba(255,68,102,0.4);animation-duration:2.3s;animation-delay:.1s"></div>
+      </div>
+      <!-- Floating price numbers -->
+      <div class="al-fnum" style="left:18%;animation-delay:0s;bottom:20px">1.0842</div>
+      <div class="al-fnum" style="left:42%;animation-delay:-3s;bottom:20px">159.34</div>
+      <div class="al-fnum" style="left:65%;animation-delay:-6s;bottom:20px">+0.42%</div>
+      <div class="al-fnum" style="left:28%;animation-delay:-4.5s;bottom:20px">1.2756</div>
+      <div class="al-fnum" style="left:52%;animation-delay:-1.5s;bottom:20px">78/100</div>
+      <!-- LIVE badge -->
+      <div class="al-badge"><div class="al-rec"></div>LIVE MARKET DATA</div>
+      <!-- Content -->
+      <div class="al-inner">
+        <div>
+          <div class="al-logo">🔮 SAGE OF SIX PATHS</div>
+          <div class="al-title">Trade with<br><span>wisdom.</span></div>
+          <div class="al-sub">AI-powered market intelligence built for serious traders. Six paths of analysis. Live data. Real insight.</div>
+        </div>
+        <div class="al-feats">
+          <div class="al-feat"><div class="al-dot"></div><span class="al-feat-text">50 structured trading lessons</span></div>
+          <div class="al-feat"><div class="al-dot"></div><span class="al-feat-text">Live market intel — price, RSI, EMA, regime</span></div>
+          <div class="al-feat"><div class="al-dot"></div><span class="al-feat-text">Detailed trade cards — entry, SL, TP1, TP2</span></div>
+          <div class="al-feat"><div class="al-dot"></div><span class="al-feat-text">Watchlist price alerts — 30s monitoring</span></div>
+          <div class="al-feat"><div class="al-dot"></div><span class="al-feat-text">Multi-pair scanner — find setups fast</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div class="ar-toggle">
+        <button class="active" id="btn-signin" onclick="showTab('signin')">SIGN IN</button>
+        <button id="btn-signup" onclick="showTab('signup')">SIGN UP</button>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash-msg flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- SIGN IN -->
+      <div class="form-section active" id="tab-signin">
+        <div class="ar-title">Welcome back</div>
+        <div class="ar-sub">SIGN IN TO YOUR ACCOUNT</div>
+        <form method="POST" action="/auth/login">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token is defined else '' }}">
+          <div class="fl">
+            <label>EMAIL</label>
+            <input type="email" name="email" placeholder="your@email.com" required autocomplete="email">
+          </div>
+          <div class="fl">
+            <label>PASSWORD</label>
+            <input type="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+          <button type="submit" class="btn-main">ENTER THE PATH →</button>
+        </form>
+        <div class="divider">or</div>
+        <a href="/pricing" class="btn-free">START FREE — 30 DAYS →</a>
+        <div class="ar-note">No account? <a href="#" onclick="showTab('signup');return false">Create one free →</a></div>
+      </div>
+
+      <!-- SIGN UP -->
+      <div class="form-section" id="tab-signup">
+        <div class="ar-title">Create account</div>
+        <div class="ar-sub">START YOUR 30-DAY FREE TRIAL</div>
+        <form method="POST" action="/auth/register">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token is defined else '' }}">
+          <div class="fl">
+            <label>USERNAME</label>
+            <input type="text" name="username" placeholder="tradername" required autocomplete="username">
+          </div>
+          <div class="fl">
+            <label>EMAIL</label>
+            <input type="email" name="email" placeholder="your@email.com" required autocomplete="email">
+          </div>
+          <div class="fl">
+            <label>PASSWORD</label>
+            <input type="password" name="password" placeholder="Create a strong password" required autocomplete="new-password">
+          </div>
+          <button type="submit" class="btn-main">CREATE ACCOUNT →</button>
+        </form>
+        <div class="ar-note">Already have an account? <a href="#" onclick="showTab('signin');return false">Sign in →</a></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<div class="footer">© JAYDAWOLFX · SAGE OF SIX PATHS · ALL RIGHTS RESERVED</div>
+
+<script>
+function showTab(tab) {
+  document.getElementById('tab-signin').classList.remove('active');
+  document.getElementById('tab-signup').classList.remove('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('btn-signin').classList.remove('active');
+  document.getElementById('btn-signup').classList.remove('active');
+  document.getElementById('btn-' + tab).classList.add('active');
+}
+// If URL has ?signup=1 show signup tab
+if (window.location.search.includes('signup')) showTab('signup');
+</script>
+</body>
+</html>
