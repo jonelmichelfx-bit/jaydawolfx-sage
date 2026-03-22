@@ -182,8 +182,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
   padding:4px 9px;font-family:var(--mono);font-size:11px;letter-spacing:1px;cursor:pointer;transition:.15s;}
 .sqb:hover{border-color:var(--sage);color:var(--sage);background:rgba(96,208,255,0.05);}
 
-.sage-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;
-  flex-direction:column;gap:10px;scroll-behavior:smooth;min-height:0;}
+.sage-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;
+  flex-direction:column;gap:12px;scroll-behavior:smooth;min-height:0;font-size:14px;line-height:1.75;}
 .sage-msgs::-webkit-scrollbar{width:3px;}
 .sage-msgs::-webkit-scrollbar-thumb{background:var(--border);}
 
@@ -240,8 +240,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 .sage-input-area{padding:8px 10px;background:var(--surface);
   border-top:1px solid var(--border);display:flex;gap:7px;align-items:flex-end;flex-shrink:0;}
 .sage-textarea{flex:1;background:var(--bg);border:1px solid var(--border);
-  color:var(--text);padding:8px 10px;font-family:var(--mono);font-size:12px;
-  outline:none;resize:none;min-height:36px;max-height:80px;line-height:1.5;}
+  color:var(--text);padding:8px 10px;font-family:var(--mono);font-size:13px;
+  outline:none;resize:none;min-height:44px;max-height:160px;line-height:1.6;}
 .sage-textarea:focus{border-color:rgba(96,208,255,.4);}
 .sage-textarea::placeholder{color:var(--text-dim);font-size:12px;}
 .sage-send{background:rgba(96,208,255,.1);border:1px solid var(--sage);
@@ -615,14 +615,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
           <span class="sw-icon">🔮</span>
           <div class="sw-title">SAGE OF 6 PATHS</div>
           <div class="sw-sub">Live data · Institutional analysis · 6-path methodology</div>
-          <div class="sw-cta">Select a pair → ask anything about the market 💚</div>
+          <div class="sw-cta">Welcome, Student — select a pair and ask anything 💚</div>
         </div>
       </div>
 
       <!-- Input -->
       <div class="sage-input-area">
         <textarea class="sage-textarea" id="sageInput"
-          placeholder="Ask Sage about this pair — levels, setup, macro context..."
+          placeholder="Student, ask Sage anything — levels, setup, AI plays, crypto, options..."
           onkeydown="sageHandleKey(event)" oninput="sageAutoResize(this)"></textarea>
         <button class="sage-send" id="sageSendBtn" onclick="sageSend()">➤</button>
       </div>
