@@ -182,8 +182,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
   padding:4px 9px;font-family:var(--mono);font-size:11px;letter-spacing:1px;cursor:pointer;transition:.15s;}
 .sqb:hover{border-color:var(--sage);color:var(--sage);background:rgba(96,208,255,0.05);}
 
-.sage-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;
-  flex-direction:column;gap:12px;scroll-behavior:smooth;min-height:0;font-size:14px;line-height:1.75;}
+.sage-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;
+  flex-direction:column;gap:10px;scroll-behavior:smooth;min-height:0;}
 .sage-msgs::-webkit-scrollbar{width:3px;}
 .sage-msgs::-webkit-scrollbar-thumb{background:var(--border);}
 
@@ -240,8 +240,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 .sage-input-area{padding:8px 10px;background:var(--surface);
   border-top:1px solid var(--border);display:flex;gap:7px;align-items:flex-end;flex-shrink:0;}
 .sage-textarea{flex:1;background:var(--bg);border:1px solid var(--border);
-  color:var(--text);padding:8px 10px;font-family:var(--mono);font-size:13px;
-  outline:none;resize:none;min-height:44px;max-height:160px;line-height:1.6;}
+  color:var(--text);padding:8px 10px;font-family:var(--mono);font-size:12px;
+  outline:none;resize:none;min-height:36px;max-height:80px;line-height:1.5;}
 .sage-textarea:focus{border-color:rgba(96,208,255,.4);}
 .sage-textarea::placeholder{color:var(--text-dim);font-size:12px;}
 .sage-send{background:rgba(96,208,255,.1);border:1px solid var(--sage);
@@ -615,14 +615,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
           <span class="sw-icon">🔮</span>
           <div class="sw-title">SAGE OF 6 PATHS</div>
           <div class="sw-sub">Live data · Institutional analysis · 6-path methodology</div>
-          <div class="sw-cta">Welcome, Student — select a pair and ask anything 💚</div>
+          <div class="sw-cta">Select a pair → ask anything about the market 💚</div>
         </div>
       </div>
 
       <!-- Input -->
       <div class="sage-input-area">
         <textarea class="sage-textarea" id="sageInput"
-          placeholder="Student, ask Sage anything — levels, setup, AI plays, crypto, options..."
+          placeholder="Ask Sage about this pair — levels, setup, macro context..."
           onkeydown="sageHandleKey(event)" oninput="sageAutoResize(this)"></textarea>
         <button class="sage-send" id="sageSendBtn" onclick="sageSend()">➤</button>
       </div>
@@ -634,7 +634,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 
       <!-- EDUCATION PANEL -->
       <div id="sagePanelEdu" style="display:none;padding:0;flex:1;min-height:0">
-        <div style="display:flex;height:100%;min-height:500px;overflow:hidden">
+        <div style="display:flex;height:100%;min-height:0;overflow:hidden">
 
           <!-- Left: Lesson list -->
           <div id="sageEduSidebar" style="width:260px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;background:var(--surface2)">
@@ -658,6 +658,23 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
                 <div style="font-size:14px;color:var(--text-mid);line-height:1.7;max-width:400px;margin:0 auto">51 structured lessons covering Forex, Stocks, and Crypto. Complete each lesson and pass the quiz to unlock the next. When you finish — you are ready for Sage.</div>
                 <div style="margin-top:20px;font-size:13px;color:var(--text-dim)">← Select a lesson from the left to begin</div>
               </div>
+            </div>
+
+            <!-- ── PRACTICE ZONE ── -->
+            <div id="sagePracticeZone" style="margin-top:32px;border-top:1px solid var(--border);padding-top:24px;display:none">
+              <div style="font-family:var(--head);font-size:13px;letter-spacing:2px;color:var(--purple);margin-bottom:6px">🎯 PRACTICE ZONE</div>
+              <div style="font-size:12px;color:var(--text-mid);margin-bottom:14px">Draw support &amp; resistance lines. Mark key levels. Practice what you just learned.</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+                <button onclick="sagePracticeSetTool('support')" id="sagePracToolS" style="padding:5px 12px;font-size:11px;font-family:var(--head);letter-spacing:1px;border:1px solid #00ff99;color:#00ff99;background:rgba(0,255,153,0.08);cursor:pointer">📈 SUPPORT</button>
+                <button onclick="sagePracticeSetTool('resistance')" id="sagePracToolR" style="padding:5px 12px;font-size:11px;font-family:var(--head);letter-spacing:1px;border:1px solid #ff4466;color:#ff4466;background:rgba(255,68,102,0.08);cursor:pointer">📉 RESISTANCE</button>
+                <button onclick="sagePracticeSetTool('zone')" id="sagePracToolZ" style="padding:5px 12px;font-size:11px;font-family:var(--head);letter-spacing:1px;border:1px solid #ffba1a;color:#ffba1a;background:rgba(255,186,26,0.08);cursor:pointer">🟡 ZONE</button>
+                <button onclick="sagePracticeSetTool('fvg')" id="sagePracToolF" style="padding:5px 12px;font-size:11px;font-family:var(--head);letter-spacing:1px;border:1px solid #aa66ff;color:#aa66ff;background:rgba(170,102,255,0.08);cursor:pointer">⚡ FVG</button>
+                <button onclick="sagePracticeReset()" style="padding:5px 12px;font-size:11px;font-family:var(--head);letter-spacing:1px;border:1px solid var(--border);color:var(--text-dim);background:transparent;cursor:pointer;margin-left:auto">↺ RESET</button>
+              </div>
+              <canvas id="sagePracticeCanvas" width="800" height="320"
+                style="width:100%;max-width:800px;display:block;border:1px solid var(--border);background:#040810;cursor:crosshair;touch-action:none">
+              </canvas>
+              <div id="sagePracticeFeedback" style="margin-top:10px;font-size:12px;color:var(--text-mid);min-height:20px"></div>
             </div>
           </div>
 
@@ -1881,6 +1898,7 @@ function sageCheckAnswer(lessonId, qIdx, selectedIdx, correctIdx) {
         resultEl.innerHTML = '✅ Perfect score! Lesson complete. You can move to the next lesson.';
         sageSaveProgress(lessonId);
         sageInitEdu();
+        sagePracticeShow();
         // Auto-advance to next lesson
         const next = SAGE_LESSONS.find(l => l.id === lessonId + 1);
         if (next) {
@@ -1896,6 +1914,262 @@ function sageCheckAnswer(lessonId, qIdx, selectedIdx, correctIdx) {
   }
 }
 
+
+
+// ══════════════════════════════════════════════════
+//  SAGE PRACTICE CHART
+// ══════════════════════════════════════════════════
+let sagePracTool = 'support';
+let sagePracLines = [];
+let sagePracDrawing = false;
+let sagePracStartY = 0;
+let sagePracCandles = [];
+
+const PRAC_COLORS = {
+  support: '#00ff99',
+  resistance: '#ff4466',
+  zone: '#ffba1a',
+  fvg: '#aa66ff'
+};
+
+const PRAC_LABELS = {
+  support: 'SUPPORT',
+  resistance: 'RESISTANCE',
+  zone: 'ZONE',
+  fvg: 'FVG'
+};
+
+function sagePracticeSetTool(tool) {
+  sagePracTool = tool;
+  ['S','R','Z','F'].forEach(t => {
+    const el = document.getElementById('sagePracTool' + t);
+    if (el) el.style.opacity = '0.4';
+  });
+  const map = {support:'S', resistance:'R', zone:'Z', fvg:'F'};
+  const active = document.getElementById('sagePracTool' + map[tool]);
+  if (active) active.style.opacity = '1';
+}
+
+function sagePracticeGenerateCandles() {
+  const candles = [];
+  let price = 1.1000 + Math.random() * 0.05;
+  for (let i = 0; i < 40; i++) {
+    const open = price;
+    const move = (Math.random() - 0.48) * 0.003;
+    const close = open + move;
+    const high = Math.max(open, close) + Math.random() * 0.002;
+    const low  = Math.min(open, close) - Math.random() * 0.002;
+    candles.push({ open, high, low, close });
+    price = close;
+  }
+  return candles;
+}
+
+function sagePracticeDrawChart() {
+  const canvas = document.getElementById('sagePracticeCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const PAD = { top: 20, bottom: 30, left: 10, right: 60 };
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#040810';
+  ctx.fillRect(0, 0, W, H);
+
+  if (!sagePracCandles.length) return;
+
+  // Price range
+  const allHigh = Math.max(...sagePracCandles.map(c => c.high));
+  const allLow  = Math.min(...sagePracCandles.map(c => c.low));
+  const priceRange = allHigh - allLow;
+  const chartH = H - PAD.top - PAD.bottom;
+  const chartW = W - PAD.left - PAD.right;
+  const candleW = Math.floor(chartW / sagePracCandles.length) - 2;
+
+  const toY = price => PAD.top + chartH - ((price - allLow) / priceRange * chartH);
+  const toX = i => PAD.left + i * (chartW / sagePracCandles.length) + candleW / 2;
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = PAD.top + (chartH / 4) * i;
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(W - PAD.right, y); ctx.stroke();
+    const price = allHigh - (priceRange / 4) * i;
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '10px monospace';
+    ctx.fillText(price.toFixed(4), W - PAD.right + 4, y + 4);
+  }
+
+  // Candles
+  sagePracCandles.forEach((c, i) => {
+    const x = toX(i);
+    const openY  = toY(c.open);
+    const closeY = toY(c.close);
+    const highY  = toY(c.high);
+    const lowY   = toY(c.low);
+    const bull   = c.close >= c.open;
+    const color  = bull ? '#00ff99' : '#ff4466';
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, highY);
+    ctx.lineTo(x, lowY);
+    ctx.stroke();
+
+    ctx.fillStyle = bull ? 'rgba(0,255,153,0.8)' : 'rgba(255,68,102,0.8)';
+    const bodyTop = Math.min(openY, closeY);
+    const bodyH   = Math.max(Math.abs(closeY - openY), 1);
+    ctx.fillRect(x - candleW / 2, bodyTop, candleW, bodyH);
+  });
+
+  // Draw saved lines
+  sagePracLines.forEach(line => {
+    ctx.strokeStyle = PRAC_COLORS[line.tool] || '#ffffff';
+    ctx.lineWidth = line.tool === 'zone' || line.tool === 'fvg' ? 1 : 1.5;
+    ctx.setLineDash(line.tool === 'support' || line.tool === 'resistance' ? [] : [4, 3]);
+    ctx.globalAlpha = 0.85;
+
+    if (line.tool === 'zone' || line.tool === 'fvg') {
+      // Draw as a shaded band
+      const y1 = toY(line.price);
+      const y2 = toY(line.price2 || line.price - priceRange * 0.015);
+      ctx.fillStyle = PRAC_COLORS[line.tool] + '22';
+      ctx.fillRect(PAD.left, Math.min(y1, y2), chartW, Math.abs(y2 - y1));
+      ctx.beginPath(); ctx.moveTo(PAD.left, y1); ctx.lineTo(W - PAD.right, y1); ctx.stroke();
+    } else {
+      const y = toY(line.price);
+      ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(W - PAD.right, y); ctx.stroke();
+    }
+
+    // Label
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = PRAC_COLORS[line.tool];
+    ctx.font = 'bold 10px monospace';
+    ctx.fillText(PRAC_LABELS[line.tool], W - PAD.right + 4, toY(line.price) + 4);
+  });
+
+  ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
+}
+
+function sagePracticeReset() {
+  sagePracCandles = sagePracticeGenerateCandles();
+  sagePracLines = [];
+  sagePracticeDrawChart();
+  const fb = document.getElementById('sagePracticeFeedback');
+  if (fb) fb.textContent = 'Chart reset. New candles loaded. Draw your levels.';
+}
+
+function sagePracticeGetPrice(canvas, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleY = canvas.height / rect.height;
+  const y = (clientY - rect.top) * scaleY;
+  const PAD = { top: 20, bottom: 30 };
+  const chartH = canvas.height - PAD.top - PAD.bottom;
+  const allHigh = Math.max(...sagePracCandles.map(c => c.high));
+  const allLow  = Math.min(...sagePracCandles.map(c => c.low));
+  const priceRange = allHigh - allLow;
+  return allHigh - ((y - PAD.top) / chartH) * priceRange;
+}
+
+function sagePracticeGetFeedback(tool, price) {
+  const allHigh = Math.max(...sagePracCandles.map(c => c.high));
+  const allLow  = Math.min(...sagePracCandles.map(c => c.low));
+  const mid = (allHigh + allLow) / 2;
+  if (tool === 'support') {
+    return price < mid
+      ? '✅ Good — support lines belong in the lower half of price action where buyers step in.'
+      : '⚠️ Support is usually drawn in the LOWER portion. Check if price bounced up from this level.';
+  }
+  if (tool === 'resistance') {
+    return price > mid
+      ? '✅ Good — resistance lines belong in the upper half where sellers reject price.'
+      : '⚠️ Resistance is usually drawn in the UPPER portion. Check if price was rejected here.';
+  }
+  if (tool === 'zone') return '✅ Zone marked. Look for multiple touches at this level — more touches = stronger zone.';
+  if (tool === 'fvg') return '✅ FVG marked. Price usually returns to fill this imbalance. Watch for the fill.';
+  return '';
+}
+
+function sagePracticeInit() {
+  const canvas = document.getElementById('sagePracticeCanvas');
+  if (!canvas) return;
+
+  sagePracCandles = sagePracticeGenerateCandles();
+  sagePracticeDrawChart();
+
+  let dragStartPrice = 0;
+
+  canvas.addEventListener('mousedown', function(e) {
+    sagePracDrawing = true;
+    dragStartPrice = sagePracticeGetPrice(canvas, e.clientY);
+  });
+
+  canvas.addEventListener('mousemove', function(e) {
+    if (!sagePracDrawing) return;
+    sagePracticeDrawChart();
+    // Draw preview line
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    const scaleY = canvas.height / rect.height;
+    const y = (e.clientY - rect.top) * scaleY;
+    ctx.strokeStyle = PRAC_COLORS[sagePracTool];
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(10, y);
+    ctx.lineTo(canvas.width - 60, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+  });
+
+  canvas.addEventListener('mouseup', function(e) {
+    if (!sagePracDrawing) return;
+    sagePracDrawing = false;
+    const price = sagePracticeGetPrice(canvas, e.clientY);
+    const line = { tool: sagePracTool, price: price };
+    if (sagePracTool === 'zone' || sagePracTool === 'fvg') {
+      line.price2 = dragStartPrice;
+    }
+    sagePracLines.push(line);
+    sagePracticeDrawChart();
+    const fb = document.getElementById('sagePracticeFeedback');
+    if (fb) fb.textContent = sagePracticeGetFeedback(sagePracTool, price);
+  });
+
+  // Touch support
+  canvas.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    sagePracDrawing = true;
+    dragStartPrice = sagePracticeGetPrice(canvas, e.touches[0].clientY);
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', function(e) {
+    if (!sagePracDrawing) return;
+    sagePracDrawing = false;
+    const price = sagePracticeGetPrice(canvas, e.changedTouches[0].clientY);
+    const line = { tool: sagePracTool, price: price };
+    if (sagePracTool === 'zone' || sagePracTool === 'fvg') line.price2 = dragStartPrice;
+    sagePracLines.push(line);
+    sagePracticeDrawChart();
+    const fb = document.getElementById('sagePracticeFeedback');
+    if (fb) fb.textContent = sagePracticeGetFeedback(sagePracTool, price);
+  }, { passive: false });
+}
+
+// Show practice zone when a lesson is loaded
+function sagePracticeShow() {
+  const zone = document.getElementById('sagePracticeZone');
+  if (zone && zone.style.display === 'none') {
+    zone.style.display = 'block';
+    sagePracticeInit();
+  }
+}
 
 </script>
 </body>
