@@ -106,10 +106,7 @@ def auth_logout():
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('sage_page'))
-    try:
-        return render_template('landing.html')
-    except Exception:
-        return redirect(url_for('login_page'))
+    return redirect(url_for('login_page'))
 
 @app.route('/pricing')
 def pricing_page():
