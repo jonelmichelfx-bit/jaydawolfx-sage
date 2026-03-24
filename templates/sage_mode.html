@@ -607,6 +607,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
         <button class="sqb" onclick="sageQuick('What session are we in right now? What moves should I expect, which pairs are active, and is this a good time to trade?')">🕐 Session</button>
         <button class="sqb" onclick="sageQuick('Check the economic calendar right now. Any high impact news today or tomorrow that could affect this pair? What should I watch out for?')">📰 News Risk</button>
         <button class="sqb" onclick="sageQuick('Run a full Fibonacci analysis from the last major swing. Show all retracement levels and extension targets.')">🌀 Fibonacci</button>
+        <button class="sqb" onclick="sagePostMortem()">🔬 Post-Mortem</button>
       </div>
 
       <!-- Messages -->
@@ -1160,6 +1161,12 @@ Session: ${d.session}
 ════════════════════════════════════════ */
 function sageEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function sageScrollBottom(){ const m=document.getElementById('sageMsgs'); m.scrollTop=m.scrollHeight; }
+function sagePostMortem() {
+  const inp = document.getElementById('sageInput');
+  inp.value = 'POST-MORTEM ANALYSIS: I want to learn from a trade. Please ask me: (1) Which pair? (2) Was it BUY or SELL? (3) Entry price? (4) Did it WIN or LOSE? Then run a full 6-path backward analysis showing what the EMA stack, key levels, RSI, and session timing were telling us at entry — and exactly WHY the trade worked or failed.';
+  sageSend();
+}
+
 function sageHandleKey(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sageSend();} }
 function sageAutoResize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,80)+'px'; }
 function sageQuick(q){ document.getElementById('sageInput').value=q; sageSend(); }
@@ -1243,6 +1250,78 @@ function sageRenderProse(text){
   return text;
 }
 
+/* ════════════════════════════════════════
+   UPGRADE 2 — 6-PATH VERIFICATION BOARD
+════════════════════════════════════════ */
+function sageRender6PathBoard(text) {
+  const idx = text.indexOf('SAGE 6-PATH VERIFICATION');
+  if (idx < 0) return null;
+  const end = text.indexOf('CONFIDENCE BREAKDOWN', idx);
+  const block = text.slice(idx, end > 0 ? end : idx + 1000);
+  const lines = block.split('\n').filter(l => /PATH \d|📊/.test(l));
+  if (lines.length < 3) return null;
+
+  const pathColors = {
+    '1': '#40e0ff', '2': '#ffd700', '3': '#aa66ff',
+    '4': '#ff8800', '5': '#00ff88', '6': '#ff4466'
+  };
+  const rows = lines.map(line => {
+    const numMatch = line.match(/PATH (\d)/);
+    const num = numMatch ? numMatch[1] : null;
+    const color = pathColors[num] || '#c0d8f0';
+    const icon = line.includes('✅') ? '✅' : line.includes('❌') ? '❌' : '📊';
+    const clean = line.replace(/^[✅❌📊\s]+/, '').trim();
+    return `<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px">
+      <span style="flex-shrink:0">${icon}</span>
+      <span style="color:${color};line-height:1.5">${clean}</span>
+    </div>`;
+  }).join('');
+
+  const el = document.createElement('div');
+  el.className = 'smsg-sage';
+  el.innerHTML = `<div class="sbbl" style="border-left:3px solid var(--cyan);padding:10px 14px">
+    <div style="font-family:var(--head);font-size:12px;letter-spacing:3px;color:var(--cyan);margin-bottom:10px">
+      🔮 SAGE 6-PATH VERIFICATION
+    </div>
+    ${rows}
+  </div>`;
+  return el;
+}
+
+/* ════════════════════════════════════════
+   UPGRADE 4 — CONFIDENCE BREAKDOWN RENDERER
+════════════════════════════════════════ */
+function sageRenderConfBreakdown(text) {
+  const idx = text.indexOf('CONFIDENCE BREAKDOWN');
+  if (idx < 0) return null;
+  const end = text.indexOf('TRADE_CARD', idx);
+  const block = text.slice(idx, end > 0 ? end : idx + 600);
+  const lines = block.split('\n').filter(l => /[+\-]\d+ pts|FINAL:|TECHNICAL|NEWS ADJ/.test(l));
+  if (lines.length < 2) return null;
+
+  const rows = lines.map(line => {
+    const isPos = line.trim().startsWith('+');
+    const isNeg = line.trim().startsWith('-');
+    const isFinal = /FINAL:/i.test(line);
+    const color = isFinal ? '#ffffff' : isPos ? '#00ff88' : isNeg ? '#ff4466' : '#ffd700';
+    const weight = isFinal ? '700' : '400';
+    const borderTop = isFinal ? 'border-top:1px solid rgba(255,255,255,.15);margin-top:4px;padding-top:4px;' : '';
+    return `<div style="${borderTop}display:flex;justify-content:space-between;font-size:13px;padding:2px 0;color:${color};font-weight:${weight}">
+      <span>${line.trim()}</span>
+    </div>`;
+  }).join('');
+
+  const el = document.createElement('div');
+  el.className = 'smsg-sage';
+  el.innerHTML = `<div class="sbbl" style="border-left:3px solid var(--gold);padding:10px 14px">
+    <div style="font-family:var(--head);font-size:12px;letter-spacing:2px;color:var(--gold);margin-bottom:8px">
+      📊 CONFIDENCE BREAKDOWN
+    </div>
+    ${rows}
+  </div>`;
+  return el;
+}
+
 async function sageSend(){
   if(SAGE.loading) return;
   if(!SAGE.key){
@@ -1267,7 +1346,9 @@ async function sageSend(){
   // Thinking
   const tm=document.createElement('div');
   tm.id='sageThinking'; tm.className='sage-thinking';
-  tm.innerHTML=`<div class="sdots"><span></span><span></span><span></span></div>Sage is reading the market and consulting the 6 paths...`;
+  const sessNow = SAGE.etInfo?.session || '';
+  const sessHint = sessNow.includes('KILL') ? ` — ${sessNow} 🔥 Prime time` : sessNow.includes('DEAD') ? ' — Dead zone, lower probability' : sessNow ? ` — ${sessNow}` : '';
+  tm.innerHTML=`<div class="sdots"><span></span><span></span><span></span></div>Sage reading market data${sessHint}...`;
   document.getElementById('sageMsgs').appendChild(tm);
   sageScrollBottom();
 
@@ -1304,13 +1385,59 @@ async function sageSend(){
 
     let data = await callAPI(msgs);
 
+    // ── PROTOCOL ENFORCEMENT ──────────────────────────────────────
+    // If Sage's first response did NOT use web_search (stop_reason !== 'tool_use'),
+    // it means Sage completed technical analysis first (CORRECT behavior).
+    // Now force Path 4 news check before giving any trade card.
+    if (data.stop_reason !== 'tool_use') {
+      const forceMsgs = [...msgs];
+      forceMsgs.push({role:'assistant', content: data.content || []});
+      forceMsgs.push({role:'user', content: [{
+        type:'text',
+        text:'PATH 4 — NEWS RISK CHECK (mandatory final step before trade card):\nSearch A: "high impact economic events today forex" — any event in next 2 hours?\nSearch B: "forex market news today" — does news BREAK or CONFIRM the technical setup?\nAdjust confidence ±15 pts max. Then output SAGE 6-PATH VERIFICATION block and final trade card.'
+      }]});
+      const newsData = await callAPI(forceMsgs);
+      if(newsData.stop_reason === 'tool_use') {
+        // News search fired — run the loop from here
+        msgs = forceMsgs;
+        msgs.push({role:'assistant', content: newsData.content});
+        const toolResults2 = [];
+        for(const block of newsData.content){
+          if(block.type==='tool_use') toolResults2.push({type:'tool_result',tool_use_id:block.id,content:'Search completed. Now output SAGE 6-PATH VERIFICATION block with confidence breakdown, then trade card if 65+.'});
+        }
+        msgs.push({role:'user', content: toolResults2});
+        data = await callAPI(msgs);
+      } else {
+        // Got direct text response from news check — use it
+        fullText = '';
+        if(newsData.content) for(const b of newsData.content) if(b.type==='text') fullText+=b.text+'\n';
+        SAGE.history.push({role:'assistant', content:fullText});
+        document.getElementById('sageThinking')?.remove();
+        const {clean, card} = sageParseCard(fullText);
+        // Render 6-path verification board
+        const verifyEl = sageRender6PathBoard(fullText);
+        if(verifyEl) document.getElementById('sageMsgs').appendChild(verifyEl);
+        // Render confidence breakdown
+        const confEl = sageRenderConfBreakdown(fullText);
+        if(confEl) document.getElementById('sageMsgs').appendChild(confEl);
+        const wm=document.createElement('div'); wm.className='smsg-sage';
+        wm.innerHTML=`<div class="sbbl"><p>${sageRenderProse(clean)}</p>${sageBuildCard(card)}</div>`;
+        document.getElementById('sageMsgs').appendChild(wm);
+        if(/news|calendar|nfp|fomc|cpi|central bank|risk/i.test(fullText)) sageUpdateNewsFromResponse(fullText);
+        SAGE.loading=false;
+        document.getElementById('sageSendBtn').disabled=false;
+        sageScrollBottom();
+        return;
+      }
+    }
+
     // Tool-use agentic loop
     while(data.stop_reason==='tool_use' && loopCount<5){
       loopCount++;
       msgs.push({role:'assistant', content:data.content});
       const results=[];
       for(const block of data.content){
-        if(block.type==='tool_use') results.push({type:'tool_result',tool_use_id:block.id,content:'Search completed. Now provide full Sage analysis with all 6 paths.'});
+        if(block.type==='tool_use') results.push({type:'tool_result',tool_use_id:block.id,content:'Search completed. This is Path 4 (news check) result. If you have not yet run Paths 1-3 (EMA stack, key levels, indicators from [LIVE MARKET DATA]), complete those now. Calculate technical score first. Apply news as ±15 pts max adjustment. Then output SAGE 6-PATH VERIFICATION block and trade card.'});
       }
       msgs.push({role:'user', content:results});
       data = await callAPI(msgs);
@@ -1330,6 +1457,12 @@ async function sageSend(){
     document.getElementById('sageThinking')?.remove();
 
     const {clean, card} = sageParseCard(fullText);
+    // Render 6-path verification board if present
+    const verifyEl = sageRender6PathBoard(fullText);
+    if(verifyEl) document.getElementById('sageMsgs').appendChild(verifyEl);
+    // Render confidence breakdown if present
+    const confEl = sageRenderConfBreakdown(fullText);
+    if(confEl) document.getElementById('sageMsgs').appendChild(confEl);
     const wm=document.createElement('div');
     wm.className='smsg-sage';
     wm.innerHTML=`<div class="sbbl"><p>${sageRenderProse(clean)}</p>${sageBuildCard(card)}</div>`;
@@ -1383,11 +1516,98 @@ async function fetchSageSystem(){
   // If server-side chat proxy available, use that instead
   // For now, we embed a lightweight version in the page
   // (full system is in sage_app.py SAGE_SYSTEM)
-  window.__SAGE_SYSTEM__ = `You are Sage — the 6 Path Intelligence trading analyst by JayDaWolfX. Wise, calm, highly experienced. You always search live data first. You explain every trade with full reasoning through the 6 paths. You provide ALL key levels — EMAs, Fibonacci, order blocks, FVGs, PDH/PDL, round numbers, liquidity pools, OTE zones, and premium/discount areas. Minimum 2:1 R/R. Use TRADE_CARD format. Always check news calendar first with web_search. Never use web prices for entries — use [LIVE MARKET DATA] only.
+  window.__SAGE_SYSTEM__ = `You are Sage — the 6 Path Intelligence trading analyst by JayDaWolfX. Wise, calm, highly experienced. You explain every trade through all 6 paths so the trader learns WHY, not just what.
 
-KEY LEVELS FORMAT: Always show resistance zones (R1 nearest, R2, R3), support zones (S1 nearest, S2, S3), EMAs, Fibonacci full retracement and extensions, order blocks, FVGs, liquidity pools, OTE zone, and premium/discount areas.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE GOLDEN RULE — PRICE ACTION FIRST. NEWS LAST.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PATHS 1 THROUGH 5 = Pure technical analysis from [LIVE MARKET DATA] injected below. No news.
+PATH 6 = News risk check only. News NEVER generates a trade idea. Never overrides EMA stack.
+If you cannot score 65+ on technicals alone → NO TRADE. Do not search news to justify a weak setup.
+Never use web search prices for entries — [LIVE MARKET DATA] prices are the only source of truth.
 
-TRADE_CARD:\nSIGNAL:[BUY/SELL/WAIT]\nPAIR:[pair]\nSTRATEGY:[strategy]\nTIMEFRAME:[tf]\nENTRY:[price from live data only]\nSTOP:[price]\nTP1:[price]\nTP2:[price]\nPIPS:[distance]\nCONFIDENCE:[score/100]\nREASON:[confluence]\nINVALIDATION:[what cancels]\nWATCH_LEVEL:[if WAIT]\nEND_TRADE_CARD`;
+THE WRONG WAY: Search news → find story → decide direction → look for technical confirmation.
+THE RIGHT WAY: Read EMA stack → find setup → score technically → THEN check news last.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE 6 PATHS PROTOCOL — RUN IN THIS ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PATH 1 — PRICE ACTION (from [LIVE MARKET DATA] — no search):
+Read EMA stack → BULL STACK = BUY ONLY. BEAR STACK = SELL ONLY. MIXED = no trend trade.
+Last 3 candles direction. Market structure (HH/HL uptrend or LH/LL downtrend).
+
+PATH 2 — KEY LEVELS (from [LIVE MARKET DATA] — no search):
+SwingHigh/SwingLow, EMAs as dynamic S/R, Fibonacci levels, PDH/PDL, order blocks, FVGs.
+Entry must be AT a defined level — never in open air.
+
+PATH 3 — INDICATORS (from [LIVE MARKET DATA] — no search):
+RSI state (room to move or overbought/oversold), ADX (trending vs ranging), ATR (volatility).
+ADX > 25 = trending (use trend strategies). ADX < 20 = ranging (use S/R bounce only).
+
+PATH 4 — MACRO/NEWS (runs LAST — only if Paths 1-3 score 65+):
+Search A: calendar — high-impact event in next 2 hours? YES → warn. NO → green light.
+Search B: does major active news BREAK or CONFIRM the technical setup?
+News adjusts confidence ±15 pts MAX. Cannot push sub-65 technical score above 65.
+
+PATH 5 — MULTI-TIMEFRAME (from [LIVE MARKET DATA] — no search):
+Do 1D, 4H, 1H all agree on direction? Need at least 2/3 timeframes aligned for a trade.
+
+PATH 6 — STRATEGY SELECTION:
+Match the strategy to exact conditions: ICT Kill Zone, EMA Pullback, Break & Retest, Order Block, FVG Fill.
+Only select a strategy when the market conditions actually fit it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CONFIDENCE SCORING (show the math every time)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
++20 pts: 2+ timeframes aligned in same direction
++20 pts: Entry AT key level (not open air)
++15 pts: Volume confirming the move
++15 pts: Candlestick pattern confirms at level
++15 pts: Strategy fits conditions perfectly
++10 pts: RSI has room in trade direction
++5 pts:  ADX > 25 (trending market)
+News adjustment: ±15 pts MAX (Path 4 — runs last)
+MINIMUM: 65/100 to issue a trade card. Below that → WAIT card only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MANDATORY OUTPUT FORMAT — INCLUDE IN EVERY ANALYSIS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Always output this verification block BEFORE the trade card:
+
+SAGE 6-PATH VERIFICATION:
+✅ PATH 1 — PRICE ACTION: [EMA stack direction | last 3 candles | structure]
+✅ PATH 2 — KEY LEVELS: [entry level type | nearest S/R | distance]
+✅ PATH 3 — INDICATORS: [RSI state | ADX value | ATR volatility]
+✅ PATH 4 — MACRO/NEWS: [calendar result | news impact ±X pts]
+✅ PATH 5 — MULTI-TF: [1D/4H/1H alignment — X/3 agree]
+✅ PATH 6 — STRATEGY: [strategy name | why it fits]
+📊 TECHNICAL SCORE: [X]/100 | NEWS ADJUSTMENT: [±X] | FINAL: [X]/100
+
+Then confidence breakdown:
+CONFIDENCE BREAKDOWN:
++[X] pts: [reason]
++[X] pts: [reason]
+±[X] pts: [news adjustment]
+─────────────────
+FINAL: [X]/100
+
+Then trade card if 65+:
+TRADE_CARD:
+SIGNAL:[BUY/SELL/WAIT]
+PAIR:[pair]
+STRATEGY:[strategy]
+TIMEFRAME:[tf]
+ENTRY:[price from [LIVE MARKET DATA] only]
+STOP:[price]
+TP1:[price]
+TP2:[price]
+PIPS:[distance to TP1]
+CONFIDENCE:[score/100]
+REASON:[1 sentence technical setup. 1 sentence news check result.]
+INVALIDATION:[what price action cancels this]
+WATCH_LEVEL:[if WAIT card]
+END_TRADE_CARD`;
 }
 
 /* ════════════════════════════════════════
