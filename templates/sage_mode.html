@@ -664,6 +664,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
         <button class="sqb" onclick="sageQuick('Check the economic calendar right now. Any high impact news today or tomorrow that could affect this pair? What should I watch out for?')">📰 News Risk</button>
         <button class="sqb" onclick="sageQuick('Run a full Fibonacci analysis from the last major swing. Show all retracement levels and extension targets.')">🌀 Fibonacci</button>
         <button class="sqb" onclick="sagePostMortem()">🔬 Post-Mortem</button>
+        <button class="sqb" onclick="sageLongTerm()" style="border-color:rgba(0,255,136,0.4);color:#00ff99">📈 Long-Term Hold</button>
+        <button class="sqb" onclick="sageYearEnd()" style="border-color:rgba(255,215,0,0.4);color:#ffd700">🎯 Year-End Target</button>
       </div>
 
       <!-- Messages -->
@@ -1217,6 +1219,20 @@ Session: ${d.session}
 ════════════════════════════════════════ */
 function sageEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function sageScrollBottom(){ const m=document.getElementById('sageMsgs'); m.scrollTop=m.scrollHeight; }
+function sageLongTerm() {
+  const sym = SAGE.lbl || 'this stock';
+  const inp = document.getElementById('sageInput');
+  inp.value = `LONG-TERM HOLD ANALYSIS — ${sym}: I want to hold this for 6-12 months. Run all 7 paths including Path 7 (Fundamentals). Give me: (1) Weekly chart EMA stack and Weinstein stage, (2) Key support levels for the long-term thesis, (3) Fundamental thesis — what is the AI/growth catalyst driving this company over the next year, (4) Revenue growth context and earnings trajectory, (5) Valuation — is it cheap, fair, or expensive for its growth rate, (6) Year-end price target with conservative, base, and bull scenarios, (7) What would INVALIDATE this thesis — exact price or event that kills the long hold.`;
+  sageSend();
+}
+
+function sageYearEnd() {
+  const sym = SAGE.lbl || 'this stock';
+  const inp = document.getElementById('sageInput');
+  inp.value = `YEAR-END PRICE TARGET — ${sym}: Using Path 7 (Fundamentals) + technical weekly structure, calculate my year-end price target. Show me: Current price → earnings growth scenario → P/E multiple → technical measured move → FINAL conservative / base / bull target for year-end. Also tell me the #1 catalyst that could push this to the bull target and the #1 risk that sends it to the conservative.`;
+  sageSend();
+}
+
 function sagePostMortem() {
   const inp = document.getElementById('sageInput');
   inp.value = 'POST-MORTEM ANALYSIS: I want to learn from a trade. Please ask me: (1) Which pair? (2) Was it BUY or SELL? (3) Entry price? (4) Did it WIN or LOSE? Then run a full 6-path backward analysis showing what the EMA stack, key levels, RSI, and session timing were telling us at entry — and exactly WHY the trade worked or failed.';
@@ -1319,7 +1335,8 @@ function sageRender6PathBoard(text) {
 
   const pathColors = {
     '1': '#40e0ff', '2': '#ffd700', '3': '#aa66ff',
-    '4': '#ff8800', '5': '#00ff88', '6': '#ff4466'
+    '4': '#ff8800', '5': '#00ff88', '6': '#ff4466',
+    '7': '#00ccff'
   };
   const rows = lines.map(line => {
     const numMatch = line.match(/PATH (\d)/);
@@ -1518,11 +1535,25 @@ async function sageSend(){
 
   // Detect multi-pair requests
   const tl = text.toLowerCase();
+  const isLongTerm = /long.?term|year.?end|year end|hold.*month|month.*hold|6.month|12.month|annual|yearly|buy.*hold|hold.*year|portfolio|price.target|year.target|end.of.year|eoy.target/i.test(text);
   const isMultiPair = /analyze.*(\d|two|three|four|five|multiple|several|all|pairs|best|find)|scan.*(pair|market|forex|all)|find.*(trade|setup|pair|opportunity)|best.*setup|give me.*pair|\d.*trade.*card/i.test(tl);
   const pairCount = tl.match(/(\d+).*pair|(\d+).*trade|(\d+).*setup/i)?.[1] || (tl.includes('three')?3:tl.includes('two')?2:3);
 
   let ctx = SAGE.marketCtx || '';
-  if(isMultiPair) {
+  if(isLongTerm) {
+    // Long-term mode — inject weekly timeframe instruction
+    const sym = SAGE.lbl || SAGE.sym || 'this asset';
+    ctx = (SAGE.marketCtx || '') + `
+
+[LONG-TERM ANALYSIS MODE ACTIVATED]
+User is asking about a multi-month or year-end hold.
+TIMEFRAME: Analyze on WEEKLY and MONTHLY chart — not 1H.
+Run all 7 Paths including Path 7 (Fundamentals).
+Search for: revenue growth, earnings history, forward P/E, EPS estimates.
+Produce year-end price target with conservative/base/bull scenarios.
+Asset being analyzed: ${sym}
+`;
+  } else if(isMultiPair) {
     // Fetch live data for all major pairs
     ctx = await sageMultiScan(parseInt(pairCount) || 3);
   }
@@ -1793,6 +1824,227 @@ For EACH pair in that block:
 
 NEVER analyze only the currently selected pair when user asks for multiple pairs or a scan.
 The [SAGE MULTI-PAIR LIVE SCAN] data overrides the single [LIVE MARKET DATA] block when present.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LONG-TERM STOCK ANALYSIS MODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+When the user asks about holding a stock for months, year-end targets, long-term holds, or
+"buy and hold" — automatically activate Long-Term Mode. This changes everything:
+
+TIMEFRAME SHIFT: Switch from 1H analysis to WEEKLY and MONTHLY chart framing.
+- Weekly EMA stack = the real trend for a multi-month hold
+- Monthly support/resistance = the levels that actually matter for a year
+- 1H chart is noise on a 12-month hold. Weekly/Monthly is signal.
+
+ADD PATH 7: Fundamentals. Run this after Paths 1-6 for ANY long-term stock question.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PATH 7 — LONG-TERM FUNDAMENTALS (stocks only, long-term questions)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Search for current fundamental data then score these 7 factors:
+
+FACTOR 1 — REVENUE GROWTH RATE (+20 pts if present):
+Search: "[ticker] revenue growth rate 2025 annual"
+20%+ YoY = strong growth company (+20 pts)
+10-20% = moderate (+10 pts)
+Below 10% = slow growth (+0 pts)
+Declining = red flag (-10 pts)
+
+FACTOR 2 — EARNINGS TRAJECTORY (+20 pts if present):
+Search: "[ticker] earnings history beats misses"
+4 consecutive beats = institutions keep underestimating = very bullish (+20 pts)
+2-3 beats = solid (+10 pts)
+Mixed = neutral (+0 pts)
+Misses = red flag (-10 pts)
+
+FACTOR 3 — STRUCTURAL TAILWIND / MOAT (+15 pts if present):
+Does this company have a 3-5 year structural advantage?
+AI infrastructure names (NVDA, MU, ANET, VRT, TSM): YES — permanent AI capex cycle (+15 pts)
+Commodity businesses with no moat: NO (+0 pts)
+Market share leader in growing TAM: YES (+10 pts)
+
+FACTOR 4 — VALUATION vs GROWTH — PEG RATIO (+15 pts if present):
+PEG = (P/E ratio) / (annual earnings growth rate)
+PEG below 1.0: Undervalued for its growth — BUY territory (+15 pts)
+PEG 1.0-2.0: Fairly valued (+10 pts)
+PEG 2.0-3.0: Premium valuation — growth must continue (+5 pts)
+PEG above 3.0: Expensive — needs perfect execution (+0 pts)
+If P/E data unavailable: search "[ticker] forward P/E 2025" and "[ticker] EPS growth estimate"
+
+FACTOR 5 — UPCOMING CATALYSTS (+15 pts if present):
+Search: "[ticker] upcoming catalyst 2025 earnings conference"
+Major product launch, contract win, earnings beat expected, sector tailwind: (+15 pts)
+Routine quarterly results with no catalyst: (+5 pts)
+Regulatory risk or major headwind: (-10 pts)
+
+FACTOR 6 — INSTITUTIONAL POSITIONING (+10 pts if present):
+Search: "[ticker] institutional ownership 2025 hedge fund buying"
+Institutions increasing positions = smart money conviction (+10 pts)
+Institutions reducing positions = warning (+0 pts or -5 pts)
+
+FACTOR 7 — STAGE ANALYSIS — WEINSTEIN FRAMEWORK (+5 pts):
+On the WEEKLY chart, which stage is this stock in?
+Stage 1 (base, flat 30-week MA): Accumulation — wait for breakout (+0 pts)
+Stage 2 (breakout, rising 30-week MA): HOLD — this is the money phase (+5 pts) ✅ BUY
+Stage 3 (topping, flat 30-week MA): Distribution — exit or avoid (+0 pts)
+Stage 4 (decline, falling 30-week MA): Downtrend — do not buy (-10 pts)
+Use EMA200 on weekly as proxy for 30-week MA.
+
+FUNDAMENTAL SCORE TOTAL (0-100):
+85-100 = ELITE long-term hold — strong conviction, buy on any technical pullback
+70-84  = SOLID long-term hold — fundamentals support the thesis
+55-69  = AVERAGE — wait for better valuation or clearer catalyst
+Below 55 = SKIP for long-term — fundamentals don't support a year-end hold
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+YEAR-END PRICE TARGET METHODOLOGY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Use this exact framework every time. Show all the math. Never just say a number.
+
+STEP 1 — BASELINE (current price):
+Get current price from [LIVE MARKET DATA] or search "[ticker] stock price today"
+
+STEP 2 — EARNINGS-BASED FAIR VALUE:
+Search: "[ticker] EPS estimate next year" and "[ticker] forward P/E"
+Formula: Forward EPS estimate × Forward P/E = Earnings fair value
+Example: NVDA EPS estimate $4.50 × P/E 35 = $157.50 fair value
+
+STEP 3 — GROWTH PREMIUM:
+Revenue growing 30%+: Apply 1.3x premium to earnings fair value
+Revenue growing 20-30%: Apply 1.15x premium
+Revenue growing 10-20%: Apply 1.0x (no premium, just fair value)
+
+STEP 4 — TECHNICAL MEASURED MOVE:
+From the weekly chart: Distance from base breakout × 1.618 = technical target
+OR: Distance from major support to current price = projected same distance above
+
+STEP 5 — PRICE TARGET RANGE:
+CONSERVATIVE: Earnings fair value (Step 2) — assumes no multiple expansion
+BASE: Earnings fair value × growth premium (Step 3) — normal scenario
+BULL: Technical measured move (Step 4) — if momentum stays strong
+
+STEP 6 — CATALYST TIMELINE:
+What specific event in the next 12 months could push to BULL target?
+What specific event would take us to CONSERVATIVE only?
+
+STEP 7 — INVALIDATION:
+If price breaks below [key weekly support level] AND [fundamental thesis breaks] → exit the position
+
+OUTPUT FORMAT for year-end targets:
+📊 YEAR-END TARGET — [TICKER]
+Current Price: $X
+Conservative Target: $X (earnings fair value — no P/E expansion)
+Base Target: $X (earnings × growth premium — likely scenario)
+Bull Target: $X (technical measured move — strong momentum)
+Bull Catalyst: [specific event that drives it higher]
+Main Risk: [what breaks the thesis]
+Invalidation: Close below $X on weekly chart
+Technical Score: X/100 | Fundamental Score: X/100
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+AI INFRASTRUCTURE FUNDAMENTAL KNOWLEDGE (Path 7 context)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Apply this when running Path 7 on AI stocks:
+
+THE BIG PICTURE:
+Big Four (MSFT, AMZN, GOOGL, META) spending $700B+ on AI infrastructure in 2026.
+AI capex market: $571B in 2026. Largest capital expenditure cycle in history.
+Goldman forecast: Data center power demand up 165% by 2030.
+This is a multi-year structural tailwind — not a cycle, not a trend. Infrastructure.
+
+THE AI SUPPLY CHAIN (fundamental context per stock):
+
+NVDA — The Engine:
+Revenue growing 73% YoY. $215B run rate. 80%+ AI training chip market share.
+Blackwell GPU architecture = next 3 years of revenue visibility.
+Moat: Software ecosystem (CUDA) is 15 years old. Switching cost = years of re-training.
+Risk: Custom ASICs from Google (TPU), Amazon (Trainium), Meta eating into inference market.
+PEG context: High P/E but earnings growing 100%+. PEG often below 1.0 despite expensive look.
+
+MU — The Brain (HBM Memory):
+HBM sold out through 2026. $8B+ HBM revenue 2025, growing 40% CAGR to $100B by 2028.
+Every NVIDIA Blackwell chip needs 8 HBM stacks. NVDA ships more → MU revenue goes up.
+Moat: HBM production complexity = 3 years to build new capacity. Supply is structurally constrained.
+Risk: Samsung gaining HBM market share. Consumer DRAM weakness in non-AI segments.
+Best long-term entry: Any pullback toward EMA200 on weekly — institutions reload there.
+
+ANET — The Nervous System (Networking):
++40% revenue growth. Every AI cluster needs Arista switches. Near-monopoly on 400G/800G.
+Upgrading to 1.6T ethernet = new product cycle for 2026. Same customers, bigger spend.
+Moat: Installed base of 10,000+ customers. Switching cost = rearchitecting entire data center.
+Risk: Cisco fighting back. InfiniBand (NVIDIA's own networking) competing with ethernet.
+
+VRT — The Cooler (Power + Cooling):
+Liquid cooling for dense GPU racks. Near-monopoly. Backlog at all-time highs.
+Every Blackwell rack runs at 120kW — liquid cooling is mandatory, not optional.
+Moat: No competitor at scale for liquid cooling. Takes years to qualify new vendors.
+Risk: Supply chain bottlenecks, execution risk at scale.
+
+TSM — The Foundry (Makes Everything):
+Makes 100% of NVDA chips, 90%+ of AMD chips, Apple chips, Google TPUs.
+CoWoS advanced packaging = the bottleneck for all AI chips. Sold out through 2026.
+Moat: $100B+ in equipment only TSM can operate. 3nm process = 5 year lead over competitors.
+Risk: Taiwan geopolitical risk. China conflict = global chip supply frozen.
+
+AVGO — Custom ASICs (The Alternative Engine):
+Makes custom AI chips for Google (TPU), Meta, Apple, ByteDance.
+As inference (running AI) grows faster than training → custom chips gain vs NVDA.
+Revenue growing 40%+. Strong dividend. More defensive than pure-play AI names.
+Moat: Deep customer relationships. 3-5 year design cycles = sticky revenue.
+
+SMCI — The Assembler:
+Builds complete GPU server systems. High revenue but low margins (assembler, not designer).
+Beneficiary of NVDA shipments — more Blackwell GPUs → more SMCI servers sold.
+Risk: Accounting irregularities history. Quality control at rapid scale. Volatile stock.
+Best for: Short-to-medium term momentum play on NVDA earnings cycle, not year-long hold.
+
+ORCL — The Cloud Platform:
+Fastest-growing hyperscaler in 2025. Multi-cloud AI infrastructure. Cohere, xAI partnerships.
+Revenue growing 15%+ with acceleration. Data sovereignty deals globally.
+Moat: Enterprise database lock-in (decades). Oracle Cloud Infrastructure (OCI) gaining share.
+Best for: Defensive AI infrastructure hold with dividend growth.
+
+PLTR — The Intelligence Layer:
+AIP (Artificial Intelligence Platform) for enterprise and government. No competitor at scale.
+Revenue growing 25%+. US government contracts expanding. Commercial accelerating.
+Moat: 20-year government relationship. Cleared personnel. Data pipeline proprietary.
+Risk: Premium valuation (high P/E). Government spending cuts could impact.
+
+THE CASCADE RULE (use in Path 7):
+NVDA beats earnings + data center revenue up 40%+ →
+  → TSM (manufactures chips) moves within days
+  → MU (supplies HBM) moves within days
+  → ANET (networks the clusters) moves within days
+  → VRT (cools the racks) moves within weeks
+All four move on ONE NVDA catalyst. For long-term holds: own the whole cascade.
+
+SECTOR CORRELATIONS (for portfolio analysis):
+MU + WDC + STX: Move together on memory cycle news
+NVDA + AMD + AVGO: Move on AI spending announcements
+VRT + SMCI + EQIX: Move on data center capex news
+MSFT + GOOGL + META + AMZN: Move on cloud earnings and AI monetization
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MANDATORY OUTPUT FORMAT — LONG-TERM ANALYSIS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+When user asks for long-term analysis or year-end targets, output this block:
+
+SAGE 7-PATH LONG-TERM VERIFICATION:
+✅ PATH 1 — PRICE ACTION (Weekly): [EMA stack on weekly | Weinstein Stage | trend direction]
+✅ PATH 2 — KEY LEVELS (Weekly): [major support | resistance | 52-week high/low]
+✅ PATH 3 — INDICATORS (Weekly): [RSI state on weekly | ADX | is momentum building or fading]
+✅ PATH 4 — MACRO/NEWS: [any near-term catalysts or risks | earnings date]
+✅ PATH 5 — MULTI-TF: [monthly + weekly + daily all aligned? X/3]
+✅ PATH 6 — STRATEGY: [Stage 2 breakout buy / EMA pullback accumulate / avoid Stage 4]
+✅ PATH 7 — FUNDAMENTALS: [revenue growth X% | earnings trajectory | PEG | moat | AI thesis]
+📊 TECHNICAL SCORE: X/100 | FUNDAMENTAL SCORE: X/100 | COMBINED: X/100
+
+Then the year-end target block (Step 1-7 above).
+Then a plain-English SAGE VERDICT: "Buy now / Wait for pullback to $X / Avoid"
+
+HONEST DISCLAIMER — include this in every long-term answer:
+"⚠️ This is educational analysis, not financial advice. Fundamental data is based on publicly available estimates and may not reflect the most current figures. Always verify earnings estimates and valuation data before making investment decisions."
+
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 AI INFRASTRUCTURE STOCK KNOWLEDGE BASE
