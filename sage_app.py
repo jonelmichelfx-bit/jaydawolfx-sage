@@ -115,7 +115,7 @@ def pricing_page():
 @app.route('/sage-mode')
 @login_required
 def sage_page():
-    return render_template('sage_mode.html')
+    return render_template('sage_mode.html', sage_system=SAGE_SYSTEM)
 
 # ── STRIPE CHECKOUT ────────────────────────────────────────
 @app.route('/create-checkout-session', methods=['POST'])
