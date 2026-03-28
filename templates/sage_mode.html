@@ -1047,6 +1047,24 @@ function sageRenderPanel(d){
   set('sageRsi', d.rsi||'--', rsi>70?'var(--green)':rsi<30?'var(--red)':'var(--text)');
   set('sageAdx', d.adx||'--', adx>25?'var(--gold)':adx<20?'var(--text-dim)':'var(--text)');
   set('sageAtr', d.atr||'--');
+
+  // 15M Entry Trigger
+  const trigEl = document.getElementById('sage15MTrigger');
+  if(trigEl && d.entry_15m){
+    const t = d.entry_15m;
+    const isBull = t.pattern && (t.pattern.includes('Bull') || t.pattern.includes('Hammer'));
+    trigEl.innerHTML = `
+      <div style="font-size:.75rem;font-weight:700;color:${isBull?'#00ff99':'#ff6680'};margin-bottom:3px">
+        ${isBull?'🟢':'🔴'} ${t.pattern}
+      </div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:#90b8d8">
+        Close: ${t.close} | H: ${t.high} | L: ${t.low}
+      </div>
+      <div style="font-size:.65rem;color:#607a94;margin-top:2px;font-weight:600">${t.note}</div>`;
+  } else if(trigEl){
+    trigEl.innerHTML = '<div style="color:var(--text-dim);font-size:.65rem">Loading 15M data...</div>';
+  }
+
   const rsiNote = document.getElementById('sageRsiNote');
   const adxNote = document.getElementById('sageAdxNote');
   if(rsiNote) rsiNote.textContent = rsi>70?'strong momentum':rsi>50?'bullish':rsi<30?'strong selling':rsi<50?'bearish':'neutral';
@@ -1085,89 +1103,144 @@ function sageRenderPanel(d){
     stratEl.textContent = strat;
   }
 
-  // ── INSTITUTIONAL TAB ──
-  // Order Blocks
+  // ── INSTITUTIONAL TAB — FULL ICT SCANNER ──
   const obEl = document.getElementById('sageOBSection');
   if(obEl){
     let obHtml = '';
-    if(d.bull_ob) obHtml += `
-      <div class="sp-news-row medium" style="border-color:var(--green)">
-        <div class="sp-news-time">BULLISH ORDER BLOCK</div>
-        <div class="sp-news-event" style="color:var(--green)">Zone: ${d.bull_ob.low} — ${d.bull_ob.high}</div>
-        <div style="font-size:.72rem;color:#90b8d8;margin-top:3px;line-height:1.7;font-weight:600">
-          Last bearish candle before bullish displacement. Price tends to return here for institutional re-entry. 
-          ${parseFloat(d.bull_ob.low)<price?'<span style="color:#00ff99">✅ Below price — watch for pullback BUY here.</span>':'<span style="color:#ffaa44">⚠️ Above price — already broken through.</span>'}
-        </div>
+    if(d.choch_bos && d.choch_bos.length){
+      obHtml += '<div style="font-size:.78rem;font-weight:700;color:#60d0ff;margin-bottom:6px;letter-spacing:.5px">🔷 MARKET STRUCTURE</div>';
+      d.choch_bos.forEach(cb=>{
+        const isBull = cb.type&&(cb.type.includes('BULL')||cb.type.includes('BOS_BULL'));
+        obHtml += `<div style="font-size:.76rem;font-weight:700;color:${isBull?'#00ff99':'#ff6680'};margin-bottom:3px">${isBull?'▲':'▼'} ${cb.note}</div>`;
+      });
+      obHtml += '<div style="border-top:1px solid rgba(64,224,255,0.1);margin:6px 0"></div>';
+    }
+    if(d.bull_ob){
+      obHtml += `<div class="sp-news-row medium" style="border-color:var(--green)">
+        <div class="sp-news-time" style="color:#00ff99;font-weight:800;font-size:.75rem">🟢 BULLISH ORDER BLOCK — UNMITIGATED</div>
+        <div style="font-family:var(--mono);font-size:.85rem;color:#00ff99;margin:3px 0">Body: ${d.bull_ob.low} — ${d.bull_ob.high} | Mid: ${d.bull_ob.mid||'--'}</div>
+        <div style="font-size:.73rem;color:#90b8d8;line-height:1.7;font-weight:600">Fresh institutional demand. Price has NOT returned here.
+          ${parseFloat(d.bull_ob.low)<price?'<br><span style="color:#00ff99">✅ Below price — watch for pullback BUY at mid</span>':'<br><span style="color:#ffaa44">⚠️ Above price — watch for price to drop back in</span>'}</div>
       </div>`;
-    if(d.bear_ob) obHtml += `
-      <div class="sp-news-row medium" style="border-color:var(--red)">
-        <div class="sp-news-time">BEARISH ORDER BLOCK</div>
-        <div class="sp-news-event" style="color:var(--red)">Zone: ${d.bear_ob.low} — ${d.bear_ob.high}</div>
-        <div style="font-size:.72rem;color:#90b8d8;margin-top:3px;line-height:1.7;font-weight:600">
-          Last bullish candle before bearish displacement. Institutions may sell here on any rally. 
-          ${parseFloat(d.bear_ob.high)>price?'<span style="color:#ff6680">✅ Above price — watch for rally REJECTION here.</span>':'<span style="color:#ffaa44">⚠️ Below price — already traded through.</span>'}
-        </div>
+    }
+    if(d.bear_ob){
+      obHtml += `<div class="sp-news-row medium" style="border-color:var(--red)">
+        <div class="sp-news-time" style="color:#ff6680;font-weight:800;font-size:.75rem">🔴 BEARISH ORDER BLOCK — UNMITIGATED</div>
+        <div style="font-family:var(--mono);font-size:.85rem;color:#ff6680;margin:3px 0">Body: ${d.bear_ob.low} — ${d.bear_ob.high} | Mid: ${d.bear_ob.mid||'--'}</div>
+        <div style="font-size:.73rem;color:#90b8d8;line-height:1.7;font-weight:600">Fresh institutional supply. Price has NOT returned here.
+          ${parseFloat(d.bear_ob.high)>price?'<br><span style="color:#ff6680">✅ Above price — watch for rally REJECTION at mid</span>':'<br><span style="color:#ffaa44">⚠️ Below price — watch for price to rally back in</span>'}</div>
       </div>`;
-    if(!obHtml) obHtml = '<div style="color:var(--text-dim);font-size:.6rem;padding:8px">No clear order blocks detected in recent 30 candles.</div>';
+    }
+    if(d.bull_breaker){
+      obHtml += `<div class="sp-news-row" style="border-color:#ffaa44;border-left-width:3px">
+        <div class="sp-news-time" style="color:#ffaa44;font-weight:800;font-size:.75rem">⚡ BULLISH BREAKER — HIGH PROBABILITY SUPPORT</div>
+        <div style="font-family:var(--mono);font-size:.82rem;color:#ffaa44;margin:3px 0">${d.bull_breaker.low} — ${d.bull_breaker.high} | Mid: ${d.bull_breaker.mid||'--'}</div>
+        <div style="font-size:.73rem;color:#90b8d8;font-weight:600">${d.bull_breaker.note}. More powerful than a regular OB.</div>
+      </div>`;
+    }
+    if(d.bear_breaker){
+      obHtml += `<div class="sp-news-row" style="border-color:#ffaa44;border-left-width:3px">
+        <div class="sp-news-time" style="color:#ffaa44;font-weight:800;font-size:.75rem">⚡ BEARISH BREAKER — HIGH PROBABILITY RESISTANCE</div>
+        <div style="font-family:var(--mono);font-size:.82rem;color:#ffaa44;margin:3px 0">${d.bear_breaker.low} — ${d.bear_breaker.high} | Mid: ${d.bear_breaker.mid||'--'}</div>
+        <div style="font-size:.73rem;color:#90b8d8;font-weight:600">${d.bear_breaker.note}. More powerful than a regular OB.</div>
+      </div>`;
+    }
+    if(!d.bull_ob && !d.bear_ob && !d.bull_breaker && !d.bear_breaker && !(d.choch_bos&&d.choch_bos.length))
+      obHtml = '<div style="color:var(--text-dim);font-size:.72rem;padding:8px;font-weight:600">No institutional levels detected in recent candles.</div>';
     obEl.innerHTML = obHtml;
   }
 
-  // FVGs
+  // FVGs + Inversion FVGs
   const fvgEl = document.getElementById('sageFVGSection');
   if(fvgEl){
+    let fvgHtml = '';
     if(d.fvgs && d.fvgs.length){
-      fvgEl.innerHTML = d.fvgs.map(f=>`
+      fvgHtml += d.fvgs.map(f=>`
         <div class="sp-news-row low" style="border-color:${f.type==='BULL'?'var(--green)':'var(--red)'}">
-          <div class="sp-news-time" style="color:${f.type==='BULL'?'#00ff99':'#ff6680'};font-weight:700">${f.type==='BULL'?'⬆ BULLISH':'⬇ BEARISH'} FAIR VALUE GAP</div>
-          <div class="sp-news-event" style="color:${f.type==='BULL'?'#00ff99':'#ff6680'};font-size:.82rem">Zone: ${f.low} — ${f.high}</div>
-          <div style="font-size:.72rem;color:#90b8d8;margin-top:4px;font-weight:600;line-height:1.7">3-candle imbalance — price fills these 80% of the time.<br>${f.type==='BULL'?'<span style=\"color:#00ff99\">Bullish gap — expect price to return UP into this zone.</span>':'<span style=\"color:#ff6680\">Bearish gap — expect price to return DOWN into this zone.</span>'}</div>
+          <div class="sp-news-time" style="color:${f.type==='BULL'?'#00ff99':'#ff6680'};font-weight:800;font-size:.75rem">${f.type==='BULL'?'📊 BULLISH FVG — OPEN':'📊 BEARISH FVG — OPEN'}</div>
+          <div style="font-family:var(--mono);font-size:.85rem;color:${f.type==='BULL'?'#00ff99':'#ff6680'};margin:3px 0">Gap: ${f.low} — ${f.high}</div>
+          <div style="font-size:.73rem;color:#90b8d8;font-weight:600;line-height:1.7">Unfilled imbalance. ${f.note}</div>
         </div>`).join('');
-    } else {
-      fvgEl.innerHTML='<div style="color:#7090a8;font-size:.72rem;padding:10px;font-weight:600">No significant fair value gaps detected in recent candles.</div>';
+    }
+    if(d.inv_fvgs && d.inv_fvgs.length){
+      fvgHtml += d.inv_fvgs.map(f=>`
+        <div class="sp-news-row" style="border-color:#9966ff;border-left-width:3px">
+          <div class="sp-news-time" style="color:#9966ff;font-weight:800;font-size:.75rem">🔄 INVERSION FVG — ${f.type&&f.type.includes('BULL')?'NOW SUPPORT':'NOW RESISTANCE'}</div>
+          <div style="font-family:var(--mono);font-size:.82rem;color:#9966ff;margin:3px 0">${f.low} — ${f.high}</div>
+          <div style="font-size:.73rem;color:#90b8d8;font-weight:600">${f.note}</div>
+        </div>`).join('');
+    }
+    if(!fvgHtml) fvgHtml = '<div style="color:#7090a8;font-size:.72rem;padding:10px;font-weight:600">No fair value gaps detected in recent candles.</div>';
+    fvgEl.innerHTML = fvgHtml;
+  }
+
+  // Premium / Discount (upgraded — from algorithmic scanner)
+  const premEl = document.getElementById('sagePremiumSection');
+  if(premEl){
+    const pd = d.premium_discount;
+    if(pd){
+      const isPrem = pd.zone && pd.zone.includes('PREMIUM');
+      premEl.innerHTML = `
+        <div style="font-size:.65rem;line-height:1.9">
+          <div style="margin-bottom:4px">
+            <span class="sp-lvl-tag res">PREMIUM</span>
+            <span style="font-family:var(--mono);font-size:.72rem;color:var(--red);margin-left:6px">${pd.range_mid} — ${pd.range_high}</span>
+            <span style="font-size:.6rem;color:var(--text-dim);margin-left:4px">above midpoint — institutional SELL zone</span>
+          </div>
+          <div style="margin-bottom:8px">
+            <span class="sp-lvl-tag sup">DISCOUNT</span>
+            <span style="font-family:var(--mono);font-size:.72rem;color:var(--green);margin-left:6px">${pd.range_low} — ${pd.range_mid}</span>
+            <span style="font-size:.6rem;color:var(--text-dim);margin-left:4px">below midpoint — institutional BUY zone</span>
+          </div>
+          <div style="color:${isPrem?'var(--red)':'var(--green)'};font-weight:800;font-size:.8rem">
+            📍 PRICE IS IN THE ${isPrem?'PREMIUM (SELL) ZONE':'DISCOUNT (BUY) ZONE'}
+          </div>
+          <div style="color:var(--text-dim);margin-top:4px;font-size:.65rem;font-weight:600">
+            ${pd.bias}. ${isPrem?'Institutions SELL from premium. Look for bearish OBs and bear FVGs.':'Institutions BUY from discount. Look for bullish OBs and bull FVGs.'}
+          </div>
+        </div>`;
+    } else if(d.swing_high_50 && d.swing_low_50){
+      const sh=parseFloat(d.swing_high_50),sl=parseFloat(d.swing_low_50);
+      const mid=((sh+sl)/2).toFixed(5);
+      const isPremium=price>(sh+sl)/2;
+      premEl.innerHTML=`<div style="color:${isPremium?'var(--red)':'var(--green)'};font-weight:800;font-size:.8rem">📍 PRICE IS IN THE ${isPremium?'PREMIUM (SELL) ZONE':'DISCOUNT (BUY) ZONE'}</div>
+        <div style="font-size:.65rem;color:var(--text-dim);margin-top:4px">Midpoint: ${mid} | High: ${d.swing_high_50} | Low: ${d.swing_low_50}</div>`;
     }
   }
 
-  // Premium / Discount
-  const premEl = document.getElementById('sagePremiumSection');
-  if(premEl && d.swing_high_50 && d.swing_low_50){
-    const sh = parseFloat(d.swing_high_50), sl = parseFloat(d.swing_low_50);
-    const mid = ((sh+sl)/2).toFixed(isJPY?2:5);
-    const isPremium = price > (sh+sl)/2;
-    const fmtN = n => isJPY ? n.toFixed(2) : n.toFixed(5);
-    premEl.innerHTML = `
-      <div style="font-size:.65rem;line-height:1.8">
-        <div style="margin-bottom:4px">
-          <span class="sp-lvl-tag res">PREMIUM</span>
-          <span style="font-family:var(--mono);font-size:.7rem;color:var(--red);margin-left:6px">${mid} — ${fmtN(sh)}</span>
-          <span style="font-size:.6rem;color:var(--text-dim);margin-left:4px">above midpoint — SELL zone</span>
-        </div>
-        <div style="margin-bottom:8px">
-          <span class="sp-lvl-tag sup">DISCOUNT</span>
-          <span style="font-family:var(--mono);font-size:.7rem;color:var(--green);margin-left:6px">${fmtN(sl)} — ${mid}</span>
-          <span style="font-size:.6rem;color:var(--text-dim);margin-left:4px">below midpoint — BUY zone</span>
-        </div>
-        <div style="color:${isPremium?'var(--red)':'var(--green)'};font-weight:700">
-          📍 PRICE IS IN THE ${isPremium?'PREMIUM (SELL) ZONE':'DISCOUNT (BUY) ZONE'}
-        </div>
-        <div style="color:var(--text-dim);margin-top:4px;font-size:.6rem">
-          ${isPremium?'Price is expensive relative to current range. ICT says look for SELL setups — institutions sell premium.':'Price is cheap relative to current range. ICT says look for BUY setups — institutions buy discount.'}
-        </div>
-      </div>`;
-  }
-
-  // Liquidity pools
+  // Liquidity Pools (upgraded — BSL/SSL from algorithmic scanner)
   const liqEl = document.getElementById('sageLiqSection');
   if(liqEl){
-    const swH20 = parseFloat(d.swing_high_20);
-    const swL20 = parseFloat(d.swing_low_20);
-    liqEl.innerHTML = `
-      <div style="font-size:.75rem;line-height:2.0;font-weight:600">
-        <div>💧 <strong style="color:#ff6680">BUY STOPS above:</strong> <span style="color:#ffcc44;font-family:var(--mono)">${d.swing_high_20}</span> — equal highs. Institutions sweep this before going down.</div>
-        <div>💧 <strong style="color:#00ff99">SELL STOPS below:</strong> <span style="color:#ffcc44;font-family:var(--mono)">${d.swing_low_20}</span> — equal lows. Institutions sweep this before going up.</div>
-        ${d.pdh?`<div>📅 <strong style="color:#80d8ff">PDH liquidity:</strong> <span style="color:#ffcc44;font-family:var(--mono)">${d.pdh}</span> — yesterday's high. Buy stops sitting above it.</div>`:''}
-        ${d.pdl?`<div>📅 <strong style="color:#80d8ff">PDL liquidity:</strong> <span style="color:#ffcc44;font-family:var(--mono)">${d.pdl}</span> — yesterday's low. Sell stops sitting below it.</div>`:''}
-        <div style="color:#60d0ff;margin-top:6px;font-size:.72rem;border-top:1px solid rgba(64,224,255,0.15);padding-top:5px">⚡ ICT rule: Price SWEEPS liquidity first, then makes the real move in the OPPOSITE direction.</div>
+    let liqHtml = '';
+    if(d.liq_highs && d.liq_highs.length){
+      d.liq_highs.forEach(lp=>{
+        liqHtml += `<div style="font-size:.76rem;font-weight:700;margin-bottom:4px">
+          💧 <strong style="color:#ff6680">BUY-SIDE LIQUIDITY (BSL):</strong>
+          <span style="color:#ffcc44;font-family:var(--mono);font-size:.82rem"> ${lp.level}</span>
+          <span style="color:#607a94;font-size:.65rem"> — ${lp.touches} touches — ${lp.note}</span>
+        </div>`;
+      });
+    }
+    if(d.liq_lows && d.liq_lows.length){
+      d.liq_lows.forEach(lp=>{
+        liqHtml += `<div style="font-size:.76rem;font-weight:700;margin-bottom:4px">
+          💧 <strong style="color:#00ff99">SELL-SIDE LIQUIDITY (SSL):</strong>
+          <span style="color:#ffcc44;font-family:var(--mono);font-size:.82rem"> ${lp.level}</span>
+          <span style="color:#607a94;font-size:.65rem"> — ${lp.touches} touches — ${lp.note}</span>
+        </div>`;
+      });
+    }
+    if(!liqHtml){
+      const swH20=d.swing_high_20,swL20=d.swing_low_20;
+      liqHtml=`<div style="font-size:.76rem;line-height:2.0;font-weight:600">
+        <div>💧 <strong style="color:#ff6680">BUY STOPS above:</strong> <span style="color:#ffcc44;font-family:var(--mono)">${swH20}</span></div>
+        <div>💧 <strong style="color:#00ff99">SELL STOPS below:</strong> <span style="color:#ffcc44;font-family:var(--mono)">${swL20}</span></div>
+        ${d.pdh?`<div>📅 <strong style="color:#80d8ff">PDH:</strong> <span style="color:#ffcc44;font-family:var(--mono)">${d.pdh}</span></div>`:''}
+        ${d.pdl?`<div>📅 <strong style="color:#80d8ff">PDL:</strong> <span style="color:#ffcc44;font-family:var(--mono)">${d.pdl}</span></div>`:''}
       </div>`;
+    }
+    liqHtml += '<div style="color:#60d0ff;margin-top:6px;font-size:.72rem;font-weight:600;border-top:1px solid rgba(64,224,255,0.15);padding-top:5px">⚡ ICT rule: Price SWEEPS liquidity first, then makes the real move in the OPPOSITE direction.</div>';
+    liqEl.innerHTML = liqHtml;
   }
 
   // OTE zone
@@ -1194,6 +1267,17 @@ function sageRenderPanel(d){
 function sageRebuildCtx(d){
   if(!d) return;
   const etInfo = SAGE.etInfo;
+  const _pd = d.premium_discount || {};
+  const _cb = (d.choch_bos||[]).map(c=>c.note).join(' | ') || 'none';
+  const _bkrs = [
+    d.bull_breaker ? `BULL BREAKER ${d.bull_breaker.low}-${d.bull_breaker.high}` : '',
+    d.bear_breaker ? `BEAR BREAKER ${d.bear_breaker.low}-${d.bear_breaker.high}` : '',
+  ].filter(Boolean).join(' | ') || 'none';
+  const _inv = (d.inv_fvgs||[]).map(f=>f.type+' '+f.low+'-'+f.high).join(', ') || 'none';
+  const _bsl = (d.liq_highs||[]).map(l=>l.level).join(', ') || d.swing_high_20 || '--';
+  const _ssl = (d.liq_lows||[]).map(l=>l.level).join(', ')  || d.swing_low_20  || '--';
+  const _15m = d.entry_15m ? `${d.entry_15m.pattern} close=${d.entry_15m.close} H=${d.entry_15m.high} L=${d.entry_15m.low}` : 'no data';
+
   SAGE.marketCtx = `
 
 [LIVE MARKET DATA — TwelveData — ${etInfo.etTime||'--'} ET | ${etInfo.session||'--'}]
@@ -1208,10 +1292,21 @@ PDH: ${d.pdh||'--'} | PDL: ${d.pdl||'--'}
 Fib 23.6%: ${d.fib236} | 38.2%: ${d.fib382} | 50%: ${d.fib500}
 Fib 61.8% GOLDEN: ${d.fib618} | 78.6%: ${d.fib786}
 Extensions: 127.2%: ${d.ext127} | 161.8%: ${d.ext162}
-Bull OB: ${d.bull_ob?d.bull_ob.low+'–'+d.bull_ob.high:'none'} | Bear OB: ${d.bear_ob?d.bear_ob.low+'–'+d.bear_ob.high:'none'}
-FVGs: ${d.fvgs&&d.fvgs.length?d.fvgs.map(f=>f.type+' '+f.low+'–'+f.high).join(', '):'none'}
+
+── ICT SMART MONEY LEVELS (algorithmic — body-based, unmitigated only) ──
+Market Zone: ${_pd.zone||'--'} | Midpoint: ${_pd.range_mid||'--'}
+Structure: ${_cb}
+Bull OB (unmitigated): ${d.bull_ob?d.bull_ob.low+'–'+d.bull_ob.high+' mid='+d.bull_ob.mid:'none'}
+Bear OB (unmitigated): ${d.bear_ob?d.bear_ob.low+'–'+d.bear_ob.high+' mid='+d.bear_ob.mid:'none'}
+Breaker Blocks: ${_bkrs}
+Open FVGs: ${d.fvgs&&d.fvgs.length?d.fvgs.map(f=>f.type+' '+f.low+'–'+f.high).join(', '):'none'}
+Inversion FVGs: ${_inv}
+Buy-Side Liquidity (BSL): ${_bsl}
+Sell-Side Liquidity (SSL): ${_ssl}
+15M Entry Trigger: ${_15m}
 Session: ${d.session}
-🚨 USE ONLY THESE PRICES FOR ALL TRADE ENTRIES. DO NOT use web search prices for entries.`;
+🚨 USE ONLY THESE PRICES FOR ALL TRADE ENTRIES. DO NOT use web search prices for entries.
+🚨 PREMIUM = SELL ZONE only. DISCOUNT = BUY ZONE only. Never buy premium, never sell discount.`;
 }
 
 /* ════════════════════════════════════════
