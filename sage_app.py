@@ -115,7 +115,13 @@ def pricing_page():
 @app.route('/sage-mode')
 @login_required
 def sage_page():
-    return render_template('sage_mode.html', sage_system=SAGE_SYSTEM)
+    return render_template('sage_mode.html')
+
+@app.route('/api/sage-system', methods=['GET'])
+@login_required
+def api_sage_system():
+    """Return the SAGE system prompt to the browser securely."""
+    return jsonify({'system': SAGE_SYSTEM})
 
 # ── STRIPE CHECKOUT ────────────────────────────────────────
 @app.route('/create-checkout-session', methods=['POST'])

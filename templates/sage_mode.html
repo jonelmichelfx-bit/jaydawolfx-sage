@@ -746,7 +746,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 /* ════════════════════════════════════════
    SAGE STATE
 ════════════════════════════════════════ */
-const SAGE_SYSTEM_PROMPT = {{ sage_system | tojson }};
+let SAGE_SYSTEM_PROMPT = '';
+(async function loadSageSystem(){
+  try{
+    const r = await fetch('/api/sage-system', {credentials:'include'});
+    if(r.ok){ const d = await r.json(); SAGE_SYSTEM_PROMPT = d.system || ''; }
+  } catch(e){ console.warn('Could not load sage system:', e); }
+})();
 
 const SAGE = {
   sym: 'EURUSD=X',
