@@ -2072,7 +2072,7 @@ async function sageSend(){
                      `The <strong style="color:#40e0ff">${sessNow||'market'}</strong> is currently active.`;
     const greetMsg = document.createElement('div');
     greetMsg.className = 'smsg-sage';
-    greetMsg.innerHTML = \`<div class="sbbl"><p><strong style="color:#60d0ff">${timeGreet}, my student.</strong> Welcome to the 6 Path Intelligence Terminal.</p>
+    greetMsg.innerHTML = `<div class="sbbl"><p><strong style="color:#60d0ff">${timeGreet}, my student.</strong> Welcome to the 6 Path Intelligence Terminal.</p>
       <p>I am Sage — your guide through the markets. I do not just give signals. I teach you <em>why</em> the market moves, <em>where</em> the institutions are positioned, and <em>when</em> the right moment to strike is.</p>
       <p>${sessLine}</p>
       <p>Here is what you can ask me:<br>
@@ -2080,7 +2080,7 @@ async function sageSend(){
       📊 <strong>"Analyze EUR/USD"</strong> — Deep dive on one pair: structure, ICT levels, support/resistance, news risk, and a trade card if the setup qualifies.<br>
       📚 <strong>"Teach me about Order Blocks"</strong> — I will explain any concept in full detail.<br>
       🎯 <strong>"Give me a trade"</strong> — I will find the cleanest setup in the current session for you.</p>
-      <p style="color:#607a94;font-size:.85em">The market is always teaching. Let us listen together.</p></div>\`;
+      <p style="color:#607a94;font-size:.85em">The market is always teaching. Let us listen together.</p></div>`;
     document.getElementById('sageMsgs').appendChild(greetMsg);
     sageScrollBottom();
     SAGE.loading = false;
