@@ -106,7 +106,7 @@ def auth_logout():
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('sage_page'))
-    return redirect(url_for('login_page'))
+    return render_template('landing.html')
 
 @app.route('/pricing')
 def pricing_page():
@@ -1192,7 +1192,7 @@ def api_sage_chat():
         final_text = ''
         for _attempt in range(4):
             resp = client.messages.create(
-                model='claude-sonnet-4-20250514',
+                model='claude-sonnet-4-6',
                 max_tokens=4000,
                 system=system,
                 tools=[{'type':'web_search_20250305','name':'web_search'}],
