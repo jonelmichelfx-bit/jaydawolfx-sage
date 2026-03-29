@@ -289,11 +289,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
       <div class="sage-hdr-title">🔮 SAGE OF 6 PATHS — INTELLIGENCE TERMINAL</div>
       <div class="sage-hdr-sub">LIVE DATA · INSTITUTIONAL ANALYSIS · NO EXECUTION · EDUCATIONAL USE ONLY</div>
     </div>
-    <button class="sak-change" onclick="document.getElementById('sageKeyBar').classList.toggle('hidden')" style="margin-left:auto">⚙ API KEY</button>
+    <!-- API key handled server-side — no user input needed -->
   </div>
 
   <!-- API Key -->
-  <div id="sageKeyBar">
+  <div id="sageKeyBar" style="display:none">
     <div class="sak-label">🔑 ANTHROPIC API KEY</div>
     <div class="sak-row">
       <input class="sak-input" id="sageKeyInput" type="password" placeholder="sk-ant-api03-..."/>
@@ -1202,24 +1202,18 @@ const SAGE = {
   sym: 'EURUSD=X',
   lbl: 'EUR/USD',
   loading: false,
-  key: localStorage.getItem('sageai_key') || '',
+  key: 'server-managed',  // API handled server-side
   history: [],
   intel: null,
   etInfo: {}
 };
 
 (function initKey(){
-  if(SAGE.key) document.getElementById('sageKeyBar').classList.add('hidden');
+  // Server-side API — no key needed
 })();
 
 function saveSageKey(){
-  const v = document.getElementById('sageKeyInput').value.trim();
-  if(!v.startsWith('sk-')){
-    document.getElementById('sageKeyInput').style.borderColor='var(--red)';
-    setTimeout(()=>document.getElementById('sageKeyInput').style.borderColor='',1500);
-    return;
-  }
-  SAGE.key=v; localStorage.setItem('sageai_key',v);
+  // API is server-managed — no user key needed
   document.getElementById('sageKeyBar').classList.add('hidden');
 }
 
@@ -2052,11 +2046,6 @@ async function sageMultiScan(count=3) {
 
 async function sageSend(){
   if(SAGE.loading) return;
-  if(!SAGE.key){
-    document.getElementById('sageKeyBar').classList.remove('hidden');
-    document.getElementById('sageKeyInput').focus();
-    return;
-  }
   const inp = document.getElementById('sageInput');
   const text = inp.value.trim();
   if(!text) return;
@@ -2070,6 +2059,34 @@ async function sageSend(){
   um.className='smsg-user';
   um.innerHTML=`<div class="sbbl">${sageEsc(text)}</div>`;
   document.getElementById('sageMsgs').appendChild(um);
+
+  // ── GREETING INTERCEPT — respond warmly without scanning market ──
+  const tl_g = text.toLowerCase().trim();
+  const isGreeting = /^(hello|hi|hey|yo|sup|what's up|whats up|good morning|good evening|good afternoon|good day|hiya|howdy|greetings|hello sage|hi sage|hey sage|yo sage|sup sage)[\.!?\s]*$/.test(tl_g);
+  if(isGreeting){
+    const hour = new Date().getHours();
+    const timeGreet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    const sessNow = SAGE.etInfo?.session || '';
+    const sessLine = sessNow.includes('KILL') ? `We are in the <strong style="color:#ffcc44">${sessNow}</strong> right now — prime hunting time. The institutions are active.` :
+                     sessNow.includes('DEAD') ? `We are in a dead zone right now — low liquidity, not the best time to trade. Use this time to study the levels.` :
+                     `The <strong style="color:#40e0ff">${sessNow||'market'}</strong> is currently active.`;
+    const greetMsg = document.createElement('div');
+    greetMsg.className = 'smsg-sage';
+    greetMsg.innerHTML = \`<div class="sbbl"><p><strong style="color:#60d0ff">${timeGreet}, my student.</strong> Welcome to the 6 Path Intelligence Terminal.</p>
+      <p>I am Sage — your guide through the markets. I do not just give signals. I teach you <em>why</em> the market moves, <em>where</em> the institutions are positioned, and <em>when</em> the right moment to strike is.</p>
+      <p>${sessLine}</p>
+      <p>Here is what you can ask me:<br>
+      🔍 <strong>"Scan all pairs and find the best trade"</strong> — I will run the full 6-Path scan across all major pairs and bring you only the highest-conviction setups.<br>
+      📊 <strong>"Analyze EUR/USD"</strong> — Deep dive on one pair: structure, ICT levels, support/resistance, news risk, and a trade card if the setup qualifies.<br>
+      📚 <strong>"Teach me about Order Blocks"</strong> — I will explain any concept in full detail.<br>
+      🎯 <strong>"Give me a trade"</strong> — I will find the cleanest setup in the current session for you.</p>
+      <p style="color:#607a94;font-size:.85em">The market is always teaching. Let us listen together.</p></div>\`;
+    document.getElementById('sageMsgs').appendChild(greetMsg);
+    sageScrollBottom();
+    SAGE.loading = false;
+    document.getElementById('sageSendBtn').disabled = false;
+    return;
+  }
 
   // Thinking
   const tm=document.createElement('div');
@@ -2114,22 +2131,19 @@ Asset being analyzed: ${sym}
     let loopCount = 0;
 
     const callAPI = async(messages) => {
-      const r = await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'x-api-key': SAGE.key,
-          'anthropic-version':'2023-06-01',
-          'anthropic-dangerous-direct-browser-access':'true'
-        },
-        body:JSON.stringify({
-          model:'claude-sonnet-4-20250514',
-          max_tokens:4000,
-          system: SAGE_SYSTEM_PROMPT,
-          tools:[{type:'web_search_20250305',name:'web_search'}],
-          messages
+      const r = await fetch('/api/sage-chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include',
+        body: JSON.stringify({
+          messages,
+          system: SAGE_SYSTEM_PROMPT
         })
       });
+      if(!r.ok){
+        const err = await r.json().catch(()=>({error:'Server error'}));
+        throw new Error(err.error || 'Server error');
+      }
       return r.json();
     };
 
@@ -2198,8 +2212,7 @@ Asset being analyzed: ${sym}
     if(!fullText && data.error){
       fullText=`Error: ${data.error.message||'Unknown error'}`;
       if(data.error.type==='authentication_error'){
-        SAGE.key=''; localStorage.removeItem('sageai_key');
-        document.getElementById('sageKeyBar').classList.remove('hidden');
+        // API error — server issue, not user key
       }
     }
 

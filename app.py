@@ -117,6 +117,12 @@ def pricing_page():
 def sage_page():
     return render_template('sage_mode.html')
 
+@app.route('/api/sage-system', methods=['GET'])
+@login_required
+def api_sage_system():
+    """Return the SAGE system prompt to the browser securely."""
+    return jsonify({'system': SAGE_SYSTEM})
+
 # ── STRIPE CHECKOUT ────────────────────────────────────────
 @app.route('/create-checkout-session', methods=['POST'])
 @login_required
@@ -801,8 +807,8 @@ def api_sage_intel():
     highs  = [c['high']  for c in candles]
     lows   = [c['low']   for c in candles]
     price  = closes[-1]
-    first  = closes[0]
-    chg    = round((price - first) / first * 100, 3)
+    prev   = closes[-2] if len(closes) > 1 else closes[-1]
+    chg    = round((price - prev) / prev * 100, 3)
     high   = max(highs)
     low    = min(lows)
 
@@ -925,34 +931,169 @@ def api_sage_intel():
     elif adx_val < 20:                regime = 'RANGING'
     else:                             regime = 'TRANSITIONING'
 
-    # Approximate order blocks (last strong candle before big move)
+    is_jpy_pair  = 'JPY' in pair.upper()
+    is_gold_pair = 'XAU' in pair.upper()
+    pip = 0.01 if is_jpy_pair else 0.5 if is_gold_pair else 0.0001
+    dp  = 3 if is_jpy_pair else 2 if is_gold_pair else 5
+    n_c = len(candles)
+
+    # ── PREMIUM / DISCOUNT ZONE ─────────────────────────────
+    range_high = max(highs[-100:]) if n_c >= 100 else max(highs)
+    range_low  = min(lows[-100:])  if n_c >= 100 else min(lows)
+    range_mid  = (range_high + range_low) / 2
+    in_premium  = price > range_mid
+    premium_discount = {
+        'range_high': round(range_high, dp),
+        'range_low':  round(range_low,  dp),
+        'range_mid':  round(range_mid,  dp),
+        'zone':       'PREMIUM — institutional SELL zone' if in_premium else 'DISCOUNT — institutional BUY zone',
+        'bias':       'SELL ONLY in premium' if in_premium else 'BUY ONLY in discount',
+    }
+
+    # ── CHoCH / BOS DETECTION ───────────────────────────────
+    choch_bos = []
+    sh_list = [(i, highs[i]) for i in range(2, n_c-2)
+               if highs[i] > highs[i-1] and highs[i] > highs[i-2]
+               and highs[i] > highs[i+1] and highs[i] > highs[i+2]]
+    sl_list = [(i, lows[i]) for i in range(2, n_c-2)
+               if lows[i] < lows[i-1] and lows[i] < lows[i-2]
+               and lows[i] < lows[i+1] and lows[i] < lows[i+2]]
+    if len(sh_list) >= 2:
+        sh1, sh2 = sh_list[-2][1], sh_list[-1][1]
+        if sh2 > sh1:
+            choch_bos.append({'type':'BOS_BULL', 'level': round(sh1, dp),
+                              'note': f'BOS UP — broke above {round(sh1,dp)} — bullish structure'})
+        else:
+            choch_bos.append({'type':'CHoCH_BEAR', 'level': round(sh2, dp),
+                              'note': f'CHoCH — lower high at {round(sh2,dp)} — potential reversal DOWN'})
+    if len(sl_list) >= 2:
+        sl1, sl2 = sl_list[-2][1], sl_list[-1][1]
+        if sl2 < sl1:
+            choch_bos.append({'type':'BOS_BEAR', 'level': round(sl1, dp),
+                              'note': f'BOS DOWN — broke below {round(sl1,dp)} — bearish structure'})
+        else:
+            choch_bos.append({'type':'CHoCH_BULL', 'level': round(sl2, dp),
+                              'note': f'CHoCH — higher low at {round(sl2,dp)} — potential reversal UP'})
+
+    # ── ORDER BLOCKS (body-based, unmitigated only) + BREAKER BLOCKS ──
     bull_ob = bear_ob = None
-    for i in range(len(candles)-2, max(0, len(candles)-30), -1):
-        c, n = candles[i], candles[i+1]
-        body = abs(c['close'] - c['open'])
-        next_body = abs(n['close'] - n['open'])
-        if c['close'] < c['open'] and n['close'] > n['open'] and next_body > body * 1.5:
-            bull_ob = {'high': round(c['high'],5), 'low': round(c['low'],5)}
-            break
-    for i in range(len(candles)-2, max(0, len(candles)-30), -1):
-        c, n = candles[i], candles[i+1]
-        body = abs(c['close'] - c['open'])
-        next_body = abs(n['close'] - n['open'])
-        if c['close'] > c['open'] and n['close'] < n['open'] and next_body > body * 1.5:
-            bear_ob = {'high': round(c['high'],5), 'low': round(c['low'],5)}
+    bull_breaker = bear_breaker = None
+    opens_c = [c['open'] for c in candles]
+    for i in range(n_c - 4, max(n_c - 150, 3), -1):
+        ob_bh = max(opens_c[i], closes[i])
+        ob_bl = min(opens_c[i], closes[i])
+        ob_mid = round((ob_bh + ob_bl) / 2, dp)
+        if closes[i] < opens_c[i]:  # bearish candle = potential bull OB
+            impulse = sum(1 for j in range(i+1, min(i+5, n_c)) if closes[j] > opens_c[j])
+            if impulse >= 2 and (closes[min(i+4,n_c-1)] - lows[i]) > pip * 8:
+                fut_lows   = lows[i+2:min(i+50, n_c)]
+                fut_closes = closes[i+2:min(i+50, n_c)]
+                violated   = any(c < ob_bl for c in fut_closes)
+                mitigated  = any(l < ob_bh for l in fut_lows)
+                if violated and not bear_breaker:
+                    bear_breaker = {'high': round(ob_bh, dp), 'low': round(ob_bl, dp), 'mid': ob_mid,
+                                    'note': 'Failed bull OB → BEARISH BREAKER (now resistance)'}
+                elif not mitigated and not bull_ob:
+                    bull_ob = {'high': round(ob_bh, dp), 'low': round(ob_bl, dp), 'mid': ob_mid,
+                               'note': 'Unmitigated — price has NOT returned to this zone'}
+        elif closes[i] > opens_c[i]:  # bullish candle = potential bear OB
+            impulse = sum(1 for j in range(i+1, min(i+5, n_c)) if closes[j] < opens_c[j])
+            if impulse >= 2 and (highs[i] - closes[min(i+4,n_c-1)]) > pip * 8:
+                fut_highs  = highs[i+2:min(i+50, n_c)]
+                fut_closes = closes[i+2:min(i+50, n_c)]
+                violated   = any(c > ob_bh for c in fut_closes)
+                mitigated  = any(h > ob_bl for h in fut_highs)
+                if violated and not bull_breaker:
+                    bull_breaker = {'high': round(ob_bh, dp), 'low': round(ob_bl, dp), 'mid': ob_mid,
+                                    'note': 'Failed bear OB → BULLISH BREAKER (now support)'}
+                elif not mitigated and not bear_ob:
+                    bear_ob = {'high': round(ob_bh, dp), 'low': round(ob_bl, dp), 'mid': ob_mid,
+                               'note': 'Unmitigated — price has NOT returned to this zone'}
+        if bull_ob and bear_ob and bull_breaker and bear_breaker:
             break
 
-    # Fair Value Gaps (3-candle imbalance)
+    # ── FAIR VALUE GAPS (open only) + INVERSION FVGs ────────
     fvgs = []
-    for i in range(1, min(len(candles)-1, 30)):
-        c1, c2, c3 = candles[-i-1], candles[-i], candles[-i+1] if i > 1 else candles[-1]
-        # Bullish FVG: c1 high < c3 low
-        if c1['high'] < c3['low']:
-            fvgs.append({'type':'BULL','high':round(c3['low'],5),'low':round(c1['high'],5)})
-        # Bearish FVG: c1 low > c3 high
-        if c1['low'] > c3['high']:
-            fvgs.append({'type':'BEAR','high':round(c1['low'],5),'low':round(c3['high'],5)})
-        if len(fvgs) >= 2: break
+    inv_fvgs = []
+    for i in range(n_c - 3, max(n_c - 100, 2), -1):
+        # Bullish FVG
+        if lows[i+2] > highs[i] and (lows[i+2] - highs[i]) > pip * 3:
+            gap_bot, gap_top = highs[i], lows[i+2]
+            fut_lows = lows[i+2:min(i+80, n_c)]
+            filled = any(l <= gap_bot for l in fut_lows)
+            if filled:
+                inv_fvgs.append({'type':'BEAR_INV','high':round(gap_top,dp),'low':round(gap_bot,dp),
+                                 'note':'Filled bull FVG → INVERSION (now resistance)'})
+            else:
+                fvgs.append({'type':'BULL','high':round(gap_top,dp),'low':round(gap_bot,dp),
+                             'filled':False,'note':'Open — draw target below'})
+        # Bearish FVG
+        elif highs[i+2] < lows[i] and (lows[i] - highs[i+2]) > pip * 3:
+            gap_top, gap_bot = lows[i], highs[i+2]
+            fut_highs = highs[i+2:min(i+80, n_c)]
+            filled = any(h >= gap_top for h in fut_highs)
+            if filled:
+                inv_fvgs.append({'type':'BULL_INV','high':round(gap_top,dp),'low':round(gap_bot,dp),
+                                 'note':'Filled bear FVG → INVERSION (now support)'})
+            else:
+                fvgs.append({'type':'BEAR','high':round(gap_top,dp),'low':round(gap_bot,dp),
+                             'filled':False,'note':'Open — draw target above'})
+        if len(fvgs) >= 3 and len(inv_fvgs) >= 2:
+            break
+
+    # ── 15M ENTRY TRIGGER ───────────────────────────────────
+    entry_15m = None
+    try:
+        c15 = get_candles(pair, '15m')
+        if c15 and len(c15) >= 3:
+            last15, prev15 = c15[-1], c15[-2]
+            body15    = abs(last15['close'] - last15['open'])
+            wick_up15 = last15['high'] - max(last15['open'], last15['close'])
+            wick_dn15 = min(last15['open'], last15['close']) - last15['low']
+            c_type = (
+                'Bullish Engulfing' if last15['close'] > last15['open'] and body15 > abs(prev15['close']-prev15['open']) else
+                'Bearish Engulfing' if last15['close'] < last15['open'] and body15 > abs(prev15['close']-prev15['open']) else
+                'Hammer'            if wick_dn15 > body15 * 1.5 and last15['close'] > last15['open'] else
+                'Shooting Star'     if wick_up15 > body15 * 1.5 and last15['close'] < last15['open'] else
+                'Doji'              if body15 < (last15['high'] - last15['low']) * 0.2 else
+                'Bullish Bar'       if last15['close'] > last15['open'] else 'Bearish Bar'
+            )
+            entry_15m = {
+                'pattern':  c_type,
+                'close':    round(last15['close'], dp),
+                'high':     round(last15['high'],  dp),
+                'low':      round(last15['low'],   dp),
+                'note':     f'15M trigger: {c_type} — use for precision entry vs 1H zone',
+            }
+    except: pass
+
+    # ── EQUAL HIGHS / LOWS (Liquidity Pools) ────────────────
+    liq_highs, liq_lows = [], []
+    lp_tol = pip * 5
+    swig_hs = [(i, highs[i]) for i in range(1, n_c-1)
+               if highs[i] > highs[i-1] and highs[i] > highs[i+1]]
+    swig_ls = [(i, lows[i]) for i in range(1, n_c-1)
+               if lows[i] < lows[i-1] and lows[i] < lows[i+1]]
+    seen_h = set()
+    for i, (ia, ha) in enumerate(swig_hs):
+        if ia in seen_h: continue
+        cluster = [(ia, ha)] + [(ib, hb) for j,(ib,hb) in enumerate(swig_hs) if i!=j and ib not in seen_h and abs(ha-hb)<=lp_tol]
+        if len(cluster) >= 2:
+            avg = sum(h for _,h in cluster)/len(cluster)
+            liq_highs.append({'level':round(avg,dp),'touches':len(cluster),
+                              'note':f'BSL — retail SELL stops above {round(avg,dp)} — sweep target'})
+            for ix,_ in cluster: seen_h.add(ix)
+        if len(liq_highs) >= 2: break
+    seen_l = set()
+    for i, (ia, la) in enumerate(swig_ls):
+        if ia in seen_l: continue
+        cluster = [(ia, la)] + [(ib, lb) for j,(ib,lb) in enumerate(swig_ls) if i!=j and ib not in seen_l and abs(la-lb)<=lp_tol]
+        if len(cluster) >= 2:
+            avg = sum(l for _,l in cluster)/len(cluster)
+            liq_lows.append({'level':round(avg,dp),'touches':len(cluster),
+                             'note':f'SSL — retail BUY stops below {round(avg,dp)} — sweep target'})
+            for ix,_ in cluster: seen_l.add(ix)
+        if len(liq_lows) >= 2: break
 
     # Session
     import datetime as _dt
@@ -981,8 +1122,18 @@ def api_sage_intel():
         'fib500': fmt(fib500), 'fib618': fmt(fib618),
         'fib786': fmt(fib786), 'ext127': fmt(ext127), 'ext162': fmt(ext162),
         'round_numbers': [fmt(r) for r in rnums],
-        'bull_ob': bull_ob, 'bear_ob': bear_ob,
-        'fvgs': fvgs,
+        # ── Upgraded ICT fields ──
+        'bull_ob':        bull_ob,
+        'bear_ob':        bear_ob,
+        'bull_breaker':   bull_breaker,
+        'bear_breaker':   bear_breaker,
+        'fvgs':           fvgs,
+        'inv_fvgs':       inv_fvgs,
+        'liq_highs':      liq_highs,
+        'liq_lows':       liq_lows,
+        'premium_discount': premium_discount,
+        'choch_bos':      choch_bos,
+        'entry_15m':      entry_15m,
         'stack': stack, 'bias': bias, 'regime': regime,
         'above_200': above_200,
         'session': session,
@@ -994,18 +1145,21 @@ def api_sage_intel():
 @app.route('/api/sage-chat', methods=['POST'])
 @login_required
 def api_sage_chat():
-    """Server-side chat proxy — keeps Anthropic key off the browser."""
+    """Server-side chat proxy — Anthropic key stays on server, never exposed to browser."""
     try:
         import anthropic as _anth
     except ImportError:
         return jsonify({'error': 'anthropic package not installed'}), 500
     d        = request.get_json() or {}
     messages = d.get('messages', [])
-    api_key  = os.environ.get('ANTHROPIC_API_KEY', d.get('key', ''))
+    # Use server env key only — users never need their own key
+    api_key  = os.environ.get('ANTHROPIC_API_KEY', '')
     if not api_key:
-        return jsonify({'error': 'ANTHROPIC_API_KEY not set on server'}), 500
+        return jsonify({'error': 'Service temporarily unavailable. Please try again shortly.'}), 500
     if not messages:
         return jsonify({'error': 'messages required'}), 400
+    # Allow browser to pass system prompt (embedded in HTML) — falls back to server SAGE_SYSTEM
+    system = d.get('system', '') or SAGE_SYSTEM
     try:
         client = _anth.Anthropic(api_key=api_key)
         # Agentic loop for web_search tool_use
@@ -1014,8 +1168,8 @@ def api_sage_chat():
         for _attempt in range(4):
             resp = client.messages.create(
                 model='claude-sonnet-4-20250514',
-                max_tokens=2000,
-                system=SAGE_SYSTEM,
+                max_tokens=4000,
+                system=system,
                 tools=[{'type':'web_search_20250305','name':'web_search'}],
                 messages=msgs
             )
@@ -1031,7 +1185,7 @@ def api_sage_chat():
                         tool_results.append({
                             'type':'tool_result',
                             'tool_use_id':block.id,
-                            'content':'Search completed. Now provide your full Sage analysis.'
+                            'content':'Search completed. Now run the full 6-Path analysis using the [LIVE MARKET DATA] injected. Explain the WHY. Teach the student. Show all support/resistance levels, ICT levels, session context, and give the trade card if confidence is 65+.'
                         })
                 msgs.append({'role':'user','content':tool_results})
             else: break
