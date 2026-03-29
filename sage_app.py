@@ -255,7 +255,12 @@ def get_candles(pair, interval='1h'):
             print(f'[TwelveData] {pair} {interval}: {e}')
     try:
         import yfinance as yf
-        sym = YF_MAP.get(pair, pair.replace('/','') + '=X')
+        if pair in YF_MAP:
+            sym = YF_MAP[pair]
+        elif '/' in pair:
+            sym = pair.replace('/', '') + '=X'
+        else:
+            sym = pair  # already a valid yfinance symbol (e.g. AUDJPY=X, NVDA, GC=F)
         pm  = {'15m':'5d','1h':'1mo','4h':'3mo','1d':'6mo'}
         df  = yf.Ticker(sym).history(interval=interval, period=pm.get(interval,'1mo'))
         if not df.empty:
@@ -791,12 +796,32 @@ def api_sage_intel():
     interval = d.get('interval', '1h')
 
     TD_SYM_MAP2 = {
+        # Majors
         'EURUSD=X':'EUR/USD','GBPUSD=X':'GBP/USD','USDJPY=X':'USD/JPY',
-        'GBPJPY=X':'GBP/JPY','AUDUSD=X':'AUD/USD','USDCAD=X':'USD/CAD',
-        'USDCHF=X':'USD/CHF','EURJPY=X':'EUR/JPY','EURGBP=X':'EUR/GBP',
-        'NZDUSD=X':'NZD/USD','GC=F':'XAU/USD','BTC-USD':'BTC/USD',
+        'AUDUSD=X':'AUD/USD','USDCAD=X':'USD/CAD','USDCHF=X':'USD/CHF',
+        'NZDUSD=X':'NZD/USD',
+        # JPY crosses
+        'GBPJPY=X':'GBP/JPY','EURJPY=X':'EUR/JPY','AUDJPY=X':'AUD/JPY',
+        'CADJPY=X':'CAD/JPY','CHFJPY=X':'CHF/JPY','NZDJPY=X':'NZD/JPY',
+        # EUR crosses
+        'EURGBP=X':'EUR/GBP','EURAUD=X':'EUR/AUD','EURCAD=X':'EUR/CAD',
+        'EURNZD=X':'EUR/NZD',
+        # GBP crosses
+        'GBPAUD=X':'GBP/AUD','GBPCAD=X':'GBP/CAD','GBPCHF=X':'GBP/CHF',
+        'GBPNZD=X':'GBP/NZD',
+        # AUD/NZD crosses
+        'AUDCAD=X':'AUD/CAD','AUDCHF=X':'AUD/CHF','AUDNZD=X':'AUD/NZD',
+        'NZDCAD=X':'NZD/CAD',
+        # Commodities & Crypto
+        'GC=F':'XAU/USD','SI=F':'XAG/USD','CL=F':'WTI/USD',
+        'BTC-USD':'BTC/USD','ETH-USD':'ETH/USD',
+        # Stocks & ETFs
         'NVDA':'NVDA','AAPL':'AAPL','TSLA':'TSLA','MSFT':'MSFT',
         'AMZN':'AMZN','META':'META','GOOGL':'GOOGL','SPY':'SPY','QQQ':'QQQ',
+        'AMD':'AMD','AVGO':'AVGO','QCOM':'QCOM','INTC':'INTC','ARM':'ARM',
+        'TSM':'TSM','MU':'MU','WDC':'WDC','STX':'STX','ANET':'ANET',
+        'MRVL':'MRVL','VRT':'VRT','SMCI':'SMCI','EQIX':'EQIX','ORCL':'ORCL',
+        'PLTR':'PLTR','SNOW':'SNOW','SOXS':'SOXS','SOXX':'SOXX',
     }
     pair = TD_SYM_MAP2.get(symbol, symbol)
     candles = get_candles(pair, interval)
