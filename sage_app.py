@@ -1145,18 +1145,21 @@ def api_sage_intel():
 @app.route('/api/sage-chat', methods=['POST'])
 @login_required
 def api_sage_chat():
-    """Server-side chat proxy — keeps Anthropic key off the browser."""
+    """Server-side chat proxy — Anthropic key stays on server, never exposed to browser."""
     try:
         import anthropic as _anth
     except ImportError:
         return jsonify({'error': 'anthropic package not installed'}), 500
     d        = request.get_json() or {}
     messages = d.get('messages', [])
-    api_key  = os.environ.get('ANTHROPIC_API_KEY', d.get('key', ''))
+    # Use server env key only — users never need their own key
+    api_key  = os.environ.get('ANTHROPIC_API_KEY', '')
     if not api_key:
-        return jsonify({'error': 'ANTHROPIC_API_KEY not set on server'}), 500
+        return jsonify({'error': 'Service temporarily unavailable. Please try again shortly.'}), 500
     if not messages:
         return jsonify({'error': 'messages required'}), 400
+    # Allow browser to pass system prompt (embedded in HTML) — falls back to server SAGE_SYSTEM
+    system = d.get('system', '') or SAGE_SYSTEM
     try:
         client = _anth.Anthropic(api_key=api_key)
         # Agentic loop for web_search tool_use
@@ -1165,8 +1168,8 @@ def api_sage_chat():
         for _attempt in range(4):
             resp = client.messages.create(
                 model='claude-sonnet-4-20250514',
-                max_tokens=2000,
-                system=SAGE_SYSTEM,
+                max_tokens=4000,
+                system=system,
                 tools=[{'type':'web_search_20250305','name':'web_search'}],
                 messages=msgs
             )
@@ -1182,7 +1185,7 @@ def api_sage_chat():
                         tool_results.append({
                             'type':'tool_result',
                             'tool_use_id':block.id,
-                            'content':'Search completed. Now provide your full Sage analysis.'
+                            'content':'Search completed. Now run the full 6-Path analysis using the [LIVE MARKET DATA] injected. Explain the WHY. Teach the student. Show all support/resistance levels, ICT levels, session context, and give the trade card if confidence is 65+.'
                         })
                 msgs.append({'role':'user','content':tool_results})
             else: break

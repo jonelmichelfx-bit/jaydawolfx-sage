@@ -2149,51 +2149,7 @@ Asset being analyzed: ${sym}
 
     let data = await callAPI(msgs);
 
-    // ── PROTOCOL ENFORCEMENT ──────────────────────────────────────
-    // If Sage's first response did NOT use web_search (stop_reason !== 'tool_use'),
-    // it means Sage completed technical analysis first (CORRECT behavior).
-    // Now force Path 4 news check before giving any trade card.
-    if (data.stop_reason !== 'tool_use') {
-      const forceMsgs = [...msgs];
-      forceMsgs.push({role:'assistant', content: data.content || []});
-      forceMsgs.push({role:'user', content: [{
-        type:'text',
-        text:'PATH 4 — NEWS RISK CHECK (mandatory final step before trade card):\nSearch A: "high impact economic events today forex" — any event in next 2 hours?\nSearch B: "forex market news today" — does news BREAK or CONFIRM the technical setup?\nAdjust confidence ±15 pts max. Then output SAGE 6-PATH VERIFICATION block and final trade card.'
-      }]});
-      const newsData = await callAPI(forceMsgs);
-      if(newsData.stop_reason === 'tool_use') {
-        // News search fired — run the loop from here
-        msgs = forceMsgs;
-        msgs.push({role:'assistant', content: newsData.content});
-        const toolResults2 = [];
-        for(const block of newsData.content){
-          if(block.type==='tool_use') toolResults2.push({type:'tool_result',tool_use_id:block.id,content:'Search completed. Now output SAGE 6-PATH VERIFICATION block with confidence breakdown, then trade card if 65+.'});
-        }
-        msgs.push({role:'user', content: toolResults2});
-        data = await callAPI(msgs);
-      } else {
-        // Got direct text response from news check — use it
-        fullText = '';
-        if(newsData.content) for(const b of newsData.content) if(b.type==='text') fullText+=b.text+'\n';
-        SAGE.history.push({role:'assistant', content:fullText});
-        document.getElementById('sageThinking')?.remove();
-        const {clean, card} = sageParseCard(fullText);
-        // Render 6-path verification board
-        const verifyEl = sageRender6PathBoard(fullText);
-        if(verifyEl) document.getElementById('sageMsgs').appendChild(verifyEl);
-        // Render confidence breakdown
-        const confEl = sageRenderConfBreakdown(fullText);
-        if(confEl) document.getElementById('sageMsgs').appendChild(confEl);
-        const wm=document.createElement('div'); wm.className='smsg-sage';
-        wm.innerHTML=`<div class="sbbl"><p>${sageRenderProse(clean)}</p>${sageBuildCard(card)}</div>`;
-        document.getElementById('sageMsgs').appendChild(wm);
-        if(/news|calendar|nfp|fomc|cpi|central bank|risk/i.test(fullText)) sageUpdateNewsFromResponse(fullText);
-        SAGE.loading=false;
-        document.getElementById('sageSendBtn').disabled=false;
-        sageScrollBottom();
-        return;
-      }
-    }
+    // Server handles the full agentic loop (web_search) internally — HTML just renders the final text.
 
     // Tool-use agentic loop
     while(data.stop_reason==='tool_use' && loopCount<5){
