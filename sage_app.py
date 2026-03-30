@@ -1174,49 +1174,91 @@ def api_sage_chat():
     try:
         import anthropic as _anth
     except ImportError:
-        return jsonify({'error': 'anthropic package not installed'}), 500
+        return jsonify({'error': 'anthropic package not installed on server'}), 500
+
     d        = request.get_json() or {}
     messages = d.get('messages', [])
-    # Use server env key only — users never need their own key
     api_key  = os.environ.get('ANTHROPIC_API_KEY', '')
+
     if not api_key:
         return jsonify({'error': 'Service temporarily unavailable. Please try again shortly.'}), 500
     if not messages:
         return jsonify({'error': 'messages required'}), 400
-    # Allow browser to pass system prompt (embedded in HTML) — falls back to server SAGE_SYSTEM
+
     system = d.get('system', '') or SAGE_SYSTEM
+
+    # Sanitize messages — only keep plain text role/content dicts
+    clean_msgs = []
+    for m in messages:
+        role    = m.get('role', 'user')
+        content = m.get('content', '')
+        if isinstance(content, str) and content.strip():
+            clean_msgs.append({'role': role, 'content': content})
+        elif isinstance(content, list):
+            text = ' '.join(
+                p.get('text', '') for p in content
+                if isinstance(p, dict) and p.get('type') == 'text'
+            ).strip()
+            if text:
+                clean_msgs.append({'role': role, 'content': text})
+
+    if not clean_msgs:
+        return jsonify({'error': 'No valid messages to process'}), 400
+
     try:
-        client = _anth.Anthropic(api_key=api_key)
-        # Agentic loop for web_search tool_use
-        msgs = messages[:]
+        client     = _anth.Anthropic(api_key=api_key)
+        msgs       = clean_msgs[:]
         final_text = ''
+
         for _attempt in range(4):
             resp = client.messages.create(
-                model='claude-sonnet-4-6',
-                max_tokens=4000,
-                system=system,
-                tools=[{'type':'web_search_20250305','name':'web_search'}],
-                messages=msgs
+                model      = 'claude-sonnet-4-6',
+                max_tokens = 4000,
+                system     = system,
+                tools      = [{'type': 'web_search_20250305', 'name': 'web_search'}],
+                messages   = msgs
             )
+
             for block in resp.content:
-                if hasattr(block,'text') and block.text:
+                if hasattr(block, 'text') and block.text:
                     final_text += block.text
-            if final_text.strip(): break
+
+            if final_text.strip():
+                break
+
             if resp.stop_reason == 'tool_use':
-                msgs.append({'role':'assistant','content':resp.content})
+                # Serialize content blocks to plain dicts for next API call
+                serialized = []
+                for block in resp.content:
+                    if hasattr(block, 'type'):
+                        if block.type == 'text':
+                            serialized.append({'type': 'text', 'text': block.text})
+                        elif block.type == 'tool_use':
+                            serialized.append({
+                                'type': 'tool_use',
+                                'id':   block.id,
+                                'name': block.name,
+                                'input': block.input if hasattr(block, 'input') else {}
+                            })
+                msgs.append({'role': 'assistant', 'content': serialized})
                 tool_results = []
                 for block in resp.content:
-                    if block.type == 'tool_use':
+                    if hasattr(block, 'type') and block.type == 'tool_use':
                         tool_results.append({
-                            'type':'tool_result',
-                            'tool_use_id':block.id,
-                            'content':'Search completed. Now run the full 6-Path analysis using the [LIVE MARKET DATA] injected. Explain the WHY. Teach the student. Show all support/resistance levels, ICT levels, session context, and give the trade card if confidence is 65+.'
+                            'type':        'tool_result',
+                            'tool_use_id': block.id,
+                            'content':     'Search completed. Now run the full 6-Path analysis using the [LIVE MARKET DATA] injected. Explain the WHY. Teach the student. Show all support/resistance levels, ICT levels, session context, and give the trade card if confidence is 65+.'
                         })
-                msgs.append({'role':'user','content':tool_results})
-            else: break
-        return jsonify({'content':[{'type':'text','text':final_text or 'No response.'}]})
+                msgs.append({'role': 'user', 'content': tool_results})
+            else:
+                break
+
+        return jsonify({'content': [{'type': 'text', 'text': final_text or 'No response generated.'}]})
+
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        error_msg = str(e)
+        print(f'[Sage Chat ERROR] {error_msg}')
+        return jsonify({'error': error_msg}), 500
 
 @app.route('/health')
 def health():
