@@ -268,12 +268,30 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 </head>
 <body>
 
+<!-- UPGRADE MODAL -->
+<div id="sageUpgradeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:none;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:40px;max-width:480px;width:90%;text-align:center">
+    <div style="font-size:48px;margin-bottom:16px">🔒</div>
+    <div id="sageModalTitle" style="font-family:var(--head);font-size:18px;letter-spacing:3px;color:var(--cyan);margin-bottom:12px">DAILY LIMIT REACHED</div>
+    <div id="sageModalBody" style="font-size:15px;color:var(--text);line-height:1.8;margin-bottom:24px">
+      You have used all 6 free messages today.<br>
+      Your limit resets at midnight UTC.<br><br>
+      Upgrade to Sage or Unleashed for unlimited access.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <a href="/pricing" style="display:block;padding:14px 24px;background:var(--cyan);color:#000;font-family:var(--head);font-size:12px;letter-spacing:2px;border-radius:4px;text-decoration:none;font-weight:700">UPGRADE NOW</a>
+      <button onclick="document.getElementById('sageUpgradeModal').style.display='none'" style="padding:10px;background:transparent;border:1px solid var(--border);color:var(--text-dim);font-size:12px;border-radius:4px;cursor:pointer">CLOSE</button>
+    </div>
+  </div>
+</div>
+
 <!-- NAV -->
 <nav class="nav">
   <div class="nav-logo">🔮 SAGE <span>OF 6 PATHS</span></div>
   <div class="nav-right">
+    <span id="sageMsgCounter" style="display:none;font-size:11px;color:var(--text-dim);letter-spacing:1px;padding:2px 8px;border:1px solid var(--border);border-radius:3px"></span>
     <span class="nav-clock" id="sageClock">--:-- ET</span>
-    <span class="nav-plan">6 PATHS</span>
+    <span id="sageNavPlan" class="nav-plan">6 PATHS</span>
     <a href="/auth/logout" class="nav-logout">LOGOUT</a>
   </div>
 </nav>
@@ -2068,6 +2086,16 @@ async function sageSend(){
   const inp = document.getElementById('sageInput');
   const text = inp.value.trim();
   if(!text) return;
+
+  // Trial message gate
+  if(!SAGE_USER.is_paid && SAGE_USER.msgs_remaining <= 0){
+    sageShowUpgradeModal('DAILY LIMIT REACHED',
+      `You have used all <strong>${SAGE_USER.msgs_limit}</strong> free messages today.<br>
+       Your limit resets at midnight UTC.<br><br>
+       Upgrade to <strong style="color:var(--cyan)">Sage</strong> or <strong style="color:var(--gold)">Unleashed</strong> for unlimited daily messages.`);
+    return;
+  }
+
   inp.value=''; sageAutoResize(inp);
   SAGE.loading=true;
   document.getElementById('sageSendBtn').disabled=true;
@@ -2159,6 +2187,18 @@ Asset being analyzed: ${sym}
           system: SAGE_SYSTEM_PROMPT
         })
       });
+      if(r.status === 429){
+        const err = await r.json().catch(()=>({}));
+        // Update local state so next send is blocked too
+        SAGE_USER.msgs_remaining = 0;
+        SAGE_USER.msgs_used_today = err.msgs_limit || SAGE_USER.msgs_limit;
+        sageApplyUserStatus();
+        sageShowUpgradeModal('DAILY LIMIT REACHED',
+          `You have used all <strong>${err.msgs_limit || SAGE_USER.msgs_limit}</strong> free messages today.<br>
+           Your limit resets at midnight UTC.<br><br>
+           Upgrade to <strong style="color:var(--cyan)">Sage</strong> or <strong style="color:var(--gold)">Unleashed</strong> for unlimited daily messages.`);
+        throw new Error('daily_limit_reached');
+      }
       if(!r.ok){
         const err = await r.json().catch(()=>({error:'Server error'}));
         throw new Error(err.error || 'Server error');
@@ -2193,6 +2233,13 @@ Asset being analyzed: ${sym}
 
     SAGE.history.push({role:'assistant', content:fullText});
     document.getElementById('sageThinking')?.remove();
+
+    // Update trial counter after successful response
+    if(!SAGE_USER.is_paid){
+      SAGE_USER.msgs_used_today = Math.min(SAGE_USER.msgs_used_today + 1, SAGE_USER.msgs_limit);
+      SAGE_USER.msgs_remaining  = Math.max(0, SAGE_USER.msgs_remaining - 1);
+      sageApplyUserStatus();
+    }
 
     const {clean, card} = sageParseCard(fullText);
     // Render 6-path verification board if present
@@ -2252,8 +2299,56 @@ function sageUpdateNewsFromResponse(text){
 
 
 /* ════════════════════════════════════════
+   USER STATUS + TRIAL GATE
+════════════════════════════════════════ */
+let SAGE_USER = { plan:'student', is_paid:false, msgs_used_today:0, msgs_limit:6, msgs_remaining:6, edu_limit:10, trial_days_left:30 };
+
+async function sageLoadUserStatus() {
+  try {
+    const r = await fetch('/api/user-status', { credentials:'include' });
+    if (!r.ok) return;
+    SAGE_USER = await r.json();
+    sageApplyUserStatus();
+  } catch(e) {}
+}
+
+function sageApplyUserStatus() {
+  const planEl    = document.getElementById('sageNavPlan');
+  const counterEl = document.getElementById('sageMsgCounter');
+
+  // Nav plan badge
+  if (planEl) {
+    if (SAGE_USER.plan === 'unleashed') { planEl.textContent = 'UNLEASHED'; planEl.style.color = 'var(--gold)'; }
+    else if (SAGE_USER.plan === 'sage') { planEl.textContent = 'SAGE'; planEl.style.color = 'var(--cyan)'; }
+    else {
+      planEl.textContent = 'FREE TRIAL · ' + SAGE_USER.trial_days_left + 'd LEFT';
+      planEl.style.color = 'var(--text-dim)';
+    }
+  }
+
+  // Message counter for trial users
+  if (!SAGE_USER.is_paid && counterEl) {
+    counterEl.style.display = 'inline-block';
+    const used = SAGE_USER.msgs_used_today;
+    const lim  = SAGE_USER.msgs_limit;
+    counterEl.textContent = used + ' / ' + lim + ' msgs today';
+    counterEl.style.color = used >= lim ? 'var(--red)' : used >= lim - 1 ? 'var(--gold)' : 'var(--text-dim)';
+  }
+}
+
+function sageShowUpgradeModal(title, body) {
+  const modal   = document.getElementById('sageUpgradeModal');
+  const titleEl = document.getElementById('sageModalTitle');
+  const bodyEl  = document.getElementById('sageModalBody');
+  if (titleEl) titleEl.textContent = title || 'UPGRADE REQUIRED';
+  if (bodyEl)  bodyEl.innerHTML    = body  || 'Upgrade to continue.';
+  if (modal)   modal.style.display = 'flex';
+}
+
+/* ════════════════════════════════════════
    BOOT
 ════════════════════════════════════════ */
+sageLoadUserStatus();
 sageRefreshIntel();
 if(_intelTimer) clearInterval(_intelTimer);
 _intelTimer = setInterval(sageRefreshIntel, 30000);
@@ -2671,12 +2766,15 @@ function sageInitEdu() {
     html += '<div style="padding:10px 12px;border-bottom:1px solid var(--border)">';
     html += '<div style="font-family:var(--head);font-size:11px;letter-spacing:2px;color:'+mColor+';margin-bottom:8px">'+mod+' ('+modDone+'/'+modLessons.length+')</div>';
     modLessons.forEach(function(l) {
-      const done = progress[l.id];
-      const bg = done ? 'rgba(64,224,255,0.05)' : 'transparent';
-      const bc = done ? mColor : 'var(--border)';
-      const tc = done ? mColor : 'var(--text-mid)';
-      html += '<div onclick="sageOpenLesson('+l.id+')" style="padding:6px 8px;margin-bottom:3px;cursor:pointer;border-radius:3px;border:1px solid '+bc+';background:'+bg+'">';
-      html += '<span style="font-size:13px">'+l.emoji+'</span> ';
+      const done    = progress[l.id];
+      const locked  = !SAGE_USER.is_paid && l.id > SAGE_USER.edu_limit;
+      const bg = done ? 'rgba(64,224,255,0.05)' : locked ? 'rgba(255,255,255,0.02)' : 'transparent';
+      const bc = done ? mColor : locked ? 'rgba(255,255,255,0.08)' : 'var(--border)';
+      const tc = done ? mColor : locked ? 'rgba(255,255,255,0.25)' : 'var(--text-mid)';
+      const click = locked ? 'sageOpenLesson('+l.id+')' : 'sageOpenLesson('+l.id+')';
+      html += '<div onclick="'+click+'" style="padding:6px 8px;margin-bottom:3px;cursor:pointer;border-radius:3px;border:1px solid '+bc+';background:'+bg+'">';
+      if (locked) html += '<span style="font-size:11px;color:rgba(255,255,255,0.2)">🔒</span> ';
+      else html += '<span style="font-size:13px">'+l.emoji+'</span> ';
       html += '<span style="font-size:12px;color:'+tc+'">'+l.title+'</span>';
       if (done) html += ' <span style="color:var(--green);font-size:11px">✓</span>';
       html += '</div>';
@@ -2689,6 +2787,17 @@ function sageInitEdu() {
 function sageOpenLesson(id) {
   const lesson = SAGE_LESSONS.find(function(l){return l.id===id;});
   if (!lesson) return;
+
+  // Block locked lessons for trial users
+  if(!SAGE_USER.is_paid && id > SAGE_USER.edu_limit){
+    sageShowUpgradeModal('LESSON LOCKED',
+      `This lesson is locked on the free trial.<br><br>
+       Free trial includes the first <strong>${SAGE_USER.edu_limit} lessons</strong> only.<br>
+       Upgrade to unlock all <strong>55 lessons</strong> across Forex, Stocks & Crypto.<br><br>
+       You have <strong style="color:var(--cyan)">${SAGE_USER.trial_days_left} days</strong> left on your trial.`);
+    return;
+  }
+
   const progress = sageGetProgress();
   const content = document.getElementById('sageEduContent');
   if (!content) return;

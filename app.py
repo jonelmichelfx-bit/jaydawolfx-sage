@@ -29,6 +29,10 @@ PRICE_UNLEASHED  = 'price_1TCWuN2jJ40b0Vm8xTaRsm03'
 stripe.api_key = STRIPE_SK
 
 # ── User Model ─────────────────────────────────────────────
+TRIAL_MSG_LIMIT  = 6    # messages per day for free trial
+TRIAL_EDU_LIMIT  = 10   # lessons accessible for free trial
+TRIAL_DAYS       = 30   # trial length in days
+
 class User(UserMixin, db.Model):
     id                = db.Column(db.Integer, primary_key=True)
     username          = db.Column(db.String(80), unique=True, nullable=False)
@@ -38,12 +42,47 @@ class User(UserMixin, db.Model):
     stripe_customer_id= db.Column(db.String(100), nullable=True)
     stripe_sub_id     = db.Column(db.String(100), nullable=True)
     created_at        = db.Column(db.DateTime, default=datetime.utcnow)
+    daily_msg_count   = db.Column(db.Integer, default=0)
+    daily_msg_date    = db.Column(db.String(10), default='')   # 'YYYY-MM-DD'
 
     def set_password(self, pw):
         self.password_hash = generate_password_hash(pw)
 
     def check_password(self, pw):
         return check_password_hash(self.password_hash, pw)
+
+    def is_paid(self):
+        return self.plan in ('sage', 'unleashed')
+
+    def trial_active(self):
+        if self.is_paid():
+            return False
+        delta = (datetime.utcnow() - self.created_at).days
+        return delta < TRIAL_DAYS
+
+    def trial_days_left(self):
+        delta = (datetime.utcnow() - self.created_at).days
+        return max(0, TRIAL_DAYS - delta)
+
+    def msgs_used_today(self):
+        today = datetime.utcnow().strftime('%Y-%m-%d')
+        if self.daily_msg_date != today:
+            return 0
+        return self.daily_msg_count
+
+    def can_send_message(self):
+        if self.is_paid():
+            return True
+        return self.msgs_used_today() < TRIAL_MSG_LIMIT
+
+    def increment_msg(self):
+        today = datetime.utcnow().strftime('%Y-%m-%d')
+        if self.daily_msg_date != today:
+            self.daily_msg_date  = today
+            self.daily_msg_count = 1
+        else:
+            self.daily_msg_count += 1
+        db.session.commit()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -1204,6 +1243,19 @@ def api_sage_chat():
     if not messages:
         return jsonify({'error': 'messages required'}), 400
 
+    # ── TRIAL GATE ─────────────────────────────────────────────
+    if not current_user.is_paid():
+        if not current_user.can_send_message():
+            return jsonify({
+                'error': 'daily_limit_reached',
+                'msgs_used': current_user.msgs_used_today(),
+                'msgs_limit': TRIAL_MSG_LIMIT,
+                'plan': current_user.plan,
+                'trial_days_left': current_user.trial_days_left()
+            }), 429
+        current_user.increment_msg()
+    # ──────────────────────────────────────────────────────────
+
     system = d.get('system', '') or SAGE_SYSTEM
 
     # Sanitize messages — only keep plain text role/content dicts
@@ -1347,6 +1399,20 @@ def api_sage_chat():
 @app.route('/health')
 def health():
     return jsonify({'status':'ok','service':'sage-of-six-paths','time':datetime.utcnow().isoformat()})
+
+@app.route('/api/user-status', methods=['GET'])
+@login_required
+def api_user_status():
+    return jsonify({
+        'plan':           current_user.plan,
+        'is_paid':        current_user.is_paid(),
+        'trial_active':   current_user.trial_active(),
+        'trial_days_left':current_user.trial_days_left(),
+        'msgs_used_today':current_user.msgs_used_today(),
+        'msgs_limit':     TRIAL_MSG_LIMIT if not current_user.is_paid() else 9999,
+        'msgs_remaining': max(0, TRIAL_MSG_LIMIT - current_user.msgs_used_today()) if not current_user.is_paid() else 9999,
+        'edu_limit':      TRIAL_EDU_LIMIT if not current_user.is_paid() else 9999,
+    })
 
 @app.route('/setup-admin')
 def setup_admin():
