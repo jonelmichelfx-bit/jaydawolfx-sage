@@ -333,7 +333,7 @@ SAGE_SYSTEM = """You are Sage — the 6 Path Intelligence trading analyst built 
 PERSONALITY: Speak like a wise master trader — direct, clear, patient. Never arrogant. Use phrases like "What the market is showing us here..." or "The 6 paths confirm..." or "Here is why this level matters...". Make complex things simple. Always explain your reasoning fully.
 
 CRITICAL RULES — NEVER BREAK:
-1. ALWAYS use web_search to check live price + economic calendar before ANY analysis. Never use memory for prices.
+1. 🚫 DO NOT use web_search during technical analysis (Paths 1-5). Web search is ONLY enabled after you reach a 70+ technical score. Run all technical paths first using [LIVE MARKET DATA].
 2. Every trade card must have entry, SL, TP1, TP2, confidence score, and full reason explained.
 3. MINIMUM 2:1 R/R. Prefer 3:1. Never recommend a trade below 65 confidence.
 4. Read the last candle structure and describe momentum before giving a trade.
@@ -1250,50 +1250,92 @@ def api_sage_chat():
     try:
         client     = _anth.Anthropic(api_key=api_key)
         msgs       = clean_msgs[:]
-        final_text = ''
 
-        for _attempt in range(4):
-            resp = client.messages.create(
-                model      = 'claude-sonnet-4-6',
-                max_tokens = 4000,
-                system     = system,
-                tools      = [{'type': 'web_search_20250305', 'name': 'web_search'}],
-                messages   = msgs
+        # ── PHASE 1: Pure technical analysis — NO web_search ──────────────
+        resp1 = client.messages.create(
+            model      = 'claude-sonnet-4-6',
+            max_tokens = 4000,
+            system     = system,
+            messages   = msgs
+            # NO tools array — physically blocks web_search
+        )
+
+        phase1_text = ''
+        for block in resp1.content:
+            if hasattr(block, 'text') and block.text:
+                phase1_text += block.text
+
+        # Extract technical score from Phase 1
+        score_match = _re.search(
+            r'(?:TECHNICAL\s+SCORE|TECH\s+SCORE|CONFIDENCE\s+SCORE|SCORE)[^\d]*(\d{2,3})',
+            phase1_text, _re.IGNORECASE
+        )
+        if not score_match:
+            score_match = _re.search(r'(\d{2,3})\s*/\s*100', phase1_text)
+        tech_score = int(score_match.group(1)) if score_match else 0
+
+        final_text = phase1_text
+
+        # ── PHASE 2: News gate — only if technical score >= 70 ────────────
+        if tech_score >= 70:
+            gate_msg = (
+                f'STEP 6 — NEWS GATE (Technical score: {tech_score}/100 — gate PASSED).\n'
+                'Now run Path 6 (Fundamentals). Search:\n'
+                '1. "economic calendar high impact events today"\n'
+                '2. "forex market sentiment today"\n'
+                'Apply news as ±15 pts max adjustment to confidence score. '
+                'Output the final updated TRADE_CARD with adjusted confidence.'
             )
+            msgs_p2 = msgs + [
+                {'role': 'assistant', 'content': phase1_text},
+                {'role': 'user',      'content': gate_msg}
+            ]
 
-            for block in resp.content:
-                if hasattr(block, 'text') and block.text:
-                    final_text += block.text
+            news_text = ''
+            for _attempt in range(4):
+                resp2 = client.messages.create(
+                    model      = 'claude-sonnet-4-6',
+                    max_tokens = 2000,
+                    system     = system,
+                    tools      = [{'type': 'web_search_20250305', 'name': 'web_search'}],
+                    messages   = msgs_p2
+                )
 
-            if final_text.strip():
-                break
+                for block in resp2.content:
+                    if hasattr(block, 'text') and block.text:
+                        news_text += block.text
 
-            if resp.stop_reason == 'tool_use':
-                # Serialize content blocks to plain dicts for next API call
-                serialized = []
-                for block in resp.content:
-                    if hasattr(block, 'type'):
-                        if block.type == 'text':
-                            serialized.append({'type': 'text', 'text': block.text})
-                        elif block.type == 'tool_use':
-                            serialized.append({
-                                'type': 'tool_use',
-                                'id':   block.id,
-                                'name': block.name,
-                                'input': block.input if hasattr(block, 'input') else {}
+                if news_text.strip():
+                    break
+
+                if resp2.stop_reason == 'tool_use':
+                    serialized = []
+                    for block in resp2.content:
+                        if hasattr(block, 'type'):
+                            if block.type == 'text':
+                                serialized.append({'type': 'text', 'text': block.text})
+                            elif block.type == 'tool_use':
+                                serialized.append({
+                                    'type':  'tool_use',
+                                    'id':    block.id,
+                                    'name':  block.name,
+                                    'input': block.input if hasattr(block, 'input') else {}
+                                })
+                    msgs_p2.append({'role': 'assistant', 'content': serialized})
+                    tool_results = []
+                    for block in resp2.content:
+                        if hasattr(block, 'type') and block.type == 'tool_use':
+                            tool_results.append({
+                                'type':        'tool_result',
+                                'tool_use_id': block.id,
+                                'content':     'Search completed. Apply news context as Path 6 adjustment (±15 pts max). Output final trade card with updated confidence.'
                             })
-                msgs.append({'role': 'assistant', 'content': serialized})
-                tool_results = []
-                for block in resp.content:
-                    if hasattr(block, 'type') and block.type == 'tool_use':
-                        tool_results.append({
-                            'type':        'tool_result',
-                            'tool_use_id': block.id,
-                            'content':     'Search completed. Now run the full 6-Path analysis using the [LIVE MARKET DATA] injected. Explain the WHY. Teach the student. Show all support/resistance levels, ICT levels, session context, and give the trade card if confidence is 65+.'
-                        })
-                msgs.append({'role': 'user', 'content': tool_results})
-            else:
-                break
+                    msgs_p2.append({'role': 'user', 'content': tool_results})
+                else:
+                    break
+
+            if news_text.strip():
+                final_text = phase1_text + '\n\n---\n**PATH 6 — NEWS GATE:**\n' + news_text
 
         return jsonify({'content': [{'type': 'text', 'text': final_text or 'No response generated.'}]})
 
