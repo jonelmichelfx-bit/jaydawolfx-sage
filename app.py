@@ -106,7 +106,7 @@ def auth_logout():
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('sage_page'))
-    return redirect(url_for('login_page'))
+    return render_template('landing.html')
 
 @app.route('/pricing')
 def pricing_page():
@@ -115,7 +115,7 @@ def pricing_page():
 @app.route('/sage-mode')
 @login_required
 def sage_page():
-    return render_template('sage_mode.html')
+    return render_template('sage_mode_fixed.html')
 
 @app.route('/api/sage-system', methods=['GET'])
 @login_required
@@ -255,7 +255,12 @@ def get_candles(pair, interval='1h'):
             print(f'[TwelveData] {pair} {interval}: {e}')
     try:
         import yfinance as yf
-        sym = YF_MAP.get(pair, pair.replace('/','') + '=X')
+        if pair in YF_MAP:
+            sym = YF_MAP[pair]
+        elif '/' in pair:
+            sym = pair.replace('/', '') + '=X'
+        else:
+            sym = pair  # already a valid yfinance symbol (e.g. AUDJPY=X, NVDA, GC=F)
         pm  = {'15m':'5d','1h':'1mo','4h':'3mo','1d':'6mo'}
         df  = yf.Ticker(sym).history(interval=interval, period=pm.get(interval,'1mo'))
         if not df.empty:
@@ -535,13 +540,32 @@ NEVER give an entry price from web search. ALWAYS use [LIVE MARKET DATA].
 When SIGNAL is WAIT — fill WATCH_LEVEL with the exact level you are watching. Never leave blank.
 
 ═══════════════════════════════════════════════════════
- COMMUNICATION & TEACHING RULES
+ SAGE TEACHING VOICE — THIS IS WHO YOU ARE. NEVER BREAK THIS.
 ═══════════════════════════════════════════════════════
-- Never address users by first name. This platform serves many traders. Use "Student" sparingly — only when opening a lesson or correction, not on every sentence.
-- Your natural voice is warm, wise, and conversational — like a master trader sitting next to them. Teach naturally. Don't lecture robotically.
-- Use phrases like "What the market is showing us here..." or "The 6 paths confirm..." or "Here is why this level matters..." — let the wisdom come through in HOW you explain, not by prefixing every line with "Student".
-- Every response should feel like a conversation with someone who genuinely wants them to understand and succeed. Encourage. Explain. Make it click.
-- Explain the WHY behind every signal. Never just give a number — always give the reason behind it.
+
+You are SAGE — a wise, calm master trader who sits beside the student and teaches. You do NOT just output tables of numbers. You BREATHE life into every analysis with wisdom and context.
+
+MANDATORY STRUCTURE FOR EVERY ANALYSIS:
+1. OPEN with 2-3 sentences of conversational context. What is the market doing RIGHT NOW and why does it matter? Speak like a wise mentor, not a robot.
+2. BEFORE every formatted data block (Key Levels, Fibonacci, EMA, Trade Card) — write a short teaching paragraph explaining WHAT the student is about to see and WHY it matters.
+3. AFTER every formatted data block — write a follow-up sentence connecting it back to the trade idea and what the student should do with that information.
+4. CLOSE every analysis with an encouraging, wise summary. What is the ONE thing they should take away from this?
+
+SAGE VOICE RULES — NEVER BREAK:
+- Never address users by first name. Use "Student" ONLY when opening a correction or lesson. Never on every line.
+- Speak like a wise master trader sitting next to them — warm, direct, patient, never arrogant.
+- Use phrases that carry wisdom: "What the market is whispering here...", "The 6 paths confirm...", "Here is why this level is sacred...", "Smart money left a trail — let me show you...", "This is not just a number — this is where institutions are watching...", "Notice how price respected this zone...", "The candles are telling a story..."
+- NEVER output raw numbers without explaining their significance. Every price level must have a WHY.
+- Every EMA must be explained: "EMA 21 is sitting at X — this is where trend traders will defend their positions."
+- Every key level must be explained: "This 1.08340 level is not random — it is the previous day high where buy stops are clustered above it."
+- Every Fibonacci level must be explained: "The 61.8% golden zone at X is where the deepest money enters — not retail, institutions."
+- Every trade card must be preceded by: what you saw, why you are taking it, what would prove you wrong.
+- If there is NO trade: say so with wisdom. "The market has not spoken clearly yet. Patience IS a position. Here is what I am watching..."
+- Make complex concepts simple. If you mention an Order Block — explain it in one plain sentence before moving on.
+- Encourage. Every trader on this platform is learning. Make them feel capable, not overwhelmed.
+
+FORMATTING REMINDER:
+The formatted data sections (Key Levels, Trade Cards) are the skeleton. YOUR WORDS are the flesh. The student sees the numbers — your job is to make them UNDERSTAND what those numbers mean for their trading decisions. A table of numbers without wisdom is just noise.
 
 ═══════════════════════════════════════════════════════
  AI INFRASTRUCTURE KNOWLEDGE — PATH 6 EXTENSION
@@ -791,12 +815,32 @@ def api_sage_intel():
     interval = d.get('interval', '1h')
 
     TD_SYM_MAP2 = {
+        # Majors
         'EURUSD=X':'EUR/USD','GBPUSD=X':'GBP/USD','USDJPY=X':'USD/JPY',
-        'GBPJPY=X':'GBP/JPY','AUDUSD=X':'AUD/USD','USDCAD=X':'USD/CAD',
-        'USDCHF=X':'USD/CHF','EURJPY=X':'EUR/JPY','EURGBP=X':'EUR/GBP',
-        'NZDUSD=X':'NZD/USD','GC=F':'XAU/USD','BTC-USD':'BTC/USD',
+        'AUDUSD=X':'AUD/USD','USDCAD=X':'USD/CAD','USDCHF=X':'USD/CHF',
+        'NZDUSD=X':'NZD/USD',
+        # JPY crosses
+        'GBPJPY=X':'GBP/JPY','EURJPY=X':'EUR/JPY','AUDJPY=X':'AUD/JPY',
+        'CADJPY=X':'CAD/JPY','CHFJPY=X':'CHF/JPY','NZDJPY=X':'NZD/JPY',
+        # EUR crosses
+        'EURGBP=X':'EUR/GBP','EURAUD=X':'EUR/AUD','EURCAD=X':'EUR/CAD',
+        'EURNZD=X':'EUR/NZD',
+        # GBP crosses
+        'GBPAUD=X':'GBP/AUD','GBPCAD=X':'GBP/CAD','GBPCHF=X':'GBP/CHF',
+        'GBPNZD=X':'GBP/NZD',
+        # AUD/NZD crosses
+        'AUDCAD=X':'AUD/CAD','AUDCHF=X':'AUD/CHF','AUDNZD=X':'AUD/NZD',
+        'NZDCAD=X':'NZD/CAD',
+        # Commodities & Crypto
+        'GC=F':'XAU/USD','SI=F':'XAG/USD','CL=F':'WTI/USD',
+        'BTC-USD':'BTC/USD','ETH-USD':'ETH/USD',
+        # Stocks & ETFs
         'NVDA':'NVDA','AAPL':'AAPL','TSLA':'TSLA','MSFT':'MSFT',
         'AMZN':'AMZN','META':'META','GOOGL':'GOOGL','SPY':'SPY','QQQ':'QQQ',
+        'AMD':'AMD','AVGO':'AVGO','QCOM':'QCOM','INTC':'INTC','ARM':'ARM',
+        'TSM':'TSM','MU':'MU','WDC':'WDC','STX':'STX','ANET':'ANET',
+        'MRVL':'MRVL','VRT':'VRT','SMCI':'SMCI','EQIX':'EQIX','ORCL':'ORCL',
+        'PLTR':'PLTR','SNOW':'SNOW','SOXS':'SOXS','SOXX':'SOXX',
     }
     pair = TD_SYM_MAP2.get(symbol, symbol)
     candles = get_candles(pair, interval)
@@ -1149,49 +1193,114 @@ def api_sage_chat():
     try:
         import anthropic as _anth
     except ImportError:
-        return jsonify({'error': 'anthropic package not installed'}), 500
+        return jsonify({'error': 'anthropic package not installed on server'}), 500
+
     d        = request.get_json() or {}
     messages = d.get('messages', [])
-    # Use server env key only — users never need their own key
     api_key  = os.environ.get('ANTHROPIC_API_KEY', '')
+
     if not api_key:
         return jsonify({'error': 'Service temporarily unavailable. Please try again shortly.'}), 500
     if not messages:
         return jsonify({'error': 'messages required'}), 400
-    # Allow browser to pass system prompt (embedded in HTML) — falls back to server SAGE_SYSTEM
+
     system = d.get('system', '') or SAGE_SYSTEM
+
+    # Sanitize messages — only keep plain text role/content dicts
+    clean_msgs = []
+    for m in messages:
+        role    = m.get('role', 'user')
+        content = m.get('content', '')
+        if isinstance(content, str) and content.strip():
+            clean_msgs.append({'role': role, 'content': content})
+        elif isinstance(content, list):
+            text = ' '.join(
+                p.get('text', '') for p in content
+                if isinstance(p, dict) and p.get('type') == 'text'
+            ).strip()
+            if text:
+                clean_msgs.append({'role': role, 'content': text})
+
+    if not clean_msgs:
+        return jsonify({'error': 'No valid messages to process'}), 400
+
+    # ── MEMORY PROTECTION ─────────────────────────────────────────
+    # Browser appends [LIVE MARKET DATA] to every user message.
+    # Old messages with stale market blobs bloat memory — strip them
+    # from all but the last user message, then cap history at 10 msgs.
+    import re as _re
+    _mkt_pat = _re.compile(r'\n*\[LIVE MARKET DATA[^\]]*\].*', _re.DOTALL)
+
+    last_user_idx = None
+    for i in range(len(clean_msgs) - 1, -1, -1):
+        if clean_msgs[i]['role'] == 'user':
+            last_user_idx = i
+            break
+
+    for i, msg in enumerate(clean_msgs):
+        if msg['role'] == 'user' and i != last_user_idx:
+            stripped = _mkt_pat.sub('', msg['content']).strip()
+            if stripped:
+                clean_msgs[i] = {'role': 'user', 'content': stripped}
+
+    if len(clean_msgs) > 10:
+        clean_msgs = clean_msgs[-10:]
+    # ──────────────────────────────────────────────────────────────
+
     try:
-        client = _anth.Anthropic(api_key=api_key)
-        # Agentic loop for web_search tool_use
-        msgs = messages[:]
+        client     = _anth.Anthropic(api_key=api_key)
+        msgs       = clean_msgs[:]
         final_text = ''
+
         for _attempt in range(4):
             resp = client.messages.create(
-                model='claude-sonnet-4-20250514',
-                max_tokens=4000,
-                system=system,
-                tools=[{'type':'web_search_20250305','name':'web_search'}],
-                messages=msgs
+                model      = 'claude-sonnet-4-6',
+                max_tokens = 4000,
+                system     = system,
+                tools      = [{'type': 'web_search_20250305', 'name': 'web_search'}],
+                messages   = msgs
             )
+
             for block in resp.content:
-                if hasattr(block,'text') and block.text:
+                if hasattr(block, 'text') and block.text:
                     final_text += block.text
-            if final_text.strip(): break
+
+            if final_text.strip():
+                break
+
             if resp.stop_reason == 'tool_use':
-                msgs.append({'role':'assistant','content':resp.content})
+                # Serialize content blocks to plain dicts for next API call
+                serialized = []
+                for block in resp.content:
+                    if hasattr(block, 'type'):
+                        if block.type == 'text':
+                            serialized.append({'type': 'text', 'text': block.text})
+                        elif block.type == 'tool_use':
+                            serialized.append({
+                                'type': 'tool_use',
+                                'id':   block.id,
+                                'name': block.name,
+                                'input': block.input if hasattr(block, 'input') else {}
+                            })
+                msgs.append({'role': 'assistant', 'content': serialized})
                 tool_results = []
                 for block in resp.content:
-                    if block.type == 'tool_use':
+                    if hasattr(block, 'type') and block.type == 'tool_use':
                         tool_results.append({
-                            'type':'tool_result',
-                            'tool_use_id':block.id,
-                            'content':'Search completed. Now run the full 6-Path analysis using the [LIVE MARKET DATA] injected. Explain the WHY. Teach the student. Show all support/resistance levels, ICT levels, session context, and give the trade card if confidence is 65+.'
+                            'type':        'tool_result',
+                            'tool_use_id': block.id,
+                            'content':     'Search completed. Now run the full 6-Path analysis using the [LIVE MARKET DATA] injected. Explain the WHY. Teach the student. Show all support/resistance levels, ICT levels, session context, and give the trade card if confidence is 65+.'
                         })
-                msgs.append({'role':'user','content':tool_results})
-            else: break
-        return jsonify({'content':[{'type':'text','text':final_text or 'No response.'}]})
+                msgs.append({'role': 'user', 'content': tool_results})
+            else:
+                break
+
+        return jsonify({'content': [{'type': 'text', 'text': final_text or 'No response generated.'}]})
+
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        error_msg = str(e)
+        print(f'[Sage Chat ERROR] {error_msg}')
+        return jsonify({'error': error_msg}), 500
 
 @app.route('/health')
 def health():
