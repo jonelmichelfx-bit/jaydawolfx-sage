@@ -80,7 +80,110 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 
 /* ── BODY SPLIT ── */
 .sage-body{flex:1;display:grid;grid-template-columns:400px 1fr;min-height:0;overflow:hidden;}
-@media(max-width:900px){.sage-body{grid-template-columns:1fr;}}
+
+/* ══════════════════════════════════
+   MOBILE LAYOUT — Full redesign
+══════════════════════════════════ */
+@media(max-width:768px){
+
+  /* Nav — compact */
+  .nav{padding:0 10px;height:44px;}
+  .nav-logo{font-size:10px;letter-spacing:2px;}
+  .nav-logo span{display:none;}  /* hide "OF 6 PATHS" text on mobile */
+  #sageNavPlan{display:none;}
+  #sageMsgCounter{font-size:10px;padding:1px 6px;}
+  .nav-clock{font-size:10px;}
+  .nav-logout{font-size:10px;padding:2px 6px;}
+
+  /* Shell sits below the 44px nav */
+  .sage-shell{top:44px;bottom:56px;} /* leave room for bottom tab bar */
+
+  /* Hide desktop header bar and pair row on mobile — shown in panel */
+  .sage-hdr{padding:6px 10px;}
+  .sage-hdr-title{font-size:11px;letter-spacing:2px;}
+  .sage-hdr-sub{display:none;}
+
+  /* Body — single column, full height */
+  .sage-body{grid-template-columns:1fr;position:relative;}
+
+  /* Left panel — hidden by default on mobile, shown via tab */
+  .sage-panel{
+    position:absolute;inset:0;
+    z-index:10;
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    background:var(--surface);
+  }
+  .sage-panel.mobile-open{transform:translateX(0);}
+
+  /* Chat — full screen on mobile */
+  .sage-chat{position:absolute;inset:0;z-index:5;}
+
+  /* Education panel — hidden by default, shown via tab */
+  #sagePanelEdu{
+    position:absolute;inset:0;
+    z-index:10;
+    transform:translateX(100%);
+    transition:transform .25s ease;
+  }
+  #sagePanelEdu.mobile-open{transform:translateX(0);}
+
+  /* Messages — bigger text for mobile */
+  .smsg-user .sbbl{font-size:15px;padding:12px 14px;max-width:88%;}
+  .smsg-sage .sbbl{font-size:15px;padding:14px 16px;line-height:1.9;}
+
+  /* Input area — larger touch targets */
+  .sage-input-area{padding:8px 10px;gap:8px;}
+  .sage-textarea{font-size:15px;min-height:42px;padding:10px 12px;}
+  .sage-send{width:44px;height:44px;font-size:18px;}
+
+  /* Quick buttons — scrollable row */
+  .sage-quick-btns{flex-wrap:nowrap;overflow-x:auto;padding:8px 10px;}
+  .sqb{font-size:13px;padding:7px 12px;white-space:nowrap;flex-shrink:0;}
+
+  /* Trade card — full width */
+  .sc-grid{grid-template-columns:1fr 1fr;}
+  .sc-hdr{padding:9px 12px;}
+  .sc-sym{font-size:16px;}
+  .sc-val{font-size:14px;}
+
+  /* Welcome screen */
+  .sw-icon{font-size:3.5rem;}
+  .sw-title{font-size:20px;}
+  .sw-sub{font-size:14px;}
+  .sw-cta{font-size:14px;}
+
+  /* Pair selector — bigger touch targets */
+  .sp-btn{padding:7px 12px;font-size:13px;}
+
+  /* Disclaimer */
+  .sage-disc{font-size:12px;padding:4px 10px 6px;}
+
+  /* Bottom tab bar */
+  .sage-mobile-tabs{
+    display:flex;
+    position:fixed;
+    bottom:0;left:0;right:0;
+    height:56px;
+    background:var(--surface);
+    border-top:1px solid var(--border);
+    z-index:100;
+  }
+  .smt-btn{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;background:transparent;border:none;cursor:pointer;
+    color:var(--text-dim);font-family:var(--mono);font-size:9px;letter-spacing:1px;
+    transition:.15s;padding:0;
+  }
+  .smt-btn .smt-icon{font-size:20px;}
+  .smt-btn.active{color:var(--cyan);}
+  .smt-btn.active .smt-icon{filter:drop-shadow(0 0 6px var(--cyan));}
+}
+
+/* Desktop — hide mobile tabs */
+@media(min-width:769px){
+  .sage-mobile-tabs{display:none;}
+}
 
 /* ══════════════════════════════════
    LEFT PANEL — INTELLIGENCE BRIEFING
@@ -771,6 +874,22 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
       </div><!-- /sagePanelEdu -->
 
 </div></div></div>
+
+<!-- MOBILE BOTTOM TAB BAR -->
+<div class="sage-mobile-tabs" id="sageMobileTabs">
+  <button class="smt-btn" id="smtChat" onclick="sageMobileTab('chat')">
+    <span class="smt-icon">💬</span>
+    <span>CHAT</span>
+  </button>
+  <button class="smt-btn" id="smtMarket" onclick="sageMobileTab('market')">
+    <span class="smt-icon">📊</span>
+    <span>MARKET</span>
+  </button>
+  <button class="smt-btn" id="smtLearn" onclick="sageMobileTab('learn')">
+    <span class="smt-icon">📚</span>
+    <span>LEARN</span>
+  </button>
+</div>
 
 <script>
 /* ════════════════════════════════════════
@@ -2309,6 +2428,47 @@ function sageUpdateNewsFromResponse(text){
    FETCH SAGE SYSTEM FROM SERVER
 ════════════════════════════════════════ */
 
+
+/* ════════════════════════════════════════
+   MOBILE TAB NAVIGATION
+════════════════════════════════════════ */
+function sageMobileTab(tab) {
+  if(window.innerWidth > 768) return;
+  const panel     = document.getElementById('sagePanelSage');
+  const eduPanel  = document.getElementById('sagePanelEdu');
+  const sagePanel = document.querySelector('.sage-panel');
+  const chatEl    = document.querySelector('.sage-chat');
+
+  // Reset all
+  if(sagePanel)  sagePanel.classList.remove('mobile-open');
+  if(eduPanel)   { eduPanel.classList.remove('mobile-open'); eduPanel.style.display='none'; }
+  document.querySelectorAll('.smt-btn').forEach(b => b.classList.remove('active'));
+
+  if(tab === 'chat'){
+    if(panel) panel.style.display='flex';
+    if(eduPanel) { eduPanel.style.display='none'; eduPanel.classList.remove('mobile-open'); }
+    if(chatEl) chatEl.style.zIndex = '5';
+    document.getElementById('smtChat').classList.add('active');
+    sageScrollBottom();
+  } else if(tab === 'market'){
+    if(panel) panel.style.display='flex';
+    if(sagePanel) sagePanel.classList.add('mobile-open');
+    document.getElementById('smtMarket').classList.add('active');
+    sageRefreshIntel();
+  } else if(tab === 'learn'){
+    if(panel) panel.style.display='flex';
+    if(eduPanel) { eduPanel.style.display='flex'; setTimeout(()=>eduPanel.classList.add('mobile-open'),10); }
+    document.getElementById('smtLearn').classList.add('active');
+    sageInitEdu();
+  }
+}
+
+// Auto-activate chat tab on mobile load
+window.addEventListener('DOMContentLoaded', () => {
+  if(window.innerWidth <= 768) {
+    sageMobileTab('chat');
+  }
+});
 
 /* ════════════════════════════════════════
    USER STATUS + TRIAL GATE
