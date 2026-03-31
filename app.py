@@ -936,7 +936,109 @@ DXY and EMA stack agree → add 10 pts confidence.
 CARRY TRADE (for JPY and AUD pairs):
 BoJ near zero = JPY is a funding currency. Risk-ON = JPY weakens (AUD/JPY, GBP/JPY rise). Risk-OFF = JPY strengthens (safe haven flow).
 Any BoJ rate hike = MAJOR yen strengthening event. Flag immediately.
-RBA (AUD) high rates = AUD attracts carry. Risk-ON environment favors AUD longs."""
+RBA (AUD) high rates = AUD attracts carry. Risk-ON environment favors AUD longs.
+
+═══════════════════════════════════════════════════════
+ STOCK NEWS INTELLIGENCE — PATH 6 EXTENSION
+═══════════════════════════════════════════════════════
+
+When asked "what stocks are moving today", "what's happening this week", "what should I trade based on the news", or when a news scan is triggered — apply this system BEFORE giving any stock recommendation.
+
+STEP 1: Identify the news event category from the headline.
+STEP 2: Apply the institutional knowledge map below.
+STEP 3: Output in the exact format: headline → category → BUY/SELL/WATCH tickers → hold duration → what confirmation is needed before acting.
+
+HOLD DURATION RULES (sourced: LPL Research, RBC Wealth Management, 70+ years of post-WWII data):
+- Markets bottom from geopolitical shocks in ~18-21 days average
+- Recovery to pre-event levels: 28-39 days
+- Sustained energy supply disruptions: hold months (not weeks)
+- Pure sentiment shocks without supply disruption: hold days to 3 weeks
+- Recession-driven moves: hold months. Fed policy shifts: hold weeks to months.
+
+INSTITUTIONAL KNOWLEDGE MAP (sourced: Morgan Stanley, JP Morgan, LPL Research, RBC Wealth Management, PLOS One, Allianz Trade):
+
+MIDDLE EAST CONFLICT / OIL SUPPLY THREAT:
+BUY: XOM, CVX, OXY, COP (energy majors, +40% during sustained conflict), LNG (Cheniere, LNG exporter) — Hold: weeks to months while oil premium holds
+BUY: LMT, NOC, RTX, BA (defense, +10-15% spike on conflict start) — Hold: weeks to months; structural if NATO budgets increase
+BUY: GLD (safe haven gold) — Hold: days to weeks
+SELL: UAL, DAL, AAL (airlines, fuel cost surge -2-3% immediately) — Hold short: weeks
+SELL/WATCH: SPY, QQQ (broad market avg -7.4% over 5-week losing streak; recovers in ~3-4 weeks — do NOT short the full move, just avoid longs initially)
+
+MIDDLE EAST CEASEFIRE / PEACE DEAL (EXACT OCTOBER 2025 DATA):
+SELL: USO (oil -1.5-2% immediately, Brent -$1.03) — Day trade only
+BUY: DAL (+5.8%), UAL (+3.9%), AAL (+4.9%) — Days to weeks; airlines immediate beneficiary
+SELL: LMT, NOC, RTX (-0.7-0.8% on ceasefire day) — Short-term only
+BUY: SPY (+1.77% on ceasefire day) — Days; then assess macro
+
+CHINA TRADE WAR / TARIFF ESCALATION:
+SELL: NVDA (-4.9% single day), AMD, QCOM (semiconductor China exposure) — Days to weeks per event
+SELL: AAPL (margin compression, -140bps gross margin, $900M Q1 headwind) — Weeks to months
+SELL: QQQ (Nasdaq -3.56% single day on major escalation) — Days to weeks
+BUY: CAT, DE (domestic US manufacturers) — Weeks to months
+BUY: MP (MP Materials), UUUU (Energy Fuels) — US rare earth miners; potential short squeeze — Weeks
+WATCH: BABA, JD, BIDU (Chinese ADRs on tariff relief or escalation pivot)
+
+FED RATE HIKE FEAR / HOT CPI DATA:
+BUY (short-term): JPM, BAC, GS, XLF (wider net interest margins) — Days to weeks (then caution: slowdown fears offset)
+SELL: QQQ, ARKK (high-P/E growth stocks, higher discount rates compress valuations) — Days to weeks
+BUY: GLD (inflation hedge; gold performs in rising real rate environments when CPI expectations spike) — Weeks to months
+SELL: TLT (long-duration bonds, inverse to rates) — Days to months
+BUY: UUP (US dollar strengthens as rates rise) — Days to weeks
+SELL: XLU (utilities, bond proxy, less attractive vs rising yields) — Days to weeks
+
+STRONG NFP / JOBS REPORT BEATS EXPECTATIONS:
+BUY: UUP (USD up immediately, foreign capital attracted) — Hours to days
+SELL (initial): GLD (strong USD headwind) — Hours to days; then can reverse on rate-hike inflation fear
+BUY (short-term): JPM, BAC, XLF — Days
+SELL: QQQ (fewer expected rate cuts = tech re-pricing) — Days
+WATCH: SPY (mixed — initial spike then potential rate-hike reversal)
+SELL: EEM, VWO (emerging markets, strong USD = capital outflow pressure) — Days to weeks
+
+RECESSION FEAR / ECONOMIC SLOWDOWN SIGNALS:
+BUY: JNJ, PG, KO (consumer staples, 53-69 consecutive years of dividend increases) — Months
+BUY: JNJ, UNH, XLV (healthcare) — Months
+BUY: GLD (surged 25%+ in 2008 recession) — Months
+BUY: TLT (long bonds +20% in 2008) — Months
+BUY: NEE, SO, XLU (utilities, low-beta dividend payers) — Months
+SELL: IWM (small caps, credit-sensitive) — Months
+SELL: XLY (consumer discretionary) — Months
+SELL: HYG, JNK (high-yield bonds, credit spreads widen) — Months
+
+UKRAINE / RUSSIA ESCALATION:
+BUY: UNG (European natural gas +7.5% per event) — Days to weeks
+BUY: WEAT, CORN (wheat/agriculture +2% per event; Russia is major exporter) — Days to weeks
+BUY: LMT, RTX, NOC, BA (+10-12% immediately on escalation); European defense: Rheinmetall — Weeks to months (structural if NATO 5% GDP target adopted)
+BUY: MOS, NTR (fertilizer producers; Russia = major fertilizer exporter) — Weeks
+SELL: EZU, VGK (European broad indices, proximity/energy cost premium) — Weeks
+SELL: FXE (Euro weakens vs safe haven USD) — Days to weeks
+
+UKRAINE / RUSSIA PEACE DEAL / CEASEFIRE:
+SELL: LMT, NOC, RTX (defense falls from highs) — Days to weeks
+SELL: UNG (natural gas falls) — Days
+BUY: EZU, VGK (European equities rally broadly) — Weeks
+BUY: FXE (Euro strengthens vs USD) — Days to weeks
+
+AI / TECH EARNINGS CASCADE (sourced: JayDaWolfX AI Infrastructure research):
+NVDA BEAT + data center revenue 40%+:
+  BUY: TSM (manufactures every chip), MU (HBM memory bottleneck), ANET (networking every rack), CEG/VST (power demand) — Days; all move on ONE catalyst
+NVDA MISS:
+  SELL: TSM, MU, ANET, CEG/VST — Same cascade in reverse — Days
+HYPERSCALER CapEx INCREASE (MSFT/AMZN/GOOGL/META quarterly guidance):
+  BUY: NVDA, AMD, ANET, CEG — Days
+HYPERSCALER CapEx DISAPPOINTS:
+  SELL: NVDA, AMD, ANET, CEG — Entire supply chain down simultaneously — Days
+
+IMPORTANT OUTPUT RULE FOR NEWS SCANS:
+Always return structured analysis. For each news event, output:
+📰 EVENT: [summary of headline]
+🏷️ CATEGORY: [one of the categories above]
+📊 STOCKS AFFECTED:
+  ▲ BUY: [ticker] — [1-sentence why] — Hold: [duration]
+  ▼ SELL: [ticker] — [1-sentence why] — Hold: [duration]
+  ⏳ WATCH: [ticker] — [what trigger needed]
+⚠️ CONFIRMATION NEEDED: [what price action or data confirms before acting]
+
+Never give a BUY or SELL without explaining the institutional logic in one sentence."""
 
 
 # ── SAGE INTEL ROUTE ──────────────────────────────────────
@@ -1510,6 +1612,128 @@ def api_sage_chat():
         error_msg = str(e)
         print(f'[Sage Chat ERROR] {error_msg}')
         return jsonify({'error': error_msg}), 500
+
+@app.route('/api/news-scan', methods=['POST'])
+@login_required
+def api_news_scan():
+    """
+    Fetches today's top market-moving news and maps each event to affected stocks
+    using the institutional knowledge map (JP Morgan / Morgan Stanley / LPL Research sourced rules).
+
+    Tier 1: Finnhub General News API (if FINNHUB_API_KEY is set)
+    Tier 2: Claude web_search fallback (always available)
+    """
+    import re as _re
+
+    api_key      = os.environ.get('ANTHROPIC_API_KEY', '')
+    finnhub_key  = os.environ.get('FINNHUB_API_KEY', '')
+
+    if not api_key:
+        return jsonify({'error': 'Service temporarily unavailable'}), 500
+
+    # ── Tier 1: Finnhub headlines ──────────────────────────────────────────
+    headlines = []
+    if finnhub_key:
+        try:
+            r = http_requests.get(
+                'https://finnhub.io/api/v1/news',
+                params={'category': 'general', 'token': finnhub_key},
+                timeout=8
+            )
+            items = r.json() if r.ok else []
+            # Take latest 10 market-relevant headlines
+            for item in items[:10]:
+                h = item.get('headline', '') or item.get('summary', '')
+                if h:
+                    headlines.append(h)
+        except Exception as e:
+            print(f'[Finnhub] {e}')
+
+    # ── Build Claude prompt ────────────────────────────────────────────────
+    today = datetime.utcnow().strftime('%B %d, %Y')
+    if headlines:
+        news_block = '\n'.join(f'- {h}' for h in headlines[:8])
+        user_msg = (
+            f'Today is {today}. Here are the latest financial news headlines:\n\n'
+            f'{news_block}\n\n'
+            f'Apply the STOCK NEWS INTELLIGENCE knowledge map from your system prompt. '
+            f'Analyze these headlines and return a JSON array called "events". '
+            f'Each event object must have: headline (string), category (string), '
+            f'buy (array of {{ticker, hold}}), sell (array of {{ticker, hold}}), '
+            f'watch (array of {{ticker}}), confirmation (string). '
+            f'Return ONLY valid JSON. No markdown, no explanation, just the JSON object: {{"events": [...]}}'
+        )
+        tools = []  # no web search needed — we already have headlines
+    else:
+        # Tier 2: Let Claude search for today's news
+        user_msg = (
+            f'Today is {today}. Search for the top 5 market-moving financial news events right now. '
+            f'Apply the STOCK NEWS INTELLIGENCE knowledge map from your system prompt. '
+            f'Return a JSON object with an "events" array. '
+            f'Each event: headline (string), category (string), '
+            f'buy (array of {{ticker, hold}}), sell (array of {{ticker, hold}}), '
+            f'watch (array of {{ticker}}), confirmation (string). '
+            f'Return ONLY valid JSON. No markdown, no extra text.'
+        )
+        tools = [{'type': 'web_search_20250305', 'name': 'web_search'}]
+
+    try:
+        import anthropic as _anth
+        client = _anth.Anthropic(api_key=api_key)
+
+        msgs = [{'role': 'user', 'content': user_msg}]
+
+        kwargs = dict(
+            model      = 'claude-sonnet-4-6',
+            max_tokens = 2000,
+            system     = SAGE_SYSTEM,
+            messages   = msgs
+        )
+        if tools:
+            kwargs['tools'] = tools
+
+        # Handle tool use loop (for web_search tier)
+        final_text = ''
+        for _attempt in range(5):
+            resp = client.messages.create(**kwargs)
+            for block in resp.content:
+                if hasattr(block, 'text') and block.text:
+                    final_text += block.text
+
+            if final_text.strip():
+                break
+
+            if resp.stop_reason == 'tool_use':
+                serialized = []
+                tool_results = []
+                for block in resp.content:
+                    if hasattr(block, 'type'):
+                        if block.type == 'text':
+                            serialized.append({'type': 'text', 'text': block.text})
+                        elif block.type == 'tool_use':
+                            serialized.append({'type': 'tool_use', 'id': block.id,
+                                               'name': block.name, 'input': getattr(block,'input',{})})
+                            tool_results.append({'type': 'tool_result', 'tool_use_id': block.id,
+                                                 'content': 'Search completed. Apply results to news analysis.'})
+                kwargs['messages'] = msgs + [
+                    {'role': 'assistant', 'content': serialized},
+                    {'role': 'user',      'content': tool_results}
+                ]
+            else:
+                break
+
+        # Parse JSON from final_text
+        json_match = _re.search(r'\{[\s\S]*"events"[\s\S]*\}', final_text)
+        if json_match:
+            data = json.loads(json_match.group(0))
+            return jsonify(data)
+
+        return jsonify({'events': [], 'raw': final_text[:500]})
+
+    except Exception as e:
+        print(f'[NewsScan ERROR] {e}')
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/health')
 def health():
