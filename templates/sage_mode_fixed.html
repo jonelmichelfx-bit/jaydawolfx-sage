@@ -2607,7 +2607,16 @@ function sageSwitchTab(tab) {
     if (eduPanel)  eduPanel.style.display  = 'flex';
     if (eduBtn)  { eduBtn.style.background='rgba(96,208,255,0.1)'; eduBtn.style.color='var(--cyan)'; eduBtn.style.borderBottom='2px solid var(--cyan)'; }
     if (sageBtn) { sageBtn.style.background='transparent'; sageBtn.style.color='var(--text-dim)'; sageBtn.style.borderBottom='2px solid transparent'; }
-    sageInitEdu();
+    // ── AUTO-RESUME: open where the student left off ─────────────────
+    // sageOpenLesson saves last lesson + calls sageInitEdu for the sidebar
+    setTimeout(function() {
+      const resumeId = sageGetResumeLesson();
+      if (resumeId) {
+        sageOpenLesson(resumeId); // this calls sageInitEdu internally
+      } else {
+        sageInitEdu(); // fallback: just build the list
+      }
+    }, 80);
   }
 }
 
@@ -2980,6 +2989,32 @@ function sageSaveProgress(lessonId) {
   localStorage.setItem('sage_edu_progress', JSON.stringify(p));
 }
 
+// ── LESSON RESUME — remember where the student left off ──────────────
+function sageSaveLastLesson(lessonId) {
+  try { localStorage.setItem('sage_edu_last_lesson', String(lessonId)); } catch(e) {}
+}
+function sageGetLastLesson() {
+  try { return parseInt(localStorage.getItem('sage_edu_last_lesson') || '0') || 0; } catch(e) { return 0; }
+}
+// Find the next lesson the student should work on:
+// - If they have incomplete lessons, return the first one after the last completed block
+// - If all done, return the last lesson
+function sageGetResumeLesson() {
+  const progress  = sageGetProgress();
+  const lastSaved = sageGetLastLesson();
+  // If we have a saved last-opened lesson that is accessible, use it
+  if (lastSaved) {
+    const l = SAGE_LESSONS.find(function(x){ return x.id === lastSaved; });
+    if (l && (SAGE_USER.is_paid || l.id <= SAGE_USER.edu_limit)) return lastSaved;
+  }
+  // Otherwise find the first incomplete accessible lesson
+  for (var i = 0; i < SAGE_LESSONS.length; i++) {
+    var l = SAGE_LESSONS[i];
+    if (!progress[l.id] && (SAGE_USER.is_paid || l.id <= SAGE_USER.edu_limit)) return l.id;
+  }
+  return SAGE_LESSONS[0].id;
+}
+
 function sageInitEdu() {
   const progress = sageGetProgress();
   const completed = Object.keys(progress).filter(k => progress[k]).length;
@@ -2991,6 +3026,7 @@ function sageInitEdu() {
   if (progTxt) progTxt.textContent = completed + ' / ' + total + ' Complete' + (pct === 100 ? ' 🎓' : '');
   const list = document.getElementById('sageEduLessonList');
   if (!list) return;
+  const currentId = sageGetLastLesson(); // highlight which lesson is currently open
   const modules = ['FOREX','STOCKS','CRYPTO'];
   let html = '';
   modules.forEach(function(mod) {
@@ -3002,15 +3038,16 @@ function sageInitEdu() {
     modLessons.forEach(function(l) {
       const done    = progress[l.id];
       const locked  = !SAGE_USER.is_paid && l.id > SAGE_USER.edu_limit;
-      const bg = done ? 'rgba(64,224,255,0.05)' : locked ? 'rgba(255,255,255,0.02)' : 'transparent';
-      const bc = done ? mColor : locked ? 'rgba(255,255,255,0.08)' : 'var(--border)';
-      const tc = done ? mColor : locked ? 'rgba(255,255,255,0.25)' : 'var(--text-mid)';
-      const click = locked ? 'sageOpenLesson('+l.id+')' : 'sageOpenLesson('+l.id+')';
-      html += '<div onclick="'+click+'" style="padding:6px 8px;margin-bottom:3px;cursor:pointer;border-radius:3px;border:1px solid '+bc+';background:'+bg+'">';
+      const isCurrent = l.id === currentId && !locked;
+      const bg = isCurrent ? 'rgba(96,208,255,0.12)' : done ? 'rgba(64,224,255,0.05)' : locked ? 'rgba(255,255,255,0.02)' : 'transparent';
+      const bc = isCurrent ? 'var(--cyan)' : done ? mColor : locked ? 'rgba(255,255,255,0.08)' : 'var(--border)';
+      const tc = isCurrent ? 'var(--cyan)' : done ? mColor : locked ? 'rgba(255,255,255,0.25)' : 'var(--text-mid)';
+      html += '<div onclick="sageOpenLesson('+l.id+')" style="padding:6px 8px;margin-bottom:3px;cursor:pointer;border-radius:3px;border:1px solid '+bc+';background:'+bg+'">';
       if (locked) html += '<span style="font-size:11px;color:rgba(255,255,255,0.2)">🔒</span> ';
       else html += '<span style="font-size:13px">'+l.emoji+'</span> ';
       html += '<span style="font-size:12px;color:'+tc+'">'+l.title+'</span>';
       if (done) html += ' <span style="color:var(--green);font-size:11px">✓</span>';
+      if (isCurrent && !done) html += ' <span style="color:var(--cyan);font-size:10px">▶</span>';
       html += '</div>';
     });
     html += '</div>';
@@ -3031,6 +3068,10 @@ function sageOpenLesson(id) {
        You have <strong style="color:var(--cyan)">${SAGE_USER.trial_days_left} days</strong> left on your trial.`);
     return;
   }
+
+  // ── Save resume position — remember where the student left off ───
+  sageSaveLastLesson(id);
+  sageInitEdu(); // refresh sidebar highlight to show current lesson
 
   const progress = sageGetProgress();
   const content = document.getElementById('sageEduContent');
