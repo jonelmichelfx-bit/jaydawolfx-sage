@@ -180,6 +180,27 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
   .smt-btn.active .smt-icon{filter:drop-shadow(0 0 6px var(--cyan));}
 }
 
+/* Education panel — full screen on mobile */
+  #sagePanelEdu{ flex-direction:column; background:var(--surface); }
+  #sageEduInner{ flex-direction:column; }
+  #sageEduSidebar{
+    width:100% !important; flex-shrink:0; height:auto; max-height:210px;
+    border-right:none !important; border-bottom:1px solid var(--border);
+    overflow-y:auto; overflow-x:hidden;
+  }
+  #sageEduLessonList > div > div{
+    padding:12px 14px !important; margin-bottom:6px !important;
+    font-size:15px !important;
+  }
+  #sageEduContentWrap{
+    flex:1; overflow-y:auto; padding:14px !important;
+    -webkit-overflow-scrolling:touch;
+  }
+  #sageEduContent{font-size:15px;line-height:1.9;}
+  [id^="sageQ"]{padding:13px 14px !important;font-size:15px !important;margin-bottom:8px !important;}
+  #sageEduHint{display:none;}
+}
+
 /* Desktop — hide mobile tabs */
 @media(min-width:769px){
   .sage-mobile-tabs{display:none;}
@@ -808,6 +829,45 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
           <div class="sw-title">SAGE OF 6 PATHS</div>
           <div class="sw-sub">Live data · Institutional analysis · 6-path methodology</div>
           <div class="sw-cta">Select a pair → ask anything about the market 💚</div>
+
+          <!-- Install App Instructions -->
+          <div id="sageInstallGuide" style="margin-top:20px;padding:14px 16px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.25);border-radius:6px;max-width:340px;margin-left:auto;margin-right:auto;text-align:left">
+            <div style="font-family:var(--head);font-size:10px;letter-spacing:3px;color:var(--gold);margin-bottom:10px;text-align:center">📲 INSTALL THE APP</div>
+            <div id="sageInstallIOS" style="display:none">
+              <div style="font-size:13px;color:var(--text);line-height:1.8">
+                <strong style="color:var(--cyan)">iPhone / iPad:</strong><br>
+                1. Tap the <strong style="color:#fff">Share</strong> button <span style="font-size:15px">⬆</span> at the bottom of Safari<br>
+                2. Scroll down → tap <strong style="color:#fff">Add to Home Screen</strong><br>
+                3. Tap <strong style="color:var(--gold)">Add</strong> — Sage icon appears on your home screen
+              </div>
+            </div>
+            <div id="sageInstallAndroid" style="display:none">
+              <div style="font-size:13px;color:var(--text);line-height:1.8">
+                <strong style="color:var(--cyan)">Android:</strong><br>
+                1. Tap the <strong style="color:#fff">⋮ menu</strong> in Chrome (top right)<br>
+                2. Tap <strong style="color:#fff">Add to Home Screen</strong><br>
+                3. Tap <strong style="color:var(--gold)">Install</strong> — Sage opens like a real app
+              </div>
+            </div>
+            <div id="sageInstallDesktop" style="display:none">
+              <div style="font-size:13px;color:var(--text);line-height:1.8">
+                <strong style="color:var(--cyan)">Desktop Chrome:</strong><br>
+                Click the <strong style="color:#fff">install icon</strong> <span style="font-size:14px">⊕</span> in the address bar to install Sage as a desktop app.
+              </div>
+            </div>
+          </div>
+
+          <script>
+          (function(){
+            const isIOS     = /iphone|ipad|ipod/i.test(navigator.userAgent);
+            const isAndroid = /android/i.test(navigator.userAgent);
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            if(isStandalone){ document.getElementById('sageInstallGuide').style.display='none'; return; }
+            if(isIOS)         document.getElementById('sageInstallIOS').style.display='block';
+            else if(isAndroid)document.getElementById('sageInstallAndroid').style.display='block';
+            else              document.getElementById('sageInstallDesktop').style.display='block';
+          })();
+          </script>
         </div>
       </div>
 
@@ -825,30 +885,32 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
   </div><!-- /sagePanelSage -->
 
       <!-- EDUCATION PANEL -->
-      <div id="sagePanelEdu" style="display:none;padding:0;flex:1;min-height:0">
-        <div style="display:flex;height:100%;min-height:0;overflow:hidden">
+      <div id="sagePanelEdu" style="display:none;padding:0;flex:1;min-height:0;flex-direction:column">
 
-          <!-- Left: Lesson list -->
+        <!-- DESKTOP: side-by-side | MOBILE: stacked with top lesson picker -->
+        <div id="sageEduInner" style="display:flex;height:100%;min-height:0;overflow:hidden">
+
+          <!-- Lesson list — sidebar on desktop, top strip on mobile -->
           <div id="sageEduSidebar" style="width:260px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;background:var(--surface2)">
             <div style="padding:14px 12px;border-bottom:1px solid var(--border)">
               <div style="font-family:var(--head);font-size:13px;letter-spacing:2px;color:var(--cyan);margin-bottom:4px">TRADING ACADEMY</div>
-              <div style="font-size:13px;color:var(--text-mid)">51 Lessons · Progress Saved</div>
+              <div style="font-size:13px;color:var(--text-mid)">55 Lessons · Progress Saved</div>
               <div style="margin-top:8px;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
                 <div id="sageEduProgress" style="height:100%;background:var(--cyan);width:0%;transition:.3s;border-radius:3px"></div>
               </div>
-              <div id="sageEduProgressText" style="font-size:13px;color:var(--text-mid);margin-top:4px">0 / 51 Complete</div>
+              <div id="sageEduProgressText" style="font-size:13px;color:var(--text-mid);margin-top:4px">0 / 55 Complete</div>
             </div>
             <div id="sageEduLessonList"></div>
           </div>
 
-          <!-- Right: Lesson content -->
-          <div style="flex:1;overflow-y:auto;padding:20px;background:var(--surface)">
+          <!-- Lesson content -->
+          <div style="flex:1;overflow-y:auto;padding:20px;background:var(--surface)" id="sageEduContentWrap">
             <div id="sageEduContent">
               <div style="text-align:center;padding:60px 20px">
                 <div style="font-size:48px;margin-bottom:16px">📚</div>
                 <div style="font-family:var(--head);font-size:18px;letter-spacing:2px;color:var(--cyan);margin-bottom:8px">TRADING ACADEMY</div>
-                <div style="font-size:15px;color:var(--text);line-height:1.7;max-width:400px;margin:0 auto">51 structured lessons covering Forex, Stocks, and Crypto. Complete each lesson and pass the quiz to unlock the next. When you finish — you are ready for Sage.</div>
-                <div style="margin-top:20px;font-size:14px;color:var(--text-mid)">← Select a lesson from the left to begin</div>
+                <div style="font-size:15px;color:var(--text);line-height:1.7;max-width:400px;margin:0 auto">55 structured lessons covering Forex, Stocks, and Crypto. Complete each lesson and pass the quiz to unlock the next.</div>
+                <div style="margin-top:20px;font-size:14px;color:var(--text-mid)" id="sageEduHint">← Select a lesson from the left to begin</div>
               </div>
             </div>
 

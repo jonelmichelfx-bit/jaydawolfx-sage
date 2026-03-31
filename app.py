@@ -995,15 +995,30 @@ def api_sage_intel():
             pdl = round(daily[-2]['low'],  5)
     except: pass
 
-    # Fibonacci from 50-bar swing
-    fib_range = sw50h - sw50l
-    fib236 = round(sw50h - fib_range * 0.236, 5)
-    fib382 = round(sw50h - fib_range * 0.382, 5)
-    fib500 = round(sw50h - fib_range * 0.500, 5)
-    fib618 = round(sw50h - fib_range * 0.618, 5)
-    fib786 = round(sw50h - fib_range * 0.786, 5)
-    ext127 = round(sw50l - fib_range * 0.272, 5)  # below swing low
-    ext162 = round(sw50l - fib_range * 0.618, 5)
+    # Fibonacci from 50-bar swing — direction-aware
+    fib_range  = sw50h - sw50l
+    # Determine dominant direction: bullish if price closer to high, bearish if closer to low
+    fib_bullish = price >= (sw50h + sw50l) / 2
+    if fib_bullish:
+        # Retracements measure pullback DOWN from swing high
+        fib236 = round(sw50h - fib_range * 0.236, 5)
+        fib382 = round(sw50h - fib_range * 0.382, 5)
+        fib500 = round(sw50h - fib_range * 0.500, 5)
+        fib618 = round(sw50h - fib_range * 0.618, 5)
+        fib786 = round(sw50h - fib_range * 0.786, 5)
+        # Extensions project ABOVE swing high (profit targets going up)
+        ext127 = round(sw50h + fib_range * 0.272, 5)
+        ext162 = round(sw50h + fib_range * 0.618, 5)
+    else:
+        # Retracements measure bounce UP from swing low
+        fib236 = round(sw50l + fib_range * 0.236, 5)
+        fib382 = round(sw50l + fib_range * 0.382, 5)
+        fib500 = round(sw50l + fib_range * 0.500, 5)
+        fib618 = round(sw50l + fib_range * 0.618, 5)
+        fib786 = round(sw50l + fib_range * 0.786, 5)
+        # Extensions project BELOW swing low (profit targets going down)
+        ext127 = round(sw50l - fib_range * 0.272, 5)
+        ext162 = round(sw50l - fib_range * 0.618, 5)
 
     # Round numbers near current price
     def round_numbers(price, pair):
