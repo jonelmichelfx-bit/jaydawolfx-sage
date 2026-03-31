@@ -1,6 +1,6 @@
 import os, json, time, uuid, threading
 from datetime import datetime
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -8,9 +8,21 @@ import requests as http_requests
 import stripe
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'sage-secret-change-in-production')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'sage6paths-wolfx-secret-2025-stable')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///sage.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# ── SESSION / REMEMBER ME CONFIG ───────────────────────────
+from datetime import timedelta
+app.config['REMEMBER_COOKIE_DURATION']  = timedelta(days=30)
+app.config['REMEMBER_COOKIE_SECURE']    = False   # set True once HTTPS confirmed stable
+app.config['REMEMBER_COOKIE_HTTPONLY']  = True
+app.config['REMEMBER_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE']     = False
+app.config['SESSION_COOKIE_HTTPONLY']   = True
+app.config['SESSION_COOKIE_SAMESITE']  = 'Lax'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
+# ───────────────────────────────────────────────────────────
 
 if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
     app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
@@ -116,6 +128,7 @@ def auth_login():
     password = request.form.get('password','')
     user = User.query.filter_by(email=email).first()
     if user and user.check_password(password):
+        session.permanent = True
         login_user(user, remember=True)
         return redirect(url_for('sage_page'))
     flash('Invalid email or password.', 'error')
