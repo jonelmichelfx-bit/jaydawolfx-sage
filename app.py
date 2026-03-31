@@ -33,7 +33,7 @@ TRIAL_MSG_LIMIT  = 6    # messages per day for free trial
 TRIAL_EDU_LIMIT  = 10   # lessons accessible for free trial
 TRIAL_DAYS       = 30   # trial length in days
 TRIAL_USER_CAP   = 200  # max free trial signups
-PAID_MSG_LIMIT   = 50   # messages per day for paid users (cost protection)
+PAID_MSG_LIMIT   = 25   # messages per day for paid users (cost protection)
 
 class User(UserMixin, db.Model):
     id                = db.Column(db.Integer, primary_key=True)
