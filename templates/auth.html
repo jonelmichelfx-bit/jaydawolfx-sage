@@ -210,8 +210,34 @@ body::before{
 
       <!-- SIGN UP -->
       <div class="form-section" id="tab-signup">
+        {% set trial_count = trial_count if trial_count is defined else 0 %}
+        {% if trial_full %}
+        <!-- WAITLIST MODE -->
+        <div class="ar-title">🐺 Waitlist</div>
+        <div class="ar-sub" style="color:var(--gold)">ALL 200 FREE SPOTS ARE TAKEN</div>
+        <div style="font-size:13px;color:var(--text-mid);margin-bottom:18px;line-height:1.7;text-align:center">
+          The free trial is full. Drop your email and we will notify you the moment a spot opens — or upgrade now for instant access.
+        </div>
+        <form method="POST" action="/waitlist">
+          <div class="fl">
+            <label>YOUR NAME</label>
+            <input type="text" name="name" placeholder="Your name" autocomplete="name">
+          </div>
+          <div class="fl">
+            <label>EMAIL</label>
+            <input type="email" name="email" placeholder="your@email.com" required autocomplete="email">
+          </div>
+          <button type="submit" class="btn-main" style="background:var(--gold);color:#000">JOIN WAITLIST →</button>
+        </form>
+        <div style="margin-top:14px;text-align:center">
+          <a href="/pricing" style="color:var(--cyan);font-size:13px;letter-spacing:1px">Skip the wait — Upgrade now →</a>
+        </div>
+        {% else %}
+        <!-- NORMAL SIGNUP -->
         <div class="ar-title">Create account</div>
-        <div class="ar-sub">START YOUR 30-DAY FREE TRIAL</div>
+        <div class="ar-sub">START YOUR 30-DAY FREE TRIAL
+          <span style="display:block;font-size:10px;color:var(--gold);margin-top:4px;letter-spacing:1px">{{ 200 - trial_count }} FREE SPOTS REMAINING</span>
+        </div>
         <form method="POST" action="/auth/register">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token is defined else '' }}">
           <div class="fl">
@@ -229,6 +255,7 @@ body::before{
           <button type="submit" class="btn-main">CREATE ACCOUNT →</button>
         </form>
         <div class="ar-note">Already have an account? <a href="#" onclick="showTab('signin');return false">Sign in →</a></div>
+        {% endif %}
       </div>
 
     </div>

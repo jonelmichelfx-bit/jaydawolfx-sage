@@ -33,6 +33,7 @@ TRIAL_MSG_LIMIT  = 6    # messages per day for free trial
 TRIAL_EDU_LIMIT  = 10   # lessons accessible for free trial
 TRIAL_DAYS       = 30   # trial length in days
 TRIAL_USER_CAP   = 200  # max free trial signups
+PAID_MSG_LIMIT   = 50   # messages per day for paid users (cost protection)
 
 class User(UserMixin, db.Model):
     id                = db.Column(db.Integer, primary_key=True)
@@ -73,8 +74,11 @@ class User(UserMixin, db.Model):
 
     def can_send_message(self):
         if self.is_paid():
-            return True
+            return self.msgs_used_today() < PAID_MSG_LIMIT
         return self.msgs_used_today() < TRIAL_MSG_LIMIT
+
+    def msg_limit(self):
+        return PAID_MSG_LIMIT if self.is_paid() else TRIAL_MSG_LIMIT
 
     def increment_msg(self):
         today = datetime.utcnow().strftime('%Y-%m-%d')
@@ -84,6 +88,12 @@ class User(UserMixin, db.Model):
         else:
             self.daily_msg_count += 1
         db.session.commit()
+
+class Waitlist(db.Model):
+    id         = db.Column(db.Integer, primary_key=True)
+    email      = db.Column(db.String(120), unique=True, nullable=False)
+    name       = db.Column(db.String(80), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -97,7 +107,8 @@ with app.app_context():
 def login_page():
     if current_user.is_authenticated:
         return redirect(url_for('sage_page'))
-    return render_template('auth.html')
+    trial_count = User.query.filter_by(plan='student').count()
+    return render_template('auth.html', trial_count=trial_count, trial_full=trial_count >= TRIAL_USER_CAP)
 
 @app.route('/auth/login', methods=['POST'])
 def auth_login():
@@ -1251,17 +1262,16 @@ def api_sage_chat():
     if not messages:
         return jsonify({'error': 'messages required'}), 400
 
-    # ── TRIAL GATE ─────────────────────────────────────────────
-    if not current_user.is_paid():
-        if not current_user.can_send_message():
-            return jsonify({
-                'error': 'daily_limit_reached',
-                'msgs_used': current_user.msgs_used_today(),
-                'msgs_limit': TRIAL_MSG_LIMIT,
-                'plan': current_user.plan,
-                'trial_days_left': current_user.trial_days_left()
-            }), 429
-        current_user.increment_msg()
+    # ── MESSAGE GATE (trial + paid) ────────────────────────────
+    if not current_user.can_send_message():
+        return jsonify({
+            'error': 'daily_limit_reached',
+            'msgs_used': current_user.msgs_used_today(),
+            'msgs_limit': current_user.msg_limit(),
+            'plan': current_user.plan,
+            'trial_days_left': current_user.trial_days_left()
+        }), 429
+    current_user.increment_msg()
     # ──────────────────────────────────────────────────────────
 
     system = d.get('system', '') or SAGE_SYSTEM
@@ -1411,16 +1421,39 @@ def health():
 @app.route('/api/user-status', methods=['GET'])
 @login_required
 def api_user_status():
+    lim = current_user.msg_limit()
+    used = current_user.msgs_used_today()
     return jsonify({
         'plan':           current_user.plan,
         'is_paid':        current_user.is_paid(),
         'trial_active':   current_user.trial_active(),
         'trial_days_left':current_user.trial_days_left(),
-        'msgs_used_today':current_user.msgs_used_today(),
-        'msgs_limit':     TRIAL_MSG_LIMIT if not current_user.is_paid() else 9999,
-        'msgs_remaining': max(0, TRIAL_MSG_LIMIT - current_user.msgs_used_today()) if not current_user.is_paid() else 9999,
-        'edu_limit':      TRIAL_EDU_LIMIT if not current_user.is_paid() else 9999,
+        'msgs_used_today':used,
+        'msgs_limit':     lim,
+        'msgs_remaining': max(0, lim - used),
+        'edu_limit':      9999 if current_user.is_paid() else TRIAL_EDU_LIMIT,
     })
+
+@app.route('/waitlist', methods=['POST'])
+def join_waitlist():
+    email = request.form.get('email','').strip().lower()
+    name  = request.form.get('name','').strip()
+    if not email:
+        flash('Email is required.', 'error')
+        return redirect(url_for('login_page') + '?signup=1')
+    if Waitlist.query.filter_by(email=email).first():
+        flash('You are already on the waitlist! We will notify you when a spot opens.', 'success')
+        return redirect(url_for('login_page'))
+    entry = Waitlist(email=email, name=name)
+    db.session.add(entry)
+    db.session.commit()
+    count = Waitlist.query.count()
+    flash(f'You are on the waitlist! You are #{count} in line. We will email you when a free spot opens.', 'success')
+    return redirect(url_for('login_page'))
+
+@app.route('/api/waitlist-count', methods=['GET'])
+def api_waitlist_count():
+    return jsonify({'count': Waitlist.query.count()})
 
 @app.route('/setup-admin')
 def setup_admin():
