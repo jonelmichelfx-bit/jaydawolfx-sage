@@ -32,6 +32,7 @@ stripe.api_key = STRIPE_SK
 TRIAL_MSG_LIMIT  = 6    # messages per day for free trial
 TRIAL_EDU_LIMIT  = 10   # lessons accessible for free trial
 TRIAL_DAYS       = 30   # trial length in days
+TRIAL_USER_CAP   = 200  # max free trial signups
 
 class User(UserMixin, db.Model):
     id                = db.Column(db.Integer, primary_key=True)
@@ -126,12 +127,19 @@ def auth_register():
     if User.query.filter_by(username=username).first():
         flash('Username already taken.', 'error')
         return redirect(url_for('login_page') + '?signup=1')
+    # ── FREE TRIAL CAP ─────────────────────────────────────────
+    trial_count = User.query.filter_by(plan='student').count()
+    if trial_count >= TRIAL_USER_CAP:
+        flash('The free trial is currently full (200/200 spots taken). Join the waitlist or upgrade directly to get access.', 'error')
+        return redirect(url_for('login_page') + '?signup=1')
+    # ──────────────────────────────────────────────────────────
     user = User(username=username, email=email, plan='student')
     user.set_password(password)
     db.session.add(user)
     db.session.commit()
     login_user(user, remember=True)
-    flash(f'Welcome {username}! Your 30-day free trial has started.', 'success')
+    spots_left = max(0, TRIAL_USER_CAP - (trial_count + 1))
+    flash(f'Welcome {username}! Your 30-day free trial has started. {spots_left} free spots remaining.', 'success')
     return redirect(url_for('sage_page'))
 
 @app.route('/auth/logout')
