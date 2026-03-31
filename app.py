@@ -1418,6 +1418,12 @@ def api_sage_chat():
 def health():
     return jsonify({'status':'ok','service':'sage-of-six-paths','time':datetime.utcnow().isoformat()})
 
+@app.route('/sw.js')
+def service_worker():
+    """Serve SW from root so it has full-site scope."""
+    from flask import send_from_directory
+    return send_from_directory('static', 'sw.js', mimetype='application/javascript')
+
 @app.route('/api/user-status', methods=['GET'])
 @login_required
 def api_user_status():

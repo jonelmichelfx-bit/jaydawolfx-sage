@@ -1,0 +1,27 @@
+{
+  "name": "Sage of Six Paths",
+  "short_name": "SAGE",
+  "description": "6 Path Intelligence Trading Terminal by JayDaWolfX",
+  "start_url": "/sage-mode",
+  "display": "standalone",
+  "background_color": "#03080f",
+  "theme_color": "#ffd700",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["finance", "education"],
+  "lang": "en-US"
+}
