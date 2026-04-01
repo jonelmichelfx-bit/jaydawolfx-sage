@@ -1626,112 +1626,129 @@ def api_sage_chat():
 @login_required
 def api_news_scan():
     """
-    Fetches today's top market-moving news and maps each event to affected stocks
-    using the institutional knowledge map (JP Morgan / Morgan Stanley / LPL Research sourced rules).
-
-    Tier 1: Finnhub General News API (if FINNHUB_API_KEY is set)
-    Tier 2: Claude web_search fallback (always available)
+    Maps today's market-moving news to affected stocks.
+    Tier 1: Finnhub API (if FINNHUB_API_KEY set)
+    Tier 2: Claude web_search (if available)
+    Tier 3: Claude knowledge-only fallback (always works)
     """
     import re as _re
 
-    api_key      = os.environ.get('ANTHROPIC_API_KEY', '')
-    finnhub_key  = os.environ.get('FINNHUB_API_KEY', '')
+    api_key     = os.environ.get('ANTHROPIC_API_KEY', '')
+    finnhub_key = os.environ.get('FINNHUB_API_KEY', '')
 
     if not api_key:
         return jsonify({'error': 'Service temporarily unavailable'}), 500
+
+    # ── Minimal system prompt — just the knowledge map, not the full SAGE_SYSTEM ──
+    NEWS_SYSTEM = """You are a stock news intelligence engine.
+When given financial headlines (or asked to identify market themes), you apply this institutional knowledge map and return ONLY a JSON object — no markdown, no explanation.
+
+KNOWLEDGE MAP:
+MIDDLE EAST CONFLICT/OIL THREAT: BUY XOM,CVX,OXY,LMT,NOC,RTX,GLD | SELL UAL,DAL,AAL | Hold: weeks-months
+MIDDLE EAST CEASEFIRE: BUY DAL,UAL,AAL,SPY | SELL USO,LMT,NOC | Hold: days-weeks
+CHINA TARIFFS/TRADE WAR: BUY CAT,DE,MP | SELL NVDA,AMD,AAPL,QQQ | Hold: days-weeks
+FED RATE HIKE/HOT CPI: BUY JPM,BAC,GLD | SELL TLT,QQQ,ARKK | Hold: days-weeks
+STRONG NFP/JOBS BEAT: BUY UUP,JPM,BAC | SELL GLD,QQQ | Hold: hours-days
+RECESSION FEAR: BUY GLD,TLT,JNJ,PG,KO | SELL IWM,XLY | Hold: months
+UKRAINE/RUSSIA ESCALATION: BUY UNG,WEAT,LMT,RTX,NOC | SELL EZU,VGK | Hold: weeks-months
+UKRAINE/RUSSIA CEASEFIRE: BUY EZU,VGK | SELL UNG,LMT,NOC | Hold: days-weeks
+AI/TECH EARNINGS BEAT: BUY TSM,MU,ANET,CEG | SELL nothing | Hold: days
+AI/TECH EARNINGS MISS: SELL NVDA,AMD,TSM,MU,ANET | Hold: days
+
+OUTPUT FORMAT (strict JSON, no code blocks):
+{"events":[{"headline":"...","category":"...","buy":[{"ticker":"XOM","hold":"weeks"}],"sell":[{"ticker":"UAL","hold":"weeks"}],"watch":[{"ticker":"SPY"}],"confirmation":"Price action above..."}]}"""
 
     # ── Tier 1: Finnhub headlines ──────────────────────────────────────────
     headlines = []
     if finnhub_key:
         try:
-            r = http_requests.get(
+            fh = http_requests.get(
                 'https://finnhub.io/api/v1/news',
                 params={'category': 'general', 'token': finnhub_key},
                 timeout=8
             )
-            items = r.json() if r.ok else []
-            # Take latest 10 market-relevant headlines
+            items = fh.json() if fh.ok else []
             for item in items[:10]:
                 h = item.get('headline', '') or item.get('summary', '')
                 if h:
                     headlines.append(h)
-        except Exception as e:
-            print(f'[Finnhub] {e}')
+        except Exception as fe:
+            print(f'[Finnhub] {fe}')
 
-    # ── Build Claude prompt ────────────────────────────────────────────────
     today = datetime.utcnow().strftime('%B %d, %Y')
-    if headlines:
-        news_block = '\n'.join(f'- {h}' for h in headlines[:8])
-        user_msg = (
-            f'Today is {today}. Here are the latest financial news headlines:\n\n'
-            f'{news_block}\n\n'
-            f'Apply the STOCK NEWS INTELLIGENCE knowledge map from your system prompt. '
-            f'Analyze these headlines and return a JSON array called "events". '
-            f'Each event object must have: headline (string), category (string), '
-            f'buy (array of {{ticker, hold}}), sell (array of {{ticker, hold}}), '
-            f'watch (array of {{ticker}}), confirmation (string). '
-            f'Return ONLY valid JSON. No markdown, no explanation, just the JSON object: {{"events": [...]}}'
-        )
-        tools = []  # no web search needed — we already have headlines
-    else:
-        # Tier 2: Let Claude search for today's news
-        user_msg = (
-            f'Today is {today}. Search for the top 5 market-moving financial news events right now. '
-            f'Apply the STOCK NEWS INTELLIGENCE knowledge map from your system prompt. '
-            f'Return a JSON object with an "events" array. '
-            f'Each event: headline (string), category (string), '
-            f'buy (array of {{ticker, hold}}), sell (array of {{ticker, hold}}), '
-            f'watch (array of {{ticker}}), confirmation (string). '
-            f'Return ONLY valid JSON. No markdown, no extra text.'
-        )
-        tools = [{'type': 'web_search_20250305', 'name': 'web_search'}]
 
     try:
         import anthropic as _anth
         client = _anth.Anthropic(api_key=api_key)
 
-        msgs = [{'role': 'user', 'content': user_msg}]
+        def _call_claude(user_msg, use_web_search=False):
+            """Call Claude, return raw text."""
+            call_kwargs = dict(
+                model      = 'claude-sonnet-4-6',
+                max_tokens = 1500,
+                system     = NEWS_SYSTEM,
+                messages   = [{'role': 'user', 'content': user_msg}]
+            )
+            if use_web_search:
+                call_kwargs['tools'] = [{'type': 'web_search_20250305', 'name': 'web_search'}]
 
-        kwargs = dict(
-            model      = 'claude-sonnet-4-6',
-            max_tokens = 2000,
-            system     = SAGE_SYSTEM,
-            messages   = msgs
-        )
-        if tools:
-            kwargs['tools'] = tools
+            result_text = ''
+            msgs_loop   = call_kwargs.pop('messages')
 
-        # Handle tool use loop (for web_search tier)
-        final_text = ''
-        for _attempt in range(5):
-            resp = client.messages.create(**kwargs)
-            for block in resp.content:
-                if hasattr(block, 'text') and block.text:
-                    final_text += block.text
-
-            if final_text.strip():
-                break
-
-            if resp.stop_reason == 'tool_use':
-                serialized = []
-                tool_results = []
+            for _attempt in range(4):
+                resp = client.messages.create(messages=msgs_loop, **call_kwargs)
                 for block in resp.content:
-                    if hasattr(block, 'type'):
-                        if block.type == 'text':
-                            serialized.append({'type': 'text', 'text': block.text})
-                        elif block.type == 'tool_use':
-                            serialized.append({'type': 'tool_use', 'id': block.id,
-                                               'name': block.name, 'input': getattr(block,'input',{})})
-                            tool_results.append({'type': 'tool_result', 'tool_use_id': block.id,
-                                                 'content': 'Search completed. Apply results to news analysis.'})
-                kwargs['messages'] = msgs + [
-                    {'role': 'assistant', 'content': serialized},
-                    {'role': 'user',      'content': tool_results}
-                ]
-            else:
-                break
+                    if hasattr(block, 'text') and block.text:
+                        result_text += block.text
+                if result_text.strip():
+                    break
+                if resp.stop_reason == 'tool_use':
+                    serialized, tool_results = [], []
+                    for block in resp.content:
+                        if hasattr(block, 'type'):
+                            if block.type == 'text':
+                                serialized.append({'type': 'text', 'text': block.text})
+                            elif block.type == 'tool_use':
+                                serialized.append({'type': 'tool_use', 'id': block.id,
+                                                   'name': block.name, 'input': getattr(block, 'input', {})})
+                                tool_results.append({'type': 'tool_result', 'tool_use_id': block.id,
+                                                     'content': 'Search completed. Now output the JSON.'})
+                    msgs_loop = msgs_loop + [
+                        {'role': 'assistant', 'content': serialized},
+                        {'role': 'user',      'content': tool_results}
+                    ]
+                else:
+                    break
+            return result_text
 
-        # Parse JSON from final_text
+        # ── Choose path ────────────────────────────────────────────────────
+        if headlines:
+            # We have headlines — just map them, no web search needed
+            news_block = '\n'.join(f'- {h}' for h in headlines[:8])
+            user_msg   = (
+                f'Today is {today}. Map these headlines to the knowledge map and return JSON:\n\n{news_block}'
+            )
+            final_text = _call_claude(user_msg, use_web_search=False)
+        else:
+            # Try with web_search first, fall back to knowledge-only
+            user_msg_search = (
+                f'Today is {today}. Search for the top 5 market-moving financial news events right now. '
+                f'Map them to the knowledge map and return JSON.'
+            )
+            try:
+                final_text = _call_claude(user_msg_search, use_web_search=True)
+            except Exception as ws_err:
+                print(f'[NewsScan web_search fallback] {ws_err}')
+                # Tier 3: knowledge-only — always works
+                user_msg_fallback = (
+                    f'Today is {today}. Based on your knowledge of current market conditions, '
+                    f'identify the 3-5 most relevant market themes active right now '
+                    f'(tariffs, Fed policy, geopolitical events, earnings). '
+                    f'Map them to the knowledge map and return JSON.'
+                )
+                final_text = _call_claude(user_msg_fallback, use_web_search=False)
+
+        # ── Parse JSON ─────────────────────────────────────────────────────
         json_match = _re.search(r'\{[\s\S]*"events"[\s\S]*\}', final_text)
         if json_match:
             data = json.loads(json_match.group(0))
@@ -1741,6 +1758,7 @@ def api_news_scan():
 
     except Exception as e:
         print(f'[NewsScan ERROR] {e}')
+        import traceback; traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 
