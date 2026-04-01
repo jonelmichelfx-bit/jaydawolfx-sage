@@ -1,6 +1,6 @@
 import os, json, time, uuid, threading
 from datetime import datetime
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, make_response
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session, make_response, Response, stream_with_context
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -1442,11 +1442,11 @@ def api_sage_intel():
     })
 
 
-# ── SAGE CHAT PROXY ─────────────────────────────────────────
+# ── SAGE CHAT PROXY (streaming SSE) ─────────────────────────
 @app.route('/api/sage-chat', methods=['POST'])
 @login_required
 def api_sage_chat():
-    """Server-side chat proxy — Anthropic key stays on server, never exposed to browser."""
+    """Server-side chat proxy — streams SSE so the platform never times out."""
     try:
         import anthropic as _anth
     except ImportError:
@@ -1476,6 +1476,7 @@ def api_sage_chat():
     system = d.get('system', '') or SAGE_SYSTEM
 
     # Sanitize messages — only keep plain text role/content dicts
+    import re as _re
     clean_msgs = []
     for m in messages:
         role    = m.get('role', 'user')
@@ -1494,10 +1495,6 @@ def api_sage_chat():
         return jsonify({'error': 'No valid messages to process'}), 400
 
     # ── MEMORY PROTECTION ─────────────────────────────────────────
-    # Browser appends [LIVE MARKET DATA] to every user message.
-    # Old messages with stale market blobs bloat memory — strip them
-    # from all but the last user message, then cap history at 10 msgs.
-    import re as _re
     _mkt_pat = _re.compile(r'\n*\[LIVE MARKET DATA[^\]]*\].*', _re.DOTALL)
 
     last_user_idx = None
@@ -1516,102 +1513,114 @@ def api_sage_chat():
         clean_msgs = clean_msgs[-10:]
     # ──────────────────────────────────────────────────────────────
 
-    try:
-        client     = _anth.Anthropic(api_key=api_key)
-        msgs       = clean_msgs[:]
+    def _sse(obj):
+        return f'data: {json.dumps(obj)}\n\n'
 
-        # ── PHASE 1: Pure technical analysis — NO web_search ──────────────
-        resp1 = client.messages.create(
-            model      = 'claude-sonnet-4-6',
-            max_tokens = 4000,
-            system     = system,
-            messages   = msgs
-            # NO tools array — physically blocks web_search
-        )
+    def generate():
+        try:
+            client = _anth.Anthropic(api_key=api_key)
+            msgs   = clean_msgs[:]
 
-        phase1_text = ''
-        for block in resp1.content:
-            if hasattr(block, 'text') and block.text:
-                phase1_text += block.text
+            # ── PHASE 1: Pure technical analysis — NO web_search ──────────
+            phase1_text = ''
+            with client.messages.stream(
+                model      = 'claude-sonnet-4-6',
+                max_tokens = 4000,
+                system     = system,
+                messages   = msgs
+            ) as stream:
+                for chunk in stream.text_stream:
+                    phase1_text += chunk
+                    yield _sse({'text': chunk})
 
-        # Extract technical score from Phase 1
-        score_match = _re.search(
-            r'(?:TECHNICAL\s+SCORE|TECH\s+SCORE|CONFIDENCE\s+SCORE|SCORE)[^\d]*(\d{2,3})',
-            phase1_text, _re.IGNORECASE
-        )
-        if not score_match:
-            score_match = _re.search(r'(\d{2,3})\s*/\s*100', phase1_text)
-        tech_score = int(score_match.group(1)) if score_match else 0
-
-        final_text = phase1_text
-
-        # ── PHASE 2: News gate — only if technical score >= 70 ────────────
-        if tech_score >= 70:
-            gate_msg = (
-                f'STEP 6 — NEWS GATE (Technical score: {tech_score}/100 — gate PASSED).\n'
-                'Now run Path 6 (Fundamentals). Search:\n'
-                '1. "economic calendar high impact events today"\n'
-                '2. "forex market sentiment today"\n'
-                'Apply news as ±15 pts max adjustment to confidence score. '
-                'Output the final updated TRADE_CARD with adjusted confidence.'
+            # Extract technical score
+            score_match = _re.search(
+                r'(?:TECHNICAL\s+SCORE|TECH\s+SCORE|CONFIDENCE\s+SCORE|SCORE)[^\d]*(\d{2,3})',
+                phase1_text, _re.IGNORECASE
             )
-            msgs_p2 = msgs + [
-                {'role': 'assistant', 'content': phase1_text},
-                {'role': 'user',      'content': gate_msg}
-            ]
+            if not score_match:
+                score_match = _re.search(r'(\d{2,3})\s*/\s*100', phase1_text)
+            tech_score = int(score_match.group(1)) if score_match else 0
 
-            news_text = ''
-            for _attempt in range(4):
-                resp2 = client.messages.create(
-                    model      = 'claude-sonnet-4-6',
-                    max_tokens = 2000,
-                    system     = system,
-                    tools      = [{'type': 'web_search_20250305', 'name': 'web_search'}],
-                    messages   = msgs_p2
+            # ── PHASE 2: News gate — only if technical score >= 70 ────────
+            if tech_score >= 70:
+                separator = '\n\n---\n**PATH 6 — NEWS GATE:**\n'
+                yield _sse({'text': separator})
+
+                gate_msg = (
+                    f'STEP 6 — NEWS GATE (Technical score: {tech_score}/100 — gate PASSED).\n'
+                    'Now run Path 6 (Fundamentals). Search:\n'
+                    '1. "economic calendar high impact events today"\n'
+                    '2. "forex market sentiment today"\n'
+                    'Apply news as ±15 pts max adjustment to confidence score. '
+                    'Output the final updated TRADE_CARD with adjusted confidence.'
                 )
+                msgs_p2 = msgs + [
+                    {'role': 'assistant', 'content': phase1_text},
+                    {'role': 'user',      'content': gate_msg}
+                ]
 
-                for block in resp2.content:
-                    if hasattr(block, 'text') and block.text:
-                        news_text += block.text
+                for _attempt in range(4):
+                    news_chunk_count = 0
+                    final_msg        = None
 
-                if news_text.strip():
-                    break
+                    with client.messages.stream(
+                        model      = 'claude-sonnet-4-6',
+                        max_tokens = 4000,
+                        system     = system,
+                        tools      = [{'type': 'web_search_20250305', 'name': 'web_search'}],
+                        messages   = msgs_p2
+                    ) as stream2:
+                        for chunk in stream2.text_stream:
+                            news_chunk_count += 1
+                            yield _sse({'text': chunk})
+                        final_msg = stream2.get_final_message()
 
-                if resp2.stop_reason == 'tool_use':
-                    serialized = []
-                    for block in resp2.content:
-                        if hasattr(block, 'type'):
-                            if block.type == 'text':
-                                serialized.append({'type': 'text', 'text': block.text})
-                            elif block.type == 'tool_use':
-                                serialized.append({
-                                    'type':  'tool_use',
-                                    'id':    block.id,
-                                    'name':  block.name,
-                                    'input': block.input if hasattr(block, 'input') else {}
+                    if news_chunk_count > 0:
+                        break  # got text — done
+
+                    # No text yet — model used a tool first; feed result and retry
+                    if final_msg and final_msg.stop_reason == 'tool_use':
+                        serialized = []
+                        for block in final_msg.content:
+                            if hasattr(block, 'type'):
+                                if block.type == 'text':
+                                    serialized.append({'type': 'text', 'text': block.text})
+                                elif block.type == 'tool_use':
+                                    serialized.append({
+                                        'type':  'tool_use',
+                                        'id':    block.id,
+                                        'name':  block.name,
+                                        'input': block.input if hasattr(block, 'input') else {}
+                                    })
+                        msgs_p2.append({'role': 'assistant', 'content': serialized})
+                        tool_results = []
+                        for block in final_msg.content:
+                            if hasattr(block, 'type') and block.type == 'tool_use':
+                                tool_results.append({
+                                    'type':        'tool_result',
+                                    'tool_use_id': block.id,
+                                    'content':     'Search completed. Apply news context as Path 6 adjustment (±15 pts max). Output final trade card with updated confidence.'
                                 })
-                    msgs_p2.append({'role': 'assistant', 'content': serialized})
-                    tool_results = []
-                    for block in resp2.content:
-                        if hasattr(block, 'type') and block.type == 'tool_use':
-                            tool_results.append({
-                                'type':        'tool_result',
-                                'tool_use_id': block.id,
-                                'content':     'Search completed. Apply news context as Path 6 adjustment (±15 pts max). Output final trade card with updated confidence.'
-                            })
-                    msgs_p2.append({'role': 'user', 'content': tool_results})
-                else:
-                    break
+                        msgs_p2.append({'role': 'user', 'content': tool_results})
+                    else:
+                        break
 
-            if news_text.strip():
-                final_text = phase1_text + '\n\n---\n**PATH 6 — NEWS GATE:**\n' + news_text
+            yield _sse({'done': True})
 
-        return jsonify({'content': [{'type': 'text', 'text': final_text or 'No response generated.'}]})
+        except Exception as e:
+            print(f'[Sage Chat ERROR] {e}')
+            yield _sse({'error': str(e)})
 
-    except Exception as e:
-        error_msg = str(e)
-        print(f'[Sage Chat ERROR] {error_msg}')
-        return jsonify({'error': error_msg}), 500
+    return Response(
+        stream_with_context(generate()),
+        content_type = 'text/event-stream',
+        headers      = {
+            'X-Accel-Buffering': 'no',
+            'Cache-Control':     'no-cache',
+            'Connection':        'keep-alive',
+        }
+    )
 
 @app.route('/api/news-scan', methods=['POST'])
 @login_required

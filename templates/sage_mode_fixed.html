@@ -355,6 +355,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--m
 .sdots{display:flex;gap:3px;}
 .sdots span{width:4px;height:4px;background:var(--purple);border-radius:50%;animation:sdot 1.2s infinite;}
 .sdots span:nth-child(2){animation-delay:.2s}.sdots span:nth-child(3){animation-delay:.4s}
+/* Streaming cursor */
+.sage-stream-cursor{display:inline-block;color:var(--sage);animation:scursor .7s step-end infinite;}
+@keyframes scursor{0%,100%{opacity:1}50%{opacity:0}}
 
 /* Trade card */
 .sage-card{background:var(--bg);border:1px solid var(--border);border-top:2px solid var(--sage);margin-top:8px;}
@@ -2525,67 +2528,74 @@ Asset being analyzed: ${sym}
   SAGE.history.push({role:'user', content: text + ctx + etStr});
 
   try{
-    // Agentic loop — handles tool_use for web_search
-    let msgs = [...SAGE.history];
-    let fullText = '';
-    let loopCount = 0;
+    const msgs = [...SAGE.history];
 
-    const callAPI = async(messages) => {
-      const r = await fetch('/api/sage-chat', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        credentials: 'include',
-        body: JSON.stringify({
-          messages,
-          system: SAGE_SYSTEM_PROMPT
-        })
-      });
-      if(r.status === 429){
-        const err = await r.json().catch(()=>({}));
-        // Update local state so next send is blocked too
-        SAGE_USER.msgs_remaining = 0;
-        SAGE_USER.msgs_used_today = err.msgs_limit || SAGE_USER.msgs_limit;
-        sageApplyUserStatus();
-        sageShowUpgradeModal('DAILY LIMIT REACHED',
-          `You have used all <strong>${err.msgs_limit || SAGE_USER.msgs_limit}</strong> free messages today.<br>
-           Your limit resets at midnight UTC.<br><br>
-           Upgrade to <strong style="color:var(--cyan)">Sage</strong> or <strong style="color:var(--gold)">Unleashed</strong> for unlimited daily messages.`);
-        throw new Error('daily_limit_reached');
-      }
-      if(!r.ok){
-        const err = await r.json().catch(()=>({error:'Server error'}));
-        throw new Error(err.error || 'Server error');
-      }
-      return r.json();
-    };
+    // ── Streaming SSE fetch ───────────────────────────────────────────
+    const r = await fetch('/api/sage-chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      credentials: 'include',
+      body: JSON.stringify({ messages: msgs, system: SAGE_SYSTEM_PROMPT })
+    });
 
-    let data = await callAPI(msgs);
-
-    // Server handles the full agentic loop (web_search) internally — HTML just renders the final text.
-
-    // Tool-use agentic loop
-    while(data.stop_reason==='tool_use' && loopCount<5){
-      loopCount++;
-      msgs.push({role:'assistant', content:data.content});
-      const results=[];
-      for(const block of data.content){
-        if(block.type==='tool_use') results.push({type:'tool_result',tool_use_id:block.id,content:'Search completed. This is Path 4 (news check) result. If you have not yet run Paths 1-3 (EMA stack, key levels, indicators from [LIVE MARKET DATA]), complete those now. Calculate technical score first. Apply news as ±15 pts max adjustment. Then output SAGE 6-PATH VERIFICATION block and trade card.'});
-      }
-      msgs.push({role:'user', content:results});
-      data = await callAPI(msgs);
+    if(r.status === 429){
+      const err = await r.json().catch(()=>({}));
+      SAGE_USER.msgs_remaining  = 0;
+      SAGE_USER.msgs_used_today = err.msgs_limit || SAGE_USER.msgs_limit;
+      sageApplyUserStatus();
+      sageShowUpgradeModal('DAILY LIMIT REACHED',
+        `You have used all <strong>${err.msgs_limit || SAGE_USER.msgs_limit}</strong> free messages today.<br>
+         Your limit resets at midnight UTC.<br><br>
+         Upgrade to <strong style="color:var(--cyan)">Sage</strong> or <strong style="color:var(--gold)">Unleashed</strong> for unlimited daily messages.`);
+      throw new Error('daily_limit_reached');
+    }
+    if(!r.ok){
+      const err = await r.json().catch(()=>({error:'Server error'}));
+      throw new Error(err.error || 'Server error');
     }
 
-    if(data.content) for(const b of data.content) if(b.type==='text') fullText+=b.text+'\n';
-
-    if(!fullText && data.error){
-      fullText=`Error: ${data.error.message||'Unknown error'}`;
-      if(data.error.type==='authentication_error'){
-        // API error — server issue, not user key
-      }
-    }
-
-    SAGE.history.push({role:'assistant', content:fullText});
+    // Remove thinking indicator, create streaming bubble right away
     document.getElementById('sageThinking')?.remove();
+    const wm = document.createElement('div');
+    wm.className = 'smsg-sage';
+    wm.innerHTML = '<div class="sbbl" id="sageStreamBubble"><span class="sage-stream-cursor">▌</span></div>';
+    document.getElementById('sageMsgs').appendChild(wm);
+
+    const reader  = r.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText  = '';
+    let sseBuffer = '';
+
+    outer: while(true){
+      const { done, value } = await reader.read();
+      if(done) break;
+
+      sseBuffer += decoder.decode(value, { stream: true });
+      const lines = sseBuffer.split('\n');
+      sseBuffer   = lines.pop(); // keep any partial line
+
+      for(const line of lines){
+        if(!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if(!raw) continue;
+        let evt;
+        try{ evt = JSON.parse(raw); } catch{ continue; }
+
+        if(evt.error) throw new Error(evt.error);
+        if(evt.done)  break outer;
+        if(evt.text){
+          fullText += evt.text;
+          const bubble = document.getElementById('sageStreamBubble');
+          if(bubble){
+            bubble.innerHTML = `<p>${sageRenderProse(fullText)}</p><span class="sage-stream-cursor">▌</span>`;
+            sageScrollBottom();
+          }
+        }
+      }
+    }
+
+    // Final render — remove cursor, parse trade card
+    SAGE.history.push({role:'assistant', content:fullText});
 
     // Update trial counter after successful response
     if(!SAGE_USER.is_paid){
@@ -2595,22 +2605,23 @@ Asset being analyzed: ${sym}
     }
 
     const {clean, card} = sageParseCard(fullText);
+    // Replace streaming bubble with final rendered content
+    const finalBubble = document.getElementById('sageStreamBubble');
+    if(finalBubble) finalBubble.innerHTML = `<p>${sageRenderProse(clean)}</p>${sageBuildCard(card)}`;
+
     // Render 6-path verification board if present
     const verifyEl2 = sageRender6PathBoard(fullText);
     if(verifyEl2) document.getElementById('sageMsgs').appendChild(verifyEl2);
     // Render confidence breakdown if present
     const confEl2 = sageRenderConfBreakdown(fullText);
     if(confEl2) document.getElementById('sageMsgs').appendChild(confEl2);
-    const wm=document.createElement('div');
-    wm.className='smsg-sage';
-    wm.innerHTML=`<div class="sbbl"><p>${sageRenderProse(clean)}</p>${sageBuildCard(card)}</div>`;
-    document.getElementById('sageMsgs').appendChild(wm);
 
     // Auto-update news tab if news mentioned
     if(/news|calendar|nfp|fomc|cpi|central bank|risk/i.test(fullText)) sageUpdateNewsFromResponse(fullText);
 
   } catch(err){
     document.getElementById('sageThinking')?.remove();
+    document.getElementById('sageStreamBubble')?.closest('.smsg-sage')?.remove();
     const em=document.createElement('div'); em.className='smsg-sage';
     em.innerHTML=`<div class="sbbl"><span style="color:var(--red)">Connection error: ${sageEsc(err.message)}</span></div>`;
     document.getElementById('sageMsgs').appendChild(em);
