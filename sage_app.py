@@ -108,6 +108,15 @@ class Waitlist(db.Model):
     name       = db.Column(db.String(80), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+class ChatMessage(db.Model):
+    """Stores last N messages per user for cross-session memory."""
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    role       = db.Column(db.String(10), nullable=False)   # 'user' or 'assistant'
+    content    = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    __table_args__ = (db.Index('idx_chat_user_time', 'user_id', 'created_at'),)
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -1066,7 +1075,24 @@ Always return structured analysis. For each news event, output:
   ⏳ WATCH: [ticker] — [what trigger needed]
 ⚠️ CONFIRMATION NEEDED: [what price action or data confirms before acting]
 
-Never give a BUY or SELL without explaining the institutional logic in one sentence."""
+Never give a BUY or SELL without explaining the institutional logic in one sentence.
+
+═══════════════════════════════════════════════════════
+ CONVERSATION RULES — CRITICAL
+═══════════════════════════════════════════════════════
+
+CORRECTIONS & FOLLOW-UPS — handle these naturally:
+If the user says "no I meant X", "I meant Y", "not that, I meant Z", "correction:", or rephrases their last message — treat it as a correction of the prior request. Acknowledge briefly and answer the corrected question. Do NOT re-run the previous analysis. Do NOT get confused. Just pivot cleanly.
+Example: User asks "analyze USD/NZD" → user says "no I meant NZD/USD" → SAGE says "Got it — NZD/USD, let me pull that." and analyzes NZD/USD.
+
+SHORT FOLLOW-UP QUESTIONS — answer conversationally:
+If the user asks a short follow-up like "what about a pullback?", "what level should I watch?", "is that the entry?", "how's that pair doing?" — answer directly using the current context. Do NOT run a full 6-path analysis unless the user asks for it.
+
+PAIR CLARIFICATION — always confirm if ambiguous:
+If the user types a pair name ambiguously (e.g. "usd nzd" instead of "NZD/USD"), confirm which direction before analyzing.
+
+MEMORY OF CURRENT SESSION:
+You have access to the last 10 messages in this conversation. Use this context. If the user references "that pair", "the setup we discussed", "the level you mentioned" — refer back to what was said earlier in the conversation."""
 
 
 # ── SAGE INTEL ROUTE ──────────────────────────────────────
@@ -1604,7 +1630,7 @@ def api_sage_chat():
             with client.messages.stream(
                 model      = 'claude-sonnet-4-6',
                 max_tokens = 8000,
-                system     = system,
+                system     = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
                 messages   = msgs
             ) as stream:
                 for chunk in stream.text_stream:
@@ -1622,6 +1648,10 @@ def api_sage_chat():
 
             # ── PHASE 2: News gate — only if technical score >= 70 ────────
             if tech_score >= 70:
+                # Send a heartbeat so the browser knows we're still alive
+                # while we set up Phase 2 — prevents "network error" on slow connections
+                yield ': heartbeat\n\n'
+
                 # Separator is NOT yielded here — it is prepended to the first real
                 # Phase 2 text chunk below. This way it only lands in the client's
                 # fullText (and therefore in SAGE.history) if Phase 2 actually
@@ -1650,7 +1680,7 @@ def api_sage_chat():
                     with client.messages.stream(
                         model      = 'claude-sonnet-4-6',
                         max_tokens = 6000,
-                        system     = system,
+                        system     = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
                         tools      = [{'type': 'web_search_20250305', 'name': 'web_search'}],
                         messages   = msgs_p2
                     ) as stream2:
@@ -1696,6 +1726,8 @@ def api_sage_chat():
                                     'content':     'Search completed. Apply news context as Path 6 adjustment (±15 pts max). Output final trade card with updated confidence.'
                                 })
                         msgs_p2.append({'role': 'user', 'content': tool_results})
+                        # Heartbeat — keep connection alive while we feed tool result back
+                        yield ': heartbeat\n\n'
                     else:
                         break
 
@@ -1858,6 +1890,46 @@ OUTPUT FORMAT (strict JSON, no code blocks):
 @app.route('/health')
 def health():
     return jsonify({'status':'ok','service':'sage-of-six-paths','time':datetime.utcnow().isoformat()})
+
+# ── SAGE MEMORY — save & load chat history ─────────────────
+MEMORY_KEEP = 10   # number of message pairs to remember across sessions
+
+@app.route('/api/sage-memory', methods=['GET'])
+@login_required
+def api_sage_memory_get():
+    """Return last MEMORY_KEEP messages for this user (oldest first)."""
+    msgs = (ChatMessage.query
+            .filter_by(user_id=current_user.id)
+            .order_by(ChatMessage.created_at.desc())
+            .limit(MEMORY_KEEP * 2)   # *2 because pairs: user+assistant
+            .all())
+    msgs.reverse()  # oldest first
+    return jsonify([{'role': m.role, 'content': m.content} for m in msgs])
+
+@app.route('/api/sage-memory', methods=['POST'])
+@login_required
+def api_sage_memory_save():
+    """Save a user+assistant message pair. Prunes old messages beyond MEMORY_KEEP pairs."""
+    d = request.get_json() or {}
+    role    = d.get('role', '')
+    content = d.get('content', '')
+    if role not in ('user', 'assistant') or not content:
+        return jsonify({'error': 'invalid'}), 400
+    # Save new message
+    msg = ChatMessage(user_id=current_user.id, role=role, content=content[:8000])
+    db.session.add(msg)
+    db.session.commit()
+    # Prune — keep only last MEMORY_KEEP*2 messages
+    old = (ChatMessage.query
+           .filter_by(user_id=current_user.id)
+           .order_by(ChatMessage.created_at.desc())
+           .offset(MEMORY_KEEP * 2)
+           .all())
+    for o in old:
+        db.session.delete(o)
+    if old:
+        db.session.commit()
+    return jsonify({'ok': True})
 
 @app.route('/sw.js')
 def service_worker():
