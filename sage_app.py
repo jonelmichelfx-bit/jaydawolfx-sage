@@ -117,6 +117,22 @@ class ChatMessage(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     __table_args__ = (db.Index('idx_chat_user_time', 'user_id', 'created_at'),)
 
+class SageJob(db.Model):
+    """
+    Temporary store for polling-based AI job results.
+    Written by background thread, read by poll endpoint.
+    Works across ALL gunicorn workers because it lives in the shared database.
+    Jobs auto-pruned after 10 minutes via cleanup in the start route.
+    """
+    __tablename__ = 'sage_job'
+    job_id     = db.Column(db.String(36), primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    text       = db.Column(db.Text, default='')   # accumulated response text
+    done       = db.Column(db.Boolean, default=False)
+    error      = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -1546,154 +1562,185 @@ def api_sage_intel():
 
 
 # ── POLLING-BASED CHAT ──────────────────────────────────────
-# Replaces the long-held SSE connection that Render/nginx kills mid-analysis.
-# Client POSTs once → gets job_id instantly → polls /api/sage-chat/poll every 400ms.
-# No persistent connection = no timeouts, no drops.
+# The original in-memory _jobs dict caused "Session expired" on Render because
+# gunicorn runs multiple worker processes — each has its own memory space.
+# Job created in Worker 1 was invisible to Worker 2 → instant 404.
+# Fix: store jobs in PostgreSQL which ALL workers share.
 
 import threading as _threading
 
-_jobs      = {}           # job_id → {chunks, done, error, ts}
-_jobs_lock = _threading.Lock()
-
-
-def _job_append(job_id, obj):
-    """Thread-safe append a chunk to a job."""
-    with _jobs_lock:
-        if job_id in _jobs:
-            _jobs[job_id]['chunks'].append(obj)
+FLUSH_INTERVAL = 0.5   # seconds between DB text flushes during streaming
 
 
 def _cleanup_old_jobs():
-    """Remove jobs older than 10 minutes to prevent memory leak."""
-    cutoff = time.time() - 600
-    with _jobs_lock:
-        stale = [jid for jid, j in _jobs.items() if j['ts'] < cutoff]
-        for jid in stale:
-            del _jobs[jid]
+    """Delete SageJob rows older than 10 minutes. Called at job start."""
+    try:
+        import datetime as _dt
+        cutoff = datetime.utcnow() - _dt.timedelta(minutes=10)
+        old = SageJob.query.filter(SageJob.created_at < cutoff).all()
+        for j in old:
+            db.session.delete(j)
+        if old:
+            db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f'[SageJob cleanup] {e}')
 
 
 def _run_sage_job(job_id, msgs, system, api_key):
     """
-    Background worker — identical logic to the old SSE generate() function.
-    Instead of yielding SSE chunks, appends to the job store.
-    Runs in a daemon thread so Render can recycle it freely.
+    Background worker — Phase 1 + Phase 2, flushing accumulated text
+    to the SageJob database row every FLUSH_INTERVAL seconds.
+    Runs with its own Flask app context so it can safely use the database
+    from a background thread independently of any HTTP request.
+    All workers share the same database, so any worker can serve the poll.
     """
     import re as _re
-    try:
-        import anthropic as _anth
-        client = _anth.Anthropic(api_key=api_key)
 
-        # ── PHASE 1: Pure technical analysis — no web_search ──────────
-        phase1_text = ''
-        with client.messages.stream(
-            model      = 'claude-sonnet-4-6',
-            max_tokens = 8000,
-            system     = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
-            messages   = msgs
-        ) as stream:
-            for chunk in stream.text_stream:
-                phase1_text += chunk
-                _job_append(job_id, {'text': chunk})
+    with app.app_context():
 
-        # Extract technical score to decide if Phase 2 runs
-        score_match = _re.search(
-            r'(?:TECHNICAL\s+SCORE|TECH\s+SCORE|CONFIDENCE\s+SCORE|SCORE)[^\d]*(\d{2,3})',
-            phase1_text, _re.IGNORECASE
-        )
-        if not score_match:
-            score_match = _re.search(r'(\d{2,3})\s*/\s*100', phase1_text)
-        tech_score = int(score_match.group(1)) if score_match else 0
+        def _flush(text_buffer):
+            try:
+                job = SageJob.query.filter_by(job_id=job_id).first()
+                if job:
+                    job.text = text_buffer
+                    db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                print(f'[SageJob flush] {e}')
 
-        # ── PHASE 2: News gate — only if technical score >= 70 ────────
-        if tech_score >= 70:
-            separator = '\n\n---\n**PATH 6 — NEWS GATE:**\n'
-            sep_sent  = False
+        def _finish(text_buffer, error=None):
+            try:
+                job = SageJob.query.filter_by(job_id=job_id).first()
+                if job:
+                    job.text  = text_buffer
+                    job.done  = True
+                    job.error = error
+                    db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                print(f'[SageJob finish] {e}')
 
-            gate_msg = (
-                f'STEP 6 — NEWS GATE (Technical score: {tech_score}/100 — gate PASSED).\n'
-                'Now run Path 6 (Fundamentals). Search:\n'
-                '1. "economic calendar high impact events today"\n'
-                '2. "forex market sentiment today"\n'
-                'Apply news as ±15 pts max adjustment to confidence score. '
-                'Output the final updated TRADE_CARD with adjusted confidence.'
+        text_buffer = ''
+        last_flush  = time.time()
+
+        try:
+            import anthropic as _anth
+            client = _anth.Anthropic(api_key=api_key)
+
+            # ── PHASE 1: Pure technical analysis — no web_search ──────────
+            phase1_text = ''
+            with client.messages.stream(
+                model      = 'claude-sonnet-4-6',
+                max_tokens = 8000,
+                system     = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
+                messages   = msgs
+            ) as stream:
+                for chunk in stream.text_stream:
+                    phase1_text += chunk
+                    text_buffer  += chunk
+                    now = time.time()
+                    if now - last_flush >= FLUSH_INTERVAL:
+                        _flush(text_buffer)
+                        last_flush = now
+            _flush(text_buffer)   # flush end of Phase 1
+
+            # Extract technical score
+            score_match = _re.search(
+                r'(?:TECHNICAL\s+SCORE|TECH\s+SCORE|CONFIDENCE\s+SCORE|SCORE)[^\d]*(\d{2,3})',
+                phase1_text, _re.IGNORECASE
             )
-            msgs_p2 = msgs + [
-                {'role': 'assistant', 'content': phase1_text},
-                {'role': 'user',      'content': gate_msg}
-            ]
+            if not score_match:
+                score_match = _re.search(r'(\d{2,3})\s*/\s*100', phase1_text)
+            tech_score = int(score_match.group(1)) if score_match else 0
 
-            for _attempt in range(4):
-                news_chunk_count = 0
-                final_msg        = None
+            # ── PHASE 2: News gate — only if technical score >= 70 ────────
+            if tech_score >= 70:
+                separator = '\n\n---\n**PATH 6 — NEWS GATE:**\n'
+                sep_sent  = False
 
-                with client.messages.stream(
-                    model      = 'claude-sonnet-4-6',
-                    max_tokens = 6000,
-                    system     = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
-                    tools      = [{'type': 'web_search_20250305', 'name': 'web_search'}],
-                    messages   = msgs_p2
-                ) as stream2:
-                    for chunk in stream2.text_stream:
-                        news_chunk_count += 1
-                        if not sep_sent:
-                            chunk    = separator + chunk
-                            sep_sent = True
-                        _job_append(job_id, {'text': chunk})
-                    final_msg = stream2.get_final_message()
+                gate_msg = (
+                    f'STEP 6 — NEWS GATE (Technical score: {tech_score}/100 — gate PASSED).\n'
+                    'Now run Path 6 (Fundamentals). Search:\n'
+                    '1. "economic calendar high impact events today"\n'
+                    '2. "forex market sentiment today"\n'
+                    'Apply news as ±15 pts max adjustment to confidence score. '
+                    'Output the final updated TRADE_CARD with adjusted confidence.'
+                )
+                msgs_p2 = msgs + [
+                    {'role': 'assistant', 'content': phase1_text},
+                    {'role': 'user',      'content': gate_msg}
+                ]
 
-                # Exit if we got text and Claude is fully done (not mid-tool)
-                if news_chunk_count > 0 and (final_msg is None or final_msg.stop_reason != 'tool_use'):
-                    break
+                for _attempt in range(4):
+                    news_chunk_count = 0
+                    final_msg        = None
 
-                # Claude fired a tool — feed result back and retry
-                if final_msg and final_msg.stop_reason == 'tool_use':
-                    serialized = []
-                    for block in final_msg.content:
-                        if hasattr(block, 'type'):
-                            if block.type == 'text':
-                                serialized.append({'type': 'text', 'text': block.text})
-                            elif block.type == 'tool_use':
-                                serialized.append({
-                                    'type':  'tool_use',
-                                    'id':    block.id,
-                                    'name':  block.name,
-                                    'input': block.input if hasattr(block, 'input') else {}
+                    with client.messages.stream(
+                        model      = 'claude-sonnet-4-6',
+                        max_tokens = 6000,
+                        system     = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
+                        tools      = [{'type': 'web_search_20250305', 'name': 'web_search'}],
+                        messages   = msgs_p2
+                    ) as stream2:
+                        for chunk in stream2.text_stream:
+                            news_chunk_count += 1
+                            if not sep_sent:
+                                chunk    = separator + chunk
+                                sep_sent = True
+                            text_buffer += chunk
+                            now = time.time()
+                            if now - last_flush >= FLUSH_INTERVAL:
+                                _flush(text_buffer)
+                                last_flush = now
+                        final_msg = stream2.get_final_message()
+
+                    _flush(text_buffer)   # flush after each Phase 2 attempt
+
+                    if news_chunk_count > 0 and (final_msg is None or final_msg.stop_reason != 'tool_use'):
+                        break
+
+                    if final_msg and final_msg.stop_reason == 'tool_use':
+                        serialized = []
+                        for block in final_msg.content:
+                            if hasattr(block, 'type'):
+                                if block.type == 'text':
+                                    serialized.append({'type': 'text', 'text': block.text})
+                                elif block.type == 'tool_use':
+                                    serialized.append({
+                                        'type':  'tool_use',
+                                        'id':    block.id,
+                                        'name':  block.name,
+                                        'input': block.input if hasattr(block, 'input') else {}
+                                    })
+                        msgs_p2.append({'role': 'assistant', 'content': serialized})
+                        tool_results = []
+                        for block in final_msg.content:
+                            if hasattr(block, 'type') and block.type == 'tool_use':
+                                tool_results.append({
+                                    'type':        'tool_result',
+                                    'tool_use_id': block.id,
+                                    'content':     'Search completed. Apply news context as Path 6 adjustment (±15 pts max). Output final trade card with updated confidence.'
                                 })
-                    msgs_p2.append({'role': 'assistant', 'content': serialized})
-                    tool_results = []
-                    for block in final_msg.content:
-                        if hasattr(block, 'type') and block.type == 'tool_use':
-                            tool_results.append({
-                                'type':        'tool_result',
-                                'tool_use_id': block.id,
-                                'content':     'Search completed. Apply news context as Path 6 adjustment (±15 pts max). Output final trade card with updated confidence.'
-                            })
-                    msgs_p2.append({'role': 'user', 'content': tool_results})
-                else:
-                    break  # unexpected stop reason — exit cleanly
+                        msgs_p2.append({'role': 'user', 'content': tool_results})
+                    else:
+                        break
 
-        # Mark job complete
-        with _jobs_lock:
-            if job_id in _jobs:
-                _jobs[job_id]['done'] = True
+            _finish(text_buffer)
 
-    except Exception as e:
-        print(f'[SageJob ERROR] {e}')
-        import traceback; traceback.print_exc()
-        with _jobs_lock:
-            if job_id in _jobs:
-                _jobs[job_id]['error'] = str(e)
-                _jobs[job_id]['done']  = True
+        except Exception as e:
+            print(f'[SageJob ERROR] {e}')
+            import traceback; traceback.print_exc()
+            _finish(text_buffer, error=str(e))
 
 
 @app.route('/api/sage-chat/start', methods=['POST'])
 @login_required
 def api_sage_chat_start():
     """
-    Start a background AI analysis job.
-    Returns job_id immediately — client then polls /api/sage-chat/poll.
-    This endpoint is identical to the old /api/sage-chat in terms of auth,
-    rate-limiting, and message sanitisation — only the delivery mechanism differs.
+    Start a background AI analysis job. Returns job_id instantly.
+    Client polls /api/sage-chat/poll for results.
+    Job state lives in PostgreSQL — visible to all gunicorn workers.
     """
     try:
         import anthropic as _anth
@@ -1722,7 +1769,6 @@ def api_sage_chat_start():
 
     system = d.get('system', '') or SAGE_SYSTEM
 
-    # Sanitize messages — identical to SSE route
     import re as _re
     clean_msgs = []
     for m in messages:
@@ -1741,7 +1787,6 @@ def api_sage_chat_start():
     if not clean_msgs:
         return jsonify({'error': 'No valid messages to process'}), 400
 
-    # ── MEMORY PROTECTION — strip stale market data from history ──
     _mkt_pat = _re.compile(r'\n*\[LIVE MARKET DATA[^\]]*\].*', _re.DOTALL)
     last_user_idx = None
     for i in range(len(clean_msgs) - 1, -1, -1):
@@ -1755,11 +1800,12 @@ def api_sage_chat_start():
     if len(clean_msgs) > 10:
         clean_msgs = clean_msgs[-10:]
 
-    # Create job and start background thread
+    # Create job row in the shared database
     _cleanup_old_jobs()
     job_id = str(uuid.uuid4())
-    with _jobs_lock:
-        _jobs[job_id] = {'chunks': [], 'done': False, 'error': None, 'ts': time.time()}
+    job = SageJob(job_id=job_id, user_id=current_user.id, text='', done=False)
+    db.session.add(job)
+    db.session.commit()
 
     t = _threading.Thread(
         target = _run_sage_job,
@@ -1775,30 +1821,36 @@ def api_sage_chat_start():
 @login_required
 def api_sage_chat_poll():
     """
-    Return new chunks for a running job since from_idx.
-    Fast, short-lived request — no long connection held.
+    Return new text for a job since from_idx (character offset).
+    Stateless — any gunicorn worker can serve this because the job is in the DB.
+    Returns chunks format the existing client already handles.
     """
     job_id   = request.args.get('job_id', '')
     from_idx = int(request.args.get('from', 0))
 
-    with _jobs_lock:
-        job = _jobs.get(job_id)
-        if not job:
-            return jsonify({'error': 'Job not found or expired. Please try your message again.'}), 404
-        new_chunks = job['chunks'][from_idx:]
-        done       = job['done']
-        error      = job['error']
-        total      = len(job['chunks'])
+    job = SageJob.query.filter_by(job_id=job_id, user_id=current_user.id).first()
+    if not job:
+        return jsonify({'error': 'Job not found or expired. Please send your message again.'}), 404
 
-    next_idx = from_idx + len(new_chunks)
+    full_text = job.text or ''
+    new_text  = full_text[from_idx:]
+    next_idx  = from_idx + len(new_text)
+    done      = job.done
+    error     = job.error
 
-    # Clean up job once client has confirmed it received everything
-    if done and next_idx >= total:
-        with _jobs_lock:
-            _jobs.pop(job_id, None)
+    # Wrap in chunks array so existing client code works unchanged
+    chunks = [{'text': new_text}] if new_text else []
+
+    # Delete job row once client has read all text
+    if done and next_idx >= len(full_text):
+        try:
+            db.session.delete(job)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
     return jsonify({
-        'chunks':   new_chunks,
+        'chunks':   chunks,
         'from_idx': next_idx,
         'done':     done,
         'error':    error
