@@ -2144,8 +2144,13 @@ Buy-Side Liquidity (BSL): ${_bsl}
 Sell-Side Liquidity (SSL): ${_ssl}
 15M Entry Trigger: ${_15m}
 Session: ${d.session}
+── VWAP & IPDA INSTITUTIONAL LEVELS ──
+VWAP: ${d.vwap||'--'} | Bias: ${d.vwap_bias||'--'}
+IPDA 20-Day: High=${d.ipda_20?d.ipda_20.high:'--'} Low=${d.ipda_20?d.ipda_20.low:'--'} | ${d.ipda_20?d.ipda_20.note:'short-term liquidity target'}
+IPDA 40-Day: High=${d.ipda_40?d.ipda_40.high:'--'} Low=${d.ipda_40?d.ipda_40.low:'--'} | ${d.ipda_40?d.ipda_40.note:'medium-term institutional target'}
+IPDA 60-Day: High=${d.ipda_60?d.ipda_60.high:'--'} Low=${d.ipda_60?d.ipda_60.low:'--'} | ${d.ipda_60?d.ipda_60.note:'major long-term reversal zone'}
 🚨 USE ONLY THESE PRICES FOR ALL TRADE ENTRIES. DO NOT use web search prices for entries.
-🚨 PREMIUM = SELL ZONE only. DISCOUNT = BUY ZONE only. Never buy premium, never sell discount.`;
+🚨 PREMIUM = SELL ZONE only. DISCOUNT = BUY ZONE only. Never buy premium, never sell discount.\`;
 }
 
 /* ════════════════════════════════════════
@@ -2179,9 +2184,13 @@ function sageQuick(q){ document.getElementById('sageInput').value=q; sageSend();
 function set(id,val,color){ const el=document.getElementById(id); if(el){el.textContent=val;if(color)el.style.color=color;} }
 
 function sageParseCard(text){
-  const m = text.match(/TRADE_CARD:([\s\S]*?)END_TRADE_CARD/);
-  if(!m) return {clean:text, card:null};
-  const block = m[1];
+  const allMatches = [...text.matchAll(/TRADE_CARD:([\s\S]*?)END_TRADE_CARD/g)];
+  if(allMatches.length === 0) return {clean:text, card:null};
+  // Always use the LAST trade card — Phase 2 updates the confidence score
+  // and we never want Phase 1's preliminary score showing in the summary
+  const lastMatch = allMatches[allMatches.length - 1];
+  const block = lastMatch[1];
+  const clean = text.replace(/TRADE_CARD:[\s\S]*?END_TRADE_CARD/g, '').trim();
   const d = {};
   const FIELDS = ['SIGNAL','PAIR','STRATEGY','TIMEFRAME','ENTRY','STOP','TP1','TP2','PIPS','CONFIDENCE','REASON','INVALIDATION','WATCH_LEVEL'];
   const pat = new RegExp('('+FIELDS.join('|')+')\\s*:\\s*([\\s\\S]*?)(?=(?:'+FIELDS.join('|')+')\\s*:|$)','g');
@@ -2193,7 +2202,7 @@ function sageParseCard(text){
     if(key&&val) d[key]=val;
   }
   if(!d.SIGNAL) return {clean:text, card:null};
-  return {clean:text.replace(m[0],'').trim(), card:d};
+  return {clean, card:d};
 }
 
 function sageBuildCard(d){
