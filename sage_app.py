@@ -1603,7 +1603,7 @@ def api_sage_chat():
             phase1_text = ''
             with client.messages.stream(
                 model      = 'claude-sonnet-4-6',
-                max_tokens = 4000,
+                max_tokens = 8000,
                 system     = system,
                 messages   = msgs
             ) as stream:
@@ -1649,7 +1649,7 @@ def api_sage_chat():
 
                     with client.messages.stream(
                         model      = 'claude-sonnet-4-6',
-                        max_tokens = 4000,
+                        max_tokens = 6000,
                         system     = system,
                         tools      = [{'type': 'web_search_20250305', 'name': 'web_search'}],
                         messages   = msgs_p2
