@@ -433,6 +433,16 @@ Fair Value Gaps: 3-candle imbalance (candle 1 high < candle 3 low = bull FVG). P
 Power of 3: Asian (accumulate) → London (manipulate/fake spike) → NY (real move).
 BOS / CHoCH RULE (BODY CLOSE ONLY): A Break of Structure (BOS) is ONLY confirmed when a candle BODY closes above the swing high (bullish BOS) or below the swing low (bearish BOS). Wicks do NOT count — a wick through a level without a body close is a LIQUIDITY SWEEP, not a break. A Change of Character (CHoCH) requires the same body close rule. This is law.
 
+IPDA LOOKBACK WINDOWS (Interbank Price Delivery Algorithm — Advanced ICT):
+The algorithm references 3 lookback periods — 20, 40, and 60 trading days — as the primary liquidity delivery targets.
+[LIVE MARKET DATA] includes ipda_20, ipda_40, ipda_60 fields — each has high, low, and note.
+RULES:
+- 20-Day High/Low: Nearest short-term liquidity. Watch for sweep + reversal when price touches or approaches.
+- 40-Day High/Low: Medium-term institutional target. High-probability reversal zone when reached.
+- 60-Day High/Low: MAJOR long-term target. Near-certain reversal — do NOT enter in direction of move when reached.
+- When all 3 highs OR all 3 lows converge near the same level = EXTREME high-probability reversal zone. Add +15 pts confidence to counter-trade.
+Always label IPDA 20/40/60-day highs and lows in the KEY LEVELS section as institutional liquidity targets.
+
 ICT KILL ZONES — TRADE ONLY INSIDE THESE WINDOWS:
 1. ASIAN KILL ZONE: 7pm–10pm ET. JPY, AUD, NZD pairs. Range-setting session. Accumulation phase.
 2. LONDON KILL ZONE: 2am–5am ET. EUR, GBP pairs. Highest manipulation. Best sweep setups. First 15 minutes after open: skip — too many fake moves. Enter after minute 15.
@@ -450,6 +460,13 @@ RSI above 50 and rising = bullish momentum. RSI below 50 falling = bearish.
 RSI above 70 in uptrend = strong momentum, NOT overbought.
 RSI below 30 in downtrend = strong selling, NOT oversold.
 Bollinger Bands squeeze = big move coming. Trade the breakout direction.
+VWAP (Volume Weighted Average Price) — THE INSTITUTIONAL BENCHMARK:
+Every institutional desk measures execution quality against VWAP. Buying below VWAP = good fill. Selling above VWAP = good fill.
+Price ABOVE VWAP = institutional buy-side bias — prefer LONG setups.
+Price BELOW VWAP = institutional sell-side bias — prefer SHORT setups.
+VWAP acts as a magnetic support in uptrends and resistance in downtrends — highest-probability intraday bounce zone.
+[LIVE MARKET DATA] includes vwap and vwap_bias fields. Always reference VWAP in level analysis.
+VWAP scoring rule: +10 pts when EMA stack direction and VWAP position agree. −10 pts when they conflict.
 
 PATH 4 — WYCKOFF MARKET CYCLE:
 Accumulation (bottoming): SC → AR → ST → Spring → LPS → Markup.
@@ -569,6 +586,10 @@ FORMAT FOR LEVELS OUTPUT — use this structure:
   FVG (if any): [zone] | [direction]
   Buy Stops (liquidity): [level]
   Sell Stops (liquidity): [level]
+  VWAP: [level] | [above = BUY bias / below = SELL bias]
+  IPDA 20-Day: High [level] / Low [level] — short-term liquidity sweep target
+  IPDA 40-Day: High [level] / Low [level] — medium-term institutional target
+  IPDA 60-Day: High [level] / Low [level] — major reversal zone if reached
 
 ⚡ AREAS OF INTEREST:
   Premium (sell zone): [range]
@@ -623,21 +644,27 @@ STRATEGY E — FLAG/PENNANT:
  CONFIDENCE SCORING
 ═══════════════════════════════════════════════════════
 
-Start at 0. Add points honestly:
+Start at 0. Add points honestly — only award each bonus if it genuinely applies to this specific setup. Do NOT give all bonuses automatically.
 +20 pts: 3+ timeframes aligned same direction
-+20 pts: Entry at significant, tested institutional level (OB+FVG = Tier 1 best, Swing/PDH/PDL = Tier 2, Fib/EMA/Round# = Tier 3)
++20 pts: Entry at significant, tested institutional level:
+         → Tier 1 (full +20): OB+FVG confluence — OR — entry at an IPDA 20/40/60-day high or low (confirmed institutional liquidity draw)
+         → Tier 2 (+15): Swing level, PDH/PDL, liquidity pool
+         → Tier 3 (+10): Fib level, EMA zone, round number
 +15 pts: Volume confirming the move
-+15 pts: News/calendar clear + macro confirms
++15 pts: News/calendar clear + macro confirms — award this if VWAP position also agrees with trade direction (price above VWAP for longs, below for shorts). Do not award if VWAP conflicts with the trade.
 +15 pts: Candlestick confirmation at level (Engulfing/Hammer with BODY close)
 +15 pts: Strategy fits current conditions
 +10 pts: Entry in valid ICT Kill Zone window
-+10 pts: Liquidity sweep confirmed BEFORE entry (classic ICT setup)
++10 pts: Liquidity sweep confirmed BEFORE entry — upgrade to +15 if the sweep targets an IPDA level
+
+SCORE CAP — CRITICAL: Total score before deductions cannot exceed 100. If raw additions exceed 100, stop at 100 then apply deductions. This prevents inflation — be selective and honest.
 
 DEDUCTIONS — subtract these if present:
 -20 pts: Price in active retest zone (≥2× ATR move with no Phase 3 rejection yet) → likely WAIT signal
 -15 pts: Entering during first 15 minutes of Kill Zone (sweep not yet formed)
 -15 pts: BOS/CHoCH based on wick only — body close not confirmed
 -10 pts: DXY direction conflicts with EMA stack on USD pairs
+-10 pts: Trading against VWAP (buying below VWAP in downtrend or selling above VWAP in uptrend without strong confluence)
 
 GRADES: 85+ = ELITE — full size. 70-84 = SOLID — standard size. 65-69 = AVERAGE — half size only. Below 65 = NO TRADE.
 If score lands below 65 after deductions, issue WAIT card — never force a trade.
@@ -1164,14 +1191,30 @@ def api_sage_intel():
     atr    = calc_atr(candles)
     adx    = calc_adx(candles)
 
+    # ── VWAP (Volume Weighted Average Price) ─────────────────
+    def calc_vwap(candles):
+        total_tpv = total_vol = 0
+        for c in candles:
+            tp = (c['high'] + c['low'] + c['close']) / 3
+            v  = c.get('volume', 0) or 0
+            total_tpv += tp * v
+            total_vol += v
+        if total_vol == 0:
+            # Fallback: equal-weight typical price average (no volume data)
+            tps = [(c['high'] + c['low'] + c['close']) / 3 for c in candles]
+            return round(sum(tps) / len(tps), 5) if tps else None
+        return round(total_tpv / total_vol, 5)
+
+    vwap = calc_vwap(candles)
+
     # Swing levels — multiple lookbacks for richer level set
     sw20h = round(max(highs[-20:]), 5)
     sw20l = round(min(lows[-20:]),  5)
     sw50h = round(max(highs[-50:]) if len(highs)>=50 else max(highs), 5)
     sw50l = round(min(lows[-50:])  if len(lows)>=50  else min(lows),  5)
 
-    # PDH/PDL from daily candles
-    pdh = pdl = None
+    # PDH/PDL from daily candles (daily saved for IPDA reuse below)
+    pdh = pdl = daily = None
     try:
         daily = get_candles(pair, '1d')
         if daily and len(daily) >= 2:
@@ -1237,6 +1280,35 @@ def api_sage_intel():
     pip = 0.01 if is_jpy_pair else 0.5 if is_gold_pair else 0.0001
     dp  = 3 if is_jpy_pair else 2 if is_gold_pair else 5
     n_c = len(candles)
+
+    # ── VWAP BIAS (dp now defined) ────────────────────────────
+    vwap_bias = ('ABOVE VWAP — institutional BUY bias' if vwap and price > vwap
+                 else 'BELOW VWAP — institutional SELL bias' if vwap else 'N/A')
+
+    # ── IPDA Lookback Windows (20 / 40 / 60 trading days) ────
+    ipda_20 = ipda_40 = ipda_60 = None
+    try:
+        if daily and len(daily) >= 3:
+            d20 = daily[-20:] if len(daily) >= 20 else daily[:-1]
+            d40 = daily[-40:] if len(daily) >= 40 else daily[:-1]
+            d60 = daily[-60:] if len(daily) >= 60 else daily[:-1]
+            ipda_20 = {
+                'high': round(max(c['high'] for c in d20), dp),
+                'low':  round(min(c['low']  for c in d20), dp),
+                'note': '20-day IPDA — short-term liquidity target'
+            }
+            ipda_40 = {
+                'high': round(max(c['high'] for c in d40), dp),
+                'low':  round(min(c['low']  for c in d40), dp),
+                'note': '40-day IPDA — medium-term institutional target'
+            }
+            ipda_60 = {
+                'high': round(max(c['high'] for c in d60), dp),
+                'low':  round(min(c['low']  for c in d60), dp),
+                'note': '60-day IPDA — major long-term liquidity target'
+            }
+    except Exception as _e:
+        print(f'[IPDA] {_e}')
 
     # ── PREMIUM / DISCOUNT ZONE ─────────────────────────────
     range_high = max(highs[-100:]) if n_c >= 100 else max(highs)
@@ -1439,6 +1511,10 @@ def api_sage_intel():
         'above_200': above_200,
         'session': session,
         'candle_count': len(candles),
+        # ── VWAP ──────────────────────────────────────────────
+        'vwap': fmt(vwap), 'vwap_bias': vwap_bias,
+        # ── IPDA Lookback Windows ─────────────────────────────
+        'ipda_20': ipda_20, 'ipda_40': ipda_40, 'ipda_60': ipda_60,
     })
 
 
