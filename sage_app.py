@@ -2064,9 +2064,11 @@ def api_sage_chat():
 def api_news_scan():
     """
     Maps today's market-moving news to affected stocks.
-    Tier 1: Finnhub API (if FINNHUB_API_KEY set)
-    Tier 2: Claude web_search (if available)
-    Tier 3: Claude knowledge-only fallback (always works)
+    Tier 1: Finnhub API headlines → Claude maps them to knowledge map (no web_search needed)
+    Tier 2: Claude knowledge-only — identifies active market themes from training knowledge
+    NOTE: web_search_20250305 intentionally NOT used here. It is a streaming-only built-in
+    tool — using it with non-streaming messages.create() and manual tool_result injection
+    causes API errors. The knowledge map + Finnhub covers all needed functionality.
     """
     import re as _re
 
@@ -2076,9 +2078,8 @@ def api_news_scan():
     if not api_key:
         return jsonify({'error': 'Service temporarily unavailable'}), 500
 
-    # ── Minimal system prompt — just the knowledge map, not the full SAGE_SYSTEM ──
     NEWS_SYSTEM = """You are a stock news intelligence engine.
-When given financial headlines (or asked to identify market themes), you apply this institutional knowledge map and return ONLY a JSON object — no markdown, no explanation.
+When given financial headlines (or asked to identify market themes), you apply this institutional knowledge map and return ONLY a valid JSON object — no markdown, no code blocks, no explanation. Just raw JSON.
 
 KNOWLEDGE MAP:
 MIDDLE EAST CONFLICT/OIL THREAT: BUY XOM,CVX,OXY,LMT,NOC,RTX,GLD | SELL UAL,DAL,AAL | Hold: weeks-months
@@ -2092,7 +2093,7 @@ UKRAINE/RUSSIA CEASEFIRE: BUY EZU,VGK | SELL UNG,LMT,NOC | Hold: days-weeks
 AI/TECH EARNINGS BEAT: BUY TSM,MU,ANET,CEG | SELL nothing | Hold: days
 AI/TECH EARNINGS MISS: SELL NVDA,AMD,TSM,MU,ANET | Hold: days
 
-OUTPUT FORMAT (strict JSON, no code blocks):
+OUTPUT FORMAT — return exactly this structure, no deviations:
 {"events":[{"headline":"...","category":"...","buy":[{"ticker":"XOM","hold":"weeks"}],"sell":[{"ticker":"UAL","hold":"weeks"}],"watch":[{"ticker":"SPY"}],"confirmation":"Price action above..."}]}"""
 
     # ── Tier 1: Finnhub headlines ──────────────────────────────────────────
@@ -2118,79 +2119,67 @@ OUTPUT FORMAT (strict JSON, no code blocks):
         import anthropic as _anth
         client = _anth.Anthropic(api_key=api_key)
 
-        def _call_claude(user_msg, use_web_search=False):
-            """Call Claude, return raw text."""
-            call_kwargs = dict(
+        def _call_claude(user_msg):
+            """
+            Call Claude knowledge-only (no tools). Always returns text.
+            No web_search — avoids the non-streaming tool_use 500 error.
+            """
+            resp = client.messages.create(
                 model      = 'claude-sonnet-4-6',
                 max_tokens = 1500,
                 system     = NEWS_SYSTEM,
                 messages   = [{'role': 'user', 'content': user_msg}]
             )
-            if use_web_search:
-                call_kwargs['tools'] = [{'type': 'web_search_20250305', 'name': 'web_search'}]
+            result = ''
+            for block in resp.content:
+                if hasattr(block, 'text') and block.text:
+                    result += block.text
+            return result
 
-            result_text = ''
-            msgs_loop   = call_kwargs.pop('messages')
-
-            for _attempt in range(4):
-                resp = client.messages.create(messages=msgs_loop, **call_kwargs)
-                for block in resp.content:
-                    if hasattr(block, 'text') and block.text:
-                        result_text += block.text
-                if result_text.strip():
-                    break
-                if resp.stop_reason == 'tool_use':
-                    serialized, tool_results = [], []
-                    for block in resp.content:
-                        if hasattr(block, 'type'):
-                            if block.type == 'text':
-                                serialized.append({'type': 'text', 'text': block.text})
-                            elif block.type == 'tool_use':
-                                serialized.append({'type': 'tool_use', 'id': block.id,
-                                                   'name': block.name, 'input': getattr(block, 'input', {})})
-                                tool_results.append({'type': 'tool_result', 'tool_use_id': block.id,
-                                                     'content': 'Search completed. Now output the JSON.'})
-                    msgs_loop = msgs_loop + [
-                        {'role': 'assistant', 'content': serialized},
-                        {'role': 'user',      'content': tool_results}
-                    ]
-                else:
-                    break
-            return result_text
-
-        # ── Choose path ────────────────────────────────────────────────────
+        # ── Build prompt ───────────────────────────────────────────────────
         if headlines:
-            # We have headlines — just map them, no web search needed
             news_block = '\n'.join(f'- {h}' for h in headlines[:8])
-            user_msg   = (
+            user_msg = (
                 f'Today is {today}. Map these headlines to the knowledge map and return JSON:\n\n{news_block}'
             )
-            final_text = _call_claude(user_msg, use_web_search=False)
         else:
-            # Try with web_search first, fall back to knowledge-only
-            user_msg_search = (
-                f'Today is {today}. Search for the top 5 market-moving financial news events right now. '
-                f'Map them to the knowledge map and return JSON.'
+            user_msg = (
+                f'Today is {today}. Based on your knowledge of current global market conditions, '
+                f'identify the 3-5 most significant market-moving themes active right now '
+                f'(consider: tariffs, Fed policy, geopolitical events, earnings season, sector rotations). '
+                f'Map each theme to the knowledge map and return JSON.'
             )
-            try:
-                final_text = _call_claude(user_msg_search, use_web_search=True)
-            except Exception as ws_err:
-                print(f'[NewsScan web_search fallback] {ws_err}')
-                # Tier 3: knowledge-only — always works
-                user_msg_fallback = (
-                    f'Today is {today}. Based on your knowledge of current market conditions, '
-                    f'identify the 3-5 most relevant market themes active right now '
-                    f'(tariffs, Fed policy, geopolitical events, earnings). '
-                    f'Map them to the knowledge map and return JSON.'
-                )
-                final_text = _call_claude(user_msg_fallback, use_web_search=False)
 
-        # ── Parse JSON ─────────────────────────────────────────────────────
-        json_match = _re.search(r'\{[\s\S]*"events"[\s\S]*\}', final_text)
-        if json_match:
-            data = json.loads(json_match.group(0))
+        # ── Call Claude — always knowledge-only, never throws ──────────────
+        final_text = _call_claude(user_msg)
+
+        # ── Parse JSON safely ──────────────────────────────────────────────
+        # Strip markdown fences if Claude accidentally adds them
+        clean = final_text.strip()
+        if clean.startswith('```'):
+            clean = '\n'.join(clean.split('\n')[1:])
+        if clean.endswith('```'):
+            clean = '\n'.join(clean.split('\n')[:-1])
+        clean = clean.strip()
+
+        # Try direct parse first
+        try:
+            data = json.loads(clean)
             return jsonify(data)
+        except json.JSONDecodeError:
+            pass
 
+        # Fallback: extract JSON object from surrounding text
+        json_match = _re.search(r'\{[\s\S]*"events"[\s\S]*\}', clean)
+        if json_match:
+            try:
+                data = json.loads(json_match.group(0))
+                return jsonify(data)
+            except json.JSONDecodeError:
+                pass
+
+        # Last resort: return empty events with raw text for debugging
+        print(f'[NewsScan] JSON parse failed. Raw: {final_text[:300]}')
         return jsonify({'events': [], 'raw': final_text[:500]})
 
     except Exception as e:
