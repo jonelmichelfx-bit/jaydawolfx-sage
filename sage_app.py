@@ -1545,7 +1545,267 @@ def api_sage_intel():
     })
 
 
-# ── SAGE CHAT PROXY (streaming SSE) ─────────────────────────
+# ── POLLING-BASED CHAT ──────────────────────────────────────
+# Replaces the long-held SSE connection that Render/nginx kills mid-analysis.
+# Client POSTs once → gets job_id instantly → polls /api/sage-chat/poll every 400ms.
+# No persistent connection = no timeouts, no drops.
+
+import threading as _threading
+
+_jobs      = {}           # job_id → {chunks, done, error, ts}
+_jobs_lock = _threading.Lock()
+
+
+def _job_append(job_id, obj):
+    """Thread-safe append a chunk to a job."""
+    with _jobs_lock:
+        if job_id in _jobs:
+            _jobs[job_id]['chunks'].append(obj)
+
+
+def _cleanup_old_jobs():
+    """Remove jobs older than 10 minutes to prevent memory leak."""
+    cutoff = time.time() - 600
+    with _jobs_lock:
+        stale = [jid for jid, j in _jobs.items() if j['ts'] < cutoff]
+        for jid in stale:
+            del _jobs[jid]
+
+
+def _run_sage_job(job_id, msgs, system, api_key):
+    """
+    Background worker — identical logic to the old SSE generate() function.
+    Instead of yielding SSE chunks, appends to the job store.
+    Runs in a daemon thread so Render can recycle it freely.
+    """
+    import re as _re
+    try:
+        import anthropic as _anth
+        client = _anth.Anthropic(api_key=api_key)
+
+        # ── PHASE 1: Pure technical analysis — no web_search ──────────
+        phase1_text = ''
+        with client.messages.stream(
+            model      = 'claude-sonnet-4-6',
+            max_tokens = 8000,
+            system     = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
+            messages   = msgs
+        ) as stream:
+            for chunk in stream.text_stream:
+                phase1_text += chunk
+                _job_append(job_id, {'text': chunk})
+
+        # Extract technical score to decide if Phase 2 runs
+        score_match = _re.search(
+            r'(?:TECHNICAL\s+SCORE|TECH\s+SCORE|CONFIDENCE\s+SCORE|SCORE)[^\d]*(\d{2,3})',
+            phase1_text, _re.IGNORECASE
+        )
+        if not score_match:
+            score_match = _re.search(r'(\d{2,3})\s*/\s*100', phase1_text)
+        tech_score = int(score_match.group(1)) if score_match else 0
+
+        # ── PHASE 2: News gate — only if technical score >= 70 ────────
+        if tech_score >= 70:
+            separator = '\n\n---\n**PATH 6 — NEWS GATE:**\n'
+            sep_sent  = False
+
+            gate_msg = (
+                f'STEP 6 — NEWS GATE (Technical score: {tech_score}/100 — gate PASSED).\n'
+                'Now run Path 6 (Fundamentals). Search:\n'
+                '1. "economic calendar high impact events today"\n'
+                '2. "forex market sentiment today"\n'
+                'Apply news as ±15 pts max adjustment to confidence score. '
+                'Output the final updated TRADE_CARD with adjusted confidence.'
+            )
+            msgs_p2 = msgs + [
+                {'role': 'assistant', 'content': phase1_text},
+                {'role': 'user',      'content': gate_msg}
+            ]
+
+            for _attempt in range(4):
+                news_chunk_count = 0
+                final_msg        = None
+
+                with client.messages.stream(
+                    model      = 'claude-sonnet-4-6',
+                    max_tokens = 6000,
+                    system     = [{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
+                    tools      = [{'type': 'web_search_20250305', 'name': 'web_search'}],
+                    messages   = msgs_p2
+                ) as stream2:
+                    for chunk in stream2.text_stream:
+                        news_chunk_count += 1
+                        if not sep_sent:
+                            chunk    = separator + chunk
+                            sep_sent = True
+                        _job_append(job_id, {'text': chunk})
+                    final_msg = stream2.get_final_message()
+
+                # Exit if we got text and Claude is fully done (not mid-tool)
+                if news_chunk_count > 0 and (final_msg is None or final_msg.stop_reason != 'tool_use'):
+                    break
+
+                # Claude fired a tool — feed result back and retry
+                if final_msg and final_msg.stop_reason == 'tool_use':
+                    serialized = []
+                    for block in final_msg.content:
+                        if hasattr(block, 'type'):
+                            if block.type == 'text':
+                                serialized.append({'type': 'text', 'text': block.text})
+                            elif block.type == 'tool_use':
+                                serialized.append({
+                                    'type':  'tool_use',
+                                    'id':    block.id,
+                                    'name':  block.name,
+                                    'input': block.input if hasattr(block, 'input') else {}
+                                })
+                    msgs_p2.append({'role': 'assistant', 'content': serialized})
+                    tool_results = []
+                    for block in final_msg.content:
+                        if hasattr(block, 'type') and block.type == 'tool_use':
+                            tool_results.append({
+                                'type':        'tool_result',
+                                'tool_use_id': block.id,
+                                'content':     'Search completed. Apply news context as Path 6 adjustment (±15 pts max). Output final trade card with updated confidence.'
+                            })
+                    msgs_p2.append({'role': 'user', 'content': tool_results})
+                else:
+                    break  # unexpected stop reason — exit cleanly
+
+        # Mark job complete
+        with _jobs_lock:
+            if job_id in _jobs:
+                _jobs[job_id]['done'] = True
+
+    except Exception as e:
+        print(f'[SageJob ERROR] {e}')
+        import traceback; traceback.print_exc()
+        with _jobs_lock:
+            if job_id in _jobs:
+                _jobs[job_id]['error'] = str(e)
+                _jobs[job_id]['done']  = True
+
+
+@app.route('/api/sage-chat/start', methods=['POST'])
+@login_required
+def api_sage_chat_start():
+    """
+    Start a background AI analysis job.
+    Returns job_id immediately — client then polls /api/sage-chat/poll.
+    This endpoint is identical to the old /api/sage-chat in terms of auth,
+    rate-limiting, and message sanitisation — only the delivery mechanism differs.
+    """
+    try:
+        import anthropic as _anth
+    except ImportError:
+        return jsonify({'error': 'anthropic package not installed on server'}), 500
+
+    d        = request.get_json() or {}
+    messages = d.get('messages', [])
+    api_key  = os.environ.get('ANTHROPIC_API_KEY', '')
+
+    if not api_key:
+        return jsonify({'error': 'Service temporarily unavailable. Please try again shortly.'}), 500
+    if not messages:
+        return jsonify({'error': 'messages required'}), 400
+
+    # ── MESSAGE GATE (trial + paid) ────────────────────────────
+    if not current_user.can_send_message():
+        return jsonify({
+            'error': 'daily_limit_reached',
+            'msgs_used': current_user.msgs_used_today(),
+            'msgs_limit': current_user.msg_limit(),
+            'plan': current_user.plan,
+            'trial_days_left': current_user.trial_days_left()
+        }), 429
+    current_user.increment_msg()
+
+    system = d.get('system', '') or SAGE_SYSTEM
+
+    # Sanitize messages — identical to SSE route
+    import re as _re
+    clean_msgs = []
+    for m in messages:
+        role    = m.get('role', 'user')
+        content = m.get('content', '')
+        if isinstance(content, str) and content.strip():
+            clean_msgs.append({'role': role, 'content': content})
+        elif isinstance(content, list):
+            text = ' '.join(
+                p.get('text', '') for p in content
+                if isinstance(p, dict) and p.get('type') == 'text'
+            ).strip()
+            if text:
+                clean_msgs.append({'role': role, 'content': text})
+
+    if not clean_msgs:
+        return jsonify({'error': 'No valid messages to process'}), 400
+
+    # ── MEMORY PROTECTION — strip stale market data from history ──
+    _mkt_pat = _re.compile(r'\n*\[LIVE MARKET DATA[^\]]*\].*', _re.DOTALL)
+    last_user_idx = None
+    for i in range(len(clean_msgs) - 1, -1, -1):
+        if clean_msgs[i]['role'] == 'user':
+            last_user_idx = i
+            break
+    for i, msg in enumerate(clean_msgs):
+        if msg['role'] == 'user' and i != last_user_idx:
+            stripped = _mkt_pat.sub('', msg['content']).strip()
+            clean_msgs[i] = {'role': 'user', 'content': stripped if stripped else '(market context from prior turn)'}
+    if len(clean_msgs) > 10:
+        clean_msgs = clean_msgs[-10:]
+
+    # Create job and start background thread
+    _cleanup_old_jobs()
+    job_id = str(uuid.uuid4())
+    with _jobs_lock:
+        _jobs[job_id] = {'chunks': [], 'done': False, 'error': None, 'ts': time.time()}
+
+    t = _threading.Thread(
+        target = _run_sage_job,
+        args   = (job_id, clean_msgs, system, api_key),
+        daemon = True
+    )
+    t.start()
+
+    return jsonify({'job_id': job_id})
+
+
+@app.route('/api/sage-chat/poll', methods=['GET'])
+@login_required
+def api_sage_chat_poll():
+    """
+    Return new chunks for a running job since from_idx.
+    Fast, short-lived request — no long connection held.
+    """
+    job_id   = request.args.get('job_id', '')
+    from_idx = int(request.args.get('from', 0))
+
+    with _jobs_lock:
+        job = _jobs.get(job_id)
+        if not job:
+            return jsonify({'error': 'Job not found or expired. Please try your message again.'}), 404
+        new_chunks = job['chunks'][from_idx:]
+        done       = job['done']
+        error      = job['error']
+        total      = len(job['chunks'])
+
+    next_idx = from_idx + len(new_chunks)
+
+    # Clean up job once client has confirmed it received everything
+    if done and next_idx >= total:
+        with _jobs_lock:
+            _jobs.pop(job_id, None)
+
+    return jsonify({
+        'chunks':   new_chunks,
+        'from_idx': next_idx,
+        'done':     done,
+        'error':    error
+    })
+
+
+# ── SAGE CHAT PROXY (streaming SSE) — kept as legacy fallback ─
 @app.route('/api/sage-chat', methods=['POST'])
 @login_required
 def api_sage_chat():
