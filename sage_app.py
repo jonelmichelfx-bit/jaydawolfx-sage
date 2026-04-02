@@ -1652,7 +1652,7 @@ def _run_sage_job(job_id, msgs, system, api_key):
             )
             if not score_match:
                 score_match = _re.search(r'(\d{2,3})\s*/\s*100', phase1_text)
-            tech_score = int(score_match.group(1)) if score_match else 0
+            tech_score = int(score_match.group(1)) if score_match else 75
 
             # ── PHASE 2: News gate — only if technical score >= 70 ────────
             if tech_score >= 70:
@@ -1956,7 +1956,7 @@ def api_sage_chat():
             )
             if not score_match:
                 score_match = _re.search(r'(\d{2,3})\s*/\s*100', phase1_text)
-            tech_score = int(score_match.group(1)) if score_match else 0
+            tech_score = int(score_match.group(1)) if score_match else 75
 
             # ── PHASE 2: News gate — only if technical score >= 70 ────────
             if tech_score >= 70:
