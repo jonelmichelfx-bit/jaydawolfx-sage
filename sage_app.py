@@ -137,8 +137,50 @@ class SageJob(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# ── SMART UNAUTHORIZED HANDLER ─────────────────────────────
+@login_manager.unauthorized_handler
+def handle_unauthorized():
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'session_expired', 'code': 401,
+                        'message': 'Session expired. Please reload and log in again.'}), 401
+    return redirect(url_for('login_page'))
+
+# ── GLOBAL ERROR HANDLERS ──────────────────────────────────
+@app.errorhandler(404)
+def handle_404(e):
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'not_found', 'code': 404,
+                        'message': f'Route not found: {request.path}'}), 404
+    return redirect(url_for('login_page'))
+
+@app.errorhandler(500)
+def handle_500(e):
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'server_error', 'code': 500,
+                        'message': 'Internal server error. Check Render logs.'}), 500
+    return redirect(url_for('login_page'))
+
+@app.errorhandler(502)
+def handle_502(e):
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'gateway_timeout', 'code': 502,
+                        'message': 'Request timed out — server busy. Try again.'}), 502
+    return redirect(url_for('login_page'))
+
 with app.app_context():
     db.create_all()
+    # ── AUTO ADMIN RESTORE ─────────────────────────────────
+    # Ensures jonel.michelfx@gmail.com is always unleashed even after DB reset
+    try:
+        admin = User.query.filter_by(email='jonel.michelfx@gmail.com').first()
+        if admin and admin.plan != 'unleashed':
+            admin.plan = 'unleashed'
+            db.session.commit()
+            print('[Sage] ✅ Admin plan restored → unleashed')
+        elif admin:
+            print(f'[Sage] ✅ Admin found → plan: {admin.plan}')
+    except Exception as _ae:
+        pass  # DB may not be ready yet on first cold start
 
 # ── AUTH ROUTES ────────────────────────────────────────────
 @app.route('/login')
